@@ -1,0 +1,176 @@
+--- src/hed/libs/message/Makefile.in	2011-03-23 15:18:18.000000000 +0100
++++ src/hed/libs/message/Makefile.in	2011-04-04 11:15:27.000000000 +0200
+@@ -16,7 +16,6 @@
+ @SET_MAKE@
+ 
+ 
+-
+ VPATH = @srcdir@
+ am__cd = CDPATH="$${ZSH_VERSION+.}$(PATH_SEPARATOR)" && cd
+ install_sh_DATA = $(install_sh) -c -m 644
+@@ -32,7 +31,6 @@
+ POST_UNINSTALL = :
+ build_triplet = @build@
+ host_triplet = @host@
+-noinst_PROGRAMS = testmcc$(EXEEXT)
+ subdir = src/hed/libs/message
+ DIST_COMMON = README $(libarcmessage_la_HEADERS) $(srcdir)/Makefile.am \
+ 	$(srcdir)/Makefile.in
+@@ -106,14 +104,6 @@
+ libtestmcc_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+ 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(libtestmcc_la_CXXFLAGS) \
+ 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+-PROGRAMS = $(noinst_PROGRAMS)
+-am_testmcc_OBJECTS = testmcc-testmcc.$(OBJEXT)
+-testmcc_OBJECTS = $(am_testmcc_OBJECTS)
+-testmcc_DEPENDENCIES = ./libarcmessage.la \
+-	$(top_srcdir)/src/hed/libs/common/libarccommon.la
+-testmcc_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+-	--mode=link $(CXXLD) $(testmcc_CXXFLAGS) $(CXXFLAGS) \
+-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
+ depcomp = $(SHELL) $(top_srcdir)/depcomp
+ am__depfiles_maybe = depfiles
+@@ -136,10 +126,8 @@
+ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+ 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+ 	$(LDFLAGS) -o $@
+-SOURCES = $(libarcmessage_la_SOURCES) $(libtestmcc_la_SOURCES) \
+-	$(testmcc_SOURCES)
+-DIST_SOURCES = $(libarcmessage_la_SOURCES) $(libtestmcc_la_SOURCES) \
+-	$(testmcc_SOURCES)
++SOURCES = $(libarcmessage_la_SOURCES) $(libtestmcc_la_SOURCES)
++DIST_SOURCES = $(libarcmessage_la_SOURCES) $(libtestmcc_la_SOURCES)
+ HEADERS = $(libarcmessage_la_HEADERS)
+ ETAGS = etags
+ CTAGS = ctags
+@@ -268,6 +256,7 @@
+ LTLIBINTL = @LTLIBINTL@
+ LTLIBOBJS = @LTLIBOBJS@
+ MAKEINFO = @MAKEINFO@
++MANIFEST_TOOL = @MANIFEST_TOOL@
+ MKDIR_P = @MKDIR_P@
+ MKINSTALLDIRS = @MKINSTALLDIRS@
+ MSGFMT = @MSGFMT@
+@@ -325,6 +314,7 @@
+ abs_srcdir = @abs_srcdir@
+ abs_top_builddir = @abs_top_builddir@
+ abs_top_srcdir = @abs_top_srcdir@
++ac_ct_AR = @ac_ct_AR@
+ ac_ct_CC = @ac_ct_CC@
+ ac_ct_CXX = @ac_ct_CXX@
+ ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
+@@ -399,6 +389,7 @@
+ top_srcdir = @top_srcdir@
+ ws_monitor_prefix = @ws_monitor_prefix@
+ lib_LTLIBRARIES = libarcmessage.la
++#noinst_PROGRAMS = testmcc
+ noinst_LTLIBRARIES = libtestmcc.la
+ libarcmessage_ladir = $(pkgincludedir)/message
+ libarcmessage_la_HEADERS = SOAPEnvelope.h   PayloadRaw.h   PayloadSOAP.h   PayloadStream.h   MCC_Status.h   MCC.h   Service.h   Plexer.h   MessageAttributes.h   Message.h   SOAPMessage.h   MessageAuth.h   SecAttr.h   MCCLoader.h   SecHandler.h
+@@ -409,9 +400,6 @@
+ libtestmcc_la_SOURCES = TestMCC.cpp TestMCC.h
+ libtestmcc_la_CXXFLAGS = $(LIBXML2_CFLAGS) $(GLIBMM_CFLAGS) -I$(top_srcdir)/include
+ libtestmcc_la_LIBADD = $(GLIBMM_LIBS) ./libarcmessage.la $(top_srcdir)/src/hed/libs/common/libarccommon.la 
+-testmcc_SOURCES = testmcc.cpp
+-testmcc_CXXFLAGS = $(GLIBMM_CFLAGS) $(LIBXML2_CFLAGS) -I$(top_srcdir)/include
+-testmcc_LDADD = ./libarcmessage.la $(top_srcdir)/src/hed/libs/common/libarccommon.la
+ all: all-am
+ 
+ .SUFFIXES:
+@@ -491,18 +479,6 @@
+ libtestmcc.la: $(libtestmcc_la_OBJECTS) $(libtestmcc_la_DEPENDENCIES) 
+ 	$(libtestmcc_la_LINK)  $(libtestmcc_la_OBJECTS) $(libtestmcc_la_LIBADD) $(LIBS)
+ 
+-clean-noinstPROGRAMS:
+-	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+-	echo " rm -f" $$list; \
+-	rm -f $$list || exit $$?; \
+-	test -n "$(EXEEXT)" || exit 0; \
+-	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+-	echo " rm -f" $$list; \
+-	rm -f $$list
+-testmcc$(EXEEXT): $(testmcc_OBJECTS) $(testmcc_DEPENDENCIES) 
+-	@rm -f testmcc$(EXEEXT)
+-	$(testmcc_LINK) $(testmcc_OBJECTS) $(testmcc_LDADD) $(LIBS)
+-
+ mostlyclean-compile:
+ 	-rm -f *.$(OBJEXT)
+ 
+@@ -525,7 +501,6 @@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libarcmessage_la-SecHandler.Plo@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libarcmessage_la-Service.Plo@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libtestmcc_la-TestMCC.Plo@am__quote@
+-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testmcc-testmcc.Po@am__quote@
+ 
+ .cpp.o:
+ @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@@ -660,20 +635,6 @@
+ @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+ @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libtestmcc_la_CXXFLAGS) $(CXXFLAGS) -c -o libtestmcc_la-TestMCC.lo `test -f 'TestMCC.cpp' || echo '$(srcdir)/'`TestMCC.cpp
+ 
+-testmcc-testmcc.o: testmcc.cpp
+-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testmcc_CXXFLAGS) $(CXXFLAGS) -MT testmcc-testmcc.o -MD -MP -MF $(DEPDIR)/testmcc-testmcc.Tpo -c -o testmcc-testmcc.o `test -f 'testmcc.cpp' || echo '$(srcdir)/'`testmcc.cpp
+-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/testmcc-testmcc.Tpo $(DEPDIR)/testmcc-testmcc.Po
+-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='testmcc.cpp' object='testmcc-testmcc.o' libtool=no @AMDEPBACKSLASH@
+-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testmcc_CXXFLAGS) $(CXXFLAGS) -c -o testmcc-testmcc.o `test -f 'testmcc.cpp' || echo '$(srcdir)/'`testmcc.cpp
+-
+-testmcc-testmcc.obj: testmcc.cpp
+-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testmcc_CXXFLAGS) $(CXXFLAGS) -MT testmcc-testmcc.obj -MD -MP -MF $(DEPDIR)/testmcc-testmcc.Tpo -c -o testmcc-testmcc.obj `if test -f 'testmcc.cpp'; then $(CYGPATH_W) 'testmcc.cpp'; else $(CYGPATH_W) '$(srcdir)/testmcc.cpp'; fi`
+-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/testmcc-testmcc.Tpo $(DEPDIR)/testmcc-testmcc.Po
+-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='testmcc.cpp' object='testmcc-testmcc.obj' libtool=no @AMDEPBACKSLASH@
+-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(testmcc_CXXFLAGS) $(CXXFLAGS) -c -o testmcc-testmcc.obj `if test -f 'testmcc.cpp'; then $(CYGPATH_W) 'testmcc.cpp'; else $(CYGPATH_W) '$(srcdir)/testmcc.cpp'; fi`
+-
+ mostlyclean-libtool:
+ 	-rm -f *.lo
+ 
+@@ -784,7 +745,7 @@
+ 	done
+ check-am: all-am
+ check: check-am
+-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
++all-am: Makefile $(LTLIBRARIES) $(HEADERS)
+ installdirs:
+ 	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(libarcmessage_ladir)"; do \
+ 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+@@ -817,7 +778,7 @@
+ clean: clean-am
+ 
+ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
+-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
++	clean-noinstLTLIBRARIES mostlyclean-am
+ 
+ distclean: distclean-am
+ 	-rm -rf ./$(DEPDIR)
+@@ -890,12 +851,12 @@
+ 
+ .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+ 	clean-libLTLIBRARIES clean-libtool clean-noinstLTLIBRARIES \
+-	clean-noinstPROGRAMS ctags distclean distclean-compile \
+-	distclean-generic distclean-libtool distclean-tags distdir dvi \
+-	dvi-am html html-am info info-am install install-am \
+-	install-data install-data-am install-dvi install-dvi-am \
+-	install-exec install-exec-am install-html install-html-am \
+-	install-info install-info-am install-libLTLIBRARIES \
++	ctags distclean distclean-compile distclean-generic \
++	distclean-libtool distclean-tags distdir dvi dvi-am html \
++	html-am info info-am install install-am install-data \
++	install-data-am install-dvi install-dvi-am install-exec \
++	install-exec-am install-html install-html-am install-info \
++	install-info-am install-libLTLIBRARIES \
+ 	install-libarcmessage_laHEADERS install-man install-pdf \
+ 	install-pdf-am install-ps install-ps-am install-strip \
+ 	installcheck installcheck-am installdirs maintainer-clean \
+@@ -905,6 +866,10 @@
+ 	uninstall-libarcmessage_laHEADERS
+ 
+ 
++#testmcc_SOURCES  = testmcc.cpp
++#testmcc_CXXFLAGS = $(GLIBMM_CFLAGS) $(LIBXML2_CFLAGS) -I$(top_srcdir)/include
++#testmcc_LDADD    = ./libarcmessage.la $(top_srcdir)/src/hed/libs/common/libarccommon.la
++
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+ .NOEXPORT:

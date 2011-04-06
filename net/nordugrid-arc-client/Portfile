@@ -1,0 +1,75 @@
+# $Id$
+
+PortSystem          1.0
+
+set sourcename nordugrid-arc
+set type experimental
+
+name                ${sourcename}-client
+version             1.0.0b4
+categories          net
+maintainers         nbi.ku.dk:skou
+description         ${version} release of the Advanced Resource Connector (ARC) client
+long_description    \
+        The Advanced Resource Connector (ARC) middleware, introduced by \
+        NorduGrid (www.nordugrid.org), is an open source software solution \
+        enabling production quality computational and data Grids since May \
+        2002.
+homepage            http://www.nordugrid.org
+platforms           darwin
+master_sites        http://download.nordugrid.org/software/nordugrid-arc/${type}/${version}/src/
+distfiles           ${sourcename}-${version}.tar.gz
+checksums           md5     312c5b9b0d45a3e5e7576c8ab9e9c140 \
+                    sha1    eedfc43b23bd7905b0cbcc4cdc87eade4da3d21b \
+                    rmd160  df71b11f9d3f582b5bc3664b392e6e9819193404
+
+patchfiles          patch-ignore-testmcc-program.diff
+
+depends_run         port:glibmm \
+                    port:libxml2 \
+                    port:openldap \
+                    port:globus-common \
+                    port:globus-gssapi-gsi \
+                    port:globus-rls-client \
+                    port:globus-ftp-client \
+                    port:globus-ftp-control \
+                    port:globus-io \
+                    port:globus-openssl
+
+depends_build       port:gettext \
+                    port:libtool \
+                    port:pkgconfig \
+                    port:doxygen \
+                    port:automake \
+                    port:autoconf \
+                    port:cvs \
+                    port:glibmm \
+                    port:libxml2 \
+                    port:grid-packaging-tools \
+                    port:openldap \
+                    port:globus-common \
+                    port:globus-gssapi-gsi \
+                    port:globus-rls-client \
+                    port:globus-ftp-client \
+                    port:globus-ftp-control \
+                    port:globus-io \
+                    port:globus-openssl
+                        
+worksrcdir          ${sourcename}-${version}
+pre-configure       {
+    reinplace "s/@MSGMERGE@ --update/@MSGMERGE@ --update --backup=off/" ${worksrcpath}/po/Makefile.in.in
+}
+configure.env PKG_CONFIG_LIBDIR=/opt/local/lib/pkgconfig
+configure.args-append --disable-xmlsec1 --disable-cppunit --disable-all --enable-hed --enable-arclib-client --enable-credentials-client --enable-data-client --enable-srm-client --enable-doc
+
+post-destroot {
+  system "rm -rf ${destroot}/${prefix}/share/arc/examples/config"
+  system "rm -rf ${destroot}/${prefix}/share/arc/examples/echo"
+  system "rm -rf ${destroot}/${prefix}/share/arc/profiles"
+  system "rm -rf ${destroot}/${prefix}/share/arc/schema"
+  system "rm -rf ${destroot}/${prefix}/share/doc"
+  system "rm -rf ${destroot}/${prefix}/share/man/man8"
+  system "rm -rf ${destroot}/${prefix}/sbin"
+  system "rm -rf ${destroot}/${prefix}/libexec"
+  system "rm -rf ${destroot}/Library"
+}
