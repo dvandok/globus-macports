@@ -1,7 +1,8 @@
 #!/bin/bash
 #
 # This script creates a Mac OS X NorduGrid ARC standalone package.
-# Usage: create-standalone.sh <type> [version] [build globus]
+# Requires: wget
+# Usage: create-standalone.sh <version>
 # Relies on the files in the repository, and must be executed here.
 #
 # TODO:
@@ -14,28 +15,24 @@
 if test $# != 1 && test $# != 2 && test $# != 3
 then
   echo "1 to 3 arguments needed."
-  echo "${0} <type> [version] [build globus]"
   exit 1
 fi
 
 # Second argument is type which should be one of (releases (default), testing, experimental).
-if test ${1} != "releases" && test ${1} != "testing" && test ${1} != "experimental" && test ${1} != "nightlies"
+if test $# == 2
 then
-  echo "First argument must be one of \"releases\", \"testing\", \"experimental\" or \"nightlies\"."
-  exit 1
-fi
-type=${1}
-
-if test ${type} != "nightlies" && test $# == 1
-then
-  echo "2nd argument (version) must be specified for type \"${type}\"."
-  exit 1
+  if test ${2} != "releases" && test ${2} != "testing" && test ${2} != "experimental"
+  then
+    echo "2nd argument must be one of \"releases\", \"testing\" or \"experimental\"."
+    exit 1
+  fi
+  type=${2}
+else
+  type="releases"
 fi
 
 makeglobus="no"
 test $# == 3 && test "x${3}" == "xyes" && makeglobus="yes"
-
-architecture=x86_64
 
 
 basedir=`pwd`
@@ -48,7 +45,8 @@ cd ${workdir}
 location=/opt/local/nordugrid
 
 name=nordugrid-arc-standalone
-version=$2
+version=$1
+source=nordugrid-arc-${version}.tar.gz
 
 arcglobusmoduledir=globus-plugins
 
@@ -116,7 +114,7 @@ sed -i .old "
 # Wait 1 second before creating package to avoid MacPorts complaining about files in future.
 sleep 1
 # Make a package.
-port pkg -D ${pkgname}-arcstandalone prefix=${location} build_arch=${architecture}
+port pkg -D ${pkgname}-arcstandalone +universal prefix=${location}
 if [[ $? -ne 0 ]]
 then
   echo "Unable to make package ${pkgname}"
@@ -137,7 +135,7 @@ sed -i .old "s/<string><\/string>/<string>${description}<\/string>/" \
   ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/Description.plist
 
 # Install package since others packages might depend on it.
-port install -D ${pkgname}-arcstandalone prefix=${location} build_arch=${architecture}
+port install -D ${pkgname}-arcstandalone +universal prefix=${location}
 
 # Sanity check. Check if libraries are linked properly.
 depslibs=`port contents -D ${pkgname}-arcstandalone | grep ${location} | grep dylib`
@@ -182,7 +180,7 @@ destroot.violate_mtree      yes\\
 
 if [[ "${pkgname}" == "grid-packaging-tools" ]] || [[ "${pkgname}" == "globus-core" ]];
 then
-  port install -D ${pkgname}-arcstandalone prefix=${location} build_arch=${architecture}
+  port install -D ${pkgname}-arcstandalone +universal prefix=${location}
   if [[ $? -ne 0 ]]
   then
     echo "Unable to make package ${pkgname}"
@@ -193,7 +191,7 @@ then
 fi
 
 # Make a package.
-port pkg -D ${pkgname}-arcstandalone prefix=${location} build_arch=${architecture}
+port pkg -D ${pkgname}-arcstandalone +universal prefix=${location}
 if [[ $? -ne 0 ]]
 then
   echo "Unable to make package ${pkgname}"
@@ -214,7 +212,7 @@ sed -i .old "s/<string><\/string>/<string>${description}<\/string>/" \
   ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/Description.plist
 
 # Install package since others packages might depend on it.
-port install -D ${pkgname}-arcstandalone prefix=${location} build_arch=${architecture}
+port install -D ${pkgname}-arcstandalone +universal prefix=${location}
 
 # Sanity check. Check if libraries are linked properly.
 depslibs=`port contents -D ${pkgname}-arcstandalone | grep ${location} | grep dylib`
@@ -232,7 +230,7 @@ return 0
 
 function requiredpackagescheck() {
 # The following packages are required to be installed to build the stand-alone package.
-requiredpkgs=(gperf pkgconfig autoconf automake nordugrid-arc-client doxygen p5-archive-tar perl5)
+requiredpkgs=(gperf pkgconfig autoconf automake wget doxygen p5-archive-tar perl5)
 pkgsneeded=
 installedports=`port installed`
 for package in ${requiredpkgs[@]}
@@ -253,26 +251,7 @@ function fetchsource() {
 # Source need to be downloaded to be able to calculate checksums. Remove old source first.
 rm -rf ${basedir}/${name}/files
 mkdir ${basedir}/${name}/files
-
-if test ${type} == "nightlies"
-then
-  export GLOBUS_LOCATION=/opt/local
-  date=`date +%F`
-  source=`arcls gsiftp://lscf.nbi.dk/nightlies/nordugrid-arc/trunk/${date}/src | grep "nordugrid-arc-[0-9]\+.tar.gz"`
-  
-  arccp gsiftp://lscf.nbi.dk/nightlies/nordugrid-arc/trunk/${date}/src/${source} ${basedir}/${name}/files/${source}
-  if [[ $? != 0 ]]
-  then
-    echo "Unable to fetch source."
-    exit 1
-  else
-    echo "Source successfully fetched"
-    exit 0
-  fi
-else
-  source=nordugrid-arc-${version}.tar.gz
-  arccp http://download.nordugrid.org/software/nordugrid-arc/${type}/${version}/src/${source} ${basedir}/${name}/files/${source}
-fi
+wget -q -O ${basedir}/${name}/files/${source} http://download.nordugrid.org/software/nordugrid-arc/${type}/${version}/src/${source}
 
 if [[ $? != 0 ]]
 then
@@ -514,7 +493,7 @@ insertpackage ${arcglobusmoduledir} ${version} required globus-dependencies.mpkg
 
 function packagecertificates() {
 # Include igtf-certificates in the standalone package.
-port pkg -D ${basedir}/igtf-certificates prefix=${location} build_arch=${architecture}
+port pkg -D ${basedir}/igtf-certificates prefix=${location}
 mkdir -p igtf-certificates
 mv -f ${basedir}/igtf-certificates/work/igtf-certificates-`port info --version -D ${basedir}/igtf-certificates | awk '{ print $2 }'`.pkg \
       igtf-certificates/.
@@ -568,7 +547,6 @@ export PATH=\$PATH:${location}/bin
 
 cp \${PACKAGE_PATH}/Contents/Resources/ReadMe ${location}/.
 EEOOFF
-
 chmod +x ${name}-${version}.mpkg/Contents/Resources/postinstall
 
 cp ${basedir}/${name}/work/nordugrid-arc-${version}/LICENSE \
@@ -604,7 +582,7 @@ fi
 
 # Create the Nordugrid ARC stand-alone package.
 # First destroot the stand-alone in order to extract the globus dependend modules.
-port destroot -D ${basedir}/${name} prefix=${location} build_arch=${architecture}
+port destroot -D ${basedir}/${name} +universal prefix=${location}
 if [[ $? != 0 ]]
 then
   echo "Building ${name} failed"
@@ -618,7 +596,7 @@ mkdir -p ${arcglobusmoduledir}/destroot/${location}/lib/arc
 mv `port work -D ${basedir}/${name}`/destroot/${location}/lib/arc/lib{dmc{gridftp,rls},accARC0,mccgsi}.* ${arcglobusmoduledir}/destroot/${location}/lib/arc/.
 fi
 # Make meta package which should contain dependencies as well.
-port mpkg -D ${basedir}/${name} prefix=${location} build_arch=${architecture}
+port mpkg -D ${basedir}/${name} +universal prefix=${location}
 if [[ $? != 0 ]]
 then
   echo "Creating meta-package ${name} failed"
