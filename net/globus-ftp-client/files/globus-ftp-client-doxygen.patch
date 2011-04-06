@@ -1,0 +1,398 @@
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client_attr.c globus_ftp_client-5.2/globus_ftp_client_attr.c
+--- globus_ftp_client-5.2.orig/globus_ftp_client_attr.c	2008-10-29 23:59:05.000000000 +0100
++++ globus_ftp_client-5.2/globus_ftp_client_attr.c	2010-01-23 08:50:29.709280472 +0100
+@@ -500,7 +500,7 @@
+  *
+  * @param attr
+  *        Attribute to modify
+- * @param gridftp
++ * @param gridftp2
+  *        Set to GLOBUS_TRUE to enable GridFTP2 support.
+  *        Default of GLOBUS_FALSE specifies that GridFTP is disabled.
+  */
+@@ -1987,7 +1987,7 @@
+  *
+  * @param attr
+  *        The attribute set to query or modify.
+- * @param buffer
++ * @param tcp_buffer
+  *        The value of tcp_buffer attribute.
+  *
+  * @see #globus_gsiftp_control_tcpbuffer_t
+@@ -2081,11 +2081,11 @@
+  *   data transfer, and then converted to native format before being
+  *   returned to the user's data callbacks.
+  *
+- * The default type for the ftp client libary is binary.
++ * The default type for the ftp client library is binary.
+  *
+  * @param attr
+  *        The attribute set to query or modify.
+- * @param buffer
++ * @param type
+  *        The value of type attribute.
+  *
+  * @see #globus_ftp_control_type_t
+@@ -2181,7 +2181,7 @@
+  *
+  * @param attr
+  *        The attribute set to query or modify.
+- * @param layout
++ * @param mode
+  *        The value of mode attribute
+  *
+  * @see #globus_ftp_control_mode_t,
+@@ -2270,7 +2270,9 @@
+     return globus_error_put(err);
+ }
+ /* globus_ftp_client_operationattr_get_mode() */
++/* @} */
+ 
++/* @{ */
+ /**
+  * Set/Get whether or not list data will use the current data mode
+  * @ingroup globus_ftp_client_operationattr
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client_data.c globus_ftp_client-5.2/globus_ftp_client_data.c
+--- globus_ftp_client-5.2.orig/globus_ftp_client_data.c	2008-04-04 03:51:47.000000000 +0200
++++ globus_ftp_client-5.2/globus_ftp_client_data.c	2010-01-23 08:46:26.468282590 +0100
+@@ -330,6 +330,7 @@
+  *        mode, the data does not need to be sent in order. In stream
+  *	  mode (the default), data must be sent in sequential
+  *	  order. The behavior is undefined if multiple writes overlap.
++ * @param eof
+  * @param callback
+  *        The function to be called once the data has been written.
+  * @param callback_arg
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client_debug_plugin.c globus_ftp_client-5.2/globus_ftp_client_debug_plugin.c
+--- globus_ftp_client-5.2.orig/globus_ftp_client_debug_plugin.c	2007-06-01 19:23:06.000000000 +0200
++++ globus_ftp_client-5.2/globus_ftp_client_debug_plugin.c	2010-01-23 08:46:26.469282996 +0100
+@@ -1199,6 +1199,8 @@
+  *        A pointer to an uninitialized plugin. The plugin will be
+  *        configured as a debugging plugin, with the default of sending
+  *        debugging messages to stderr.
++ * @param stream
++ * @param text
+  *
+  * @return This function returns an error if
+  * - plugin is null
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client.h globus_ftp_client-5.2/globus_ftp_client.h
+--- globus_ftp_client-5.2.orig/globus_ftp_client.h	2009-11-05 23:43:41.000000000 +0100
++++ globus_ftp_client-5.2/globus_ftp_client.h	2010-01-23 08:48:19.084280568 +0100
+@@ -414,7 +414,7 @@
+  *
+  * Create/Destroy/Modify an FTP Client Handle.
+  *
+- * Within the Globus FTP Client Libary, all FTP operations require a
++ * Within the Globus FTP Client Library, all FTP operations require a
+  * handle parameter. Currently, only one FTP operation may be in
+  * progress at once per FTP handle. FTP connections may be cached
+  * between FTP operations, for improved performance.
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client_plugin.c globus_ftp_client-5.2/globus_ftp_client_plugin.c
+--- globus_ftp_client-5.2.orig/globus_ftp_client_plugin.c	2006-10-14 09:21:56.000000000 +0200
++++ globus_ftp_client-5.2/globus_ftp_client_plugin.c	2010-01-23 08:46:26.470282702 +0100
+@@ -81,12 +81,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the list.
+- * @param source_url
++ * @param url
+  *        The destination URL of the transfer. This may be different than
+  *        the original list's URL, if the plugin decides to redirect to
+  *        another FTP server due to performance or reliability
+  *        problems with the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new transfer. This may be a
+  *        modified version of the original list's attribute set.
+  * @param when
+@@ -143,12 +143,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the list.
+- * @param source_url
++ * @param url
+  *        The destination URL of the transfer. This may be different than
+  *        the original list's URL, if the plugin decides to redirect to
+  *        another FTP server due to performance or reliability
+  *        problems with the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new transfer. This may be a
+  *        modified version of the original list's attribute set.
+  * @param when
+@@ -206,12 +206,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the list.
+- * @param source_url
++ * @param url
+  *        The destination URL of the transfer. This may be different than
+  *        the original list's URL, if the plugin decides to redirect to
+  *        another FTP server due to performance or reliability
+  *        problems with the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new transfer. This may be a
+  *        modified version of the original list's attribute set.
+  * @param when
+@@ -268,12 +268,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the list.
+- * @param source_url
++ * @param url
+  *        The destination URL of the transfer. This may be different than
+  *        the original list's URL, if the plugin decides to redirect to
+  *        another FTP server due to performance or reliability
+  *        problems with the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new transfer. This may be a
+  *        modified version of the original list's attribute set.
+  * @param when
+@@ -330,12 +330,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the list.
+- * @param source_url
++ * @param url
+  *        The destination URL of the transfer. This may be different than
+  *        the original list's URL, if the plugin decides to redirect to
+  *        another FTP server due to performance or reliability
+  *        problems with the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new transfer. This may be a
+  *        modified version of the original list's attribute set.
+  * @param when
+@@ -537,12 +537,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the delete.
+- * @param source_url
++ * @param url
+  *        The destination URL of the transfer. This may be different than
+  *        the original delete's URL, if the plugin decides to redirect to
+  *        another FTP server due to performance or reliability
+  *        problems with the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new transfer. This may be a
+  *        modified version of the original delete's attribute set.
+  * @param when
+@@ -599,12 +599,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the feat.
+- * @param source_url
++ * @param url
+  *        The destination URL of the transfer. This may be different than
+  *        the original feat's URL, if the plugin decides to redirect to
+  *        another FTP server due to performance or reliability
+  *        problems with the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new transfer. This may be a
+  *        modified version of the original feat's attribute set.
+  * @param when
+@@ -661,12 +661,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the mkdir.
+- * @param source_url
++ * @param url
+  *        The destination URL of the transfer. This may be different than
+  *        the original mkdir's URL, if the plugin decides to redirect to
+  *        another FTP server due to performance or reliability
+  *        problems with the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new transfer. This may be a
+  *        modified version of the original mkdir's attribute set.
+  * @param when
+@@ -723,12 +723,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the rmdir.
+- * @param source_url
++ * @param url
+  *        The destination URL of the transfer. This may be different than
+  *        the original rmdir's URL, if the plugin decides to redirect to
+  *        another FTP server due to performance or reliability
+  *        problems with the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new transfer. This may be a
+  *        modified version of the original rmdir's attribute set.
+  * @param when
+@@ -1101,12 +1101,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the operation.
+- * @param source_url
++ * @param url
+  *        The source URL of the size check. This may be different than
+  *        the original operations URL, if the plugin decides to redirect to
+  *        another FTP server due to performance or reliability
+  *        problems with the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new operation. This may be a
+  *        modified version of the original operations's attribute set.
+  * @param when
+@@ -1161,12 +1161,12 @@
+  *
+  * @param handle
+  *        The handle which is associated with the operation.
+- * @param source_url
++ * @param url
+  *        The source URL of the modification time check. This may be different
+  *        than the original operations URL, if the plugin decides to redirect
+  *        to another FTP server due to performance or reliability problems with
+  *        the original URL.
+- * @param source_attr
++ * @param attr
+  *        The attributes to use for the new operation. This may be a
+  *        modified version of the original operations's attribute set.
+  * @param when
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client_plugin.h globus_ftp_client-5.2/globus_ftp_client_plugin.h
+--- globus_ftp_client-5.2.orig/globus_ftp_client_plugin.h	2008-04-04 03:51:47.000000000 +0200
++++ globus_ftp_client-5.2/globus_ftp_client_plugin.h	2010-01-23 08:46:26.470282702 +0100
+@@ -947,7 +947,7 @@
+  * @ingroup globus_ftp_client_plugins
+  *
+  * This callback is used to notify a plugin that a FTP control
+- * command is being sent.The client library will only call this
++ * command is being sent. The client library will only call this
+  * function for response callbacks associated with a command which is
+  * in the plugin's command mask, and associated with one of the other
+  * ftp operations with a defined callback in the plugin.
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client_restart_marker_plugin.h globus_ftp_client-5.2/globus_ftp_client_restart_marker_plugin.h
+--- globus_ftp_client-5.2.orig/globus_ftp_client_restart_marker_plugin.h	2006-01-19 06:54:53.000000000 +0100
++++ globus_ftp_client-5.2/globus_ftp_client_restart_marker_plugin.h	2010-01-23 08:52:56.098529908 +0100
+@@ -31,7 +31,7 @@
+  * @defgroup globus_ftp_client_restart_marker_plugin Restart Marker Plugin
+  * @ingroup globus_ftp_client_plugins
+  *
+- * This plugin is intended to allow users to make restart markers persistant.
++ * This plugin is intended to allow users to make restart markers persistent.
+  * During a transfer, every marker received will result in the user's 'marker'
+  * callback being called with the new restart marker that can be stored. If
+  * the application were to prematurely terminate (while transferring), the user
+@@ -71,7 +71,7 @@
+  * started.
+  *
+  * The intended use for this callback is for the user to use the transfer
+- * urls to locate a restart marker in some persistant storage. If one is
++ * urls to locate a restart marker in some persistent storage. If one is
+  * found, it should be copied into 'user_saved_marker' and the callback
+  * should return GLOBUS_TRUE. This will cause the transfer to be restarted
+  * using that restart marker.  If one is not found, return GLOBUS_FALSE to
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client_restart_plugin.h globus_ftp_client-5.2/globus_ftp_client_restart_plugin.h
+--- globus_ftp_client-5.2.orig/globus_ftp_client_restart_plugin.h	2008-07-15 23:19:38.000000000 +0200
++++ globus_ftp_client-5.2/globus_ftp_client_restart_plugin.h	2010-01-23 08:53:17.717279709 +0100
+@@ -35,7 +35,7 @@
+  * is parameterized to control how often and when to attempt to restart
+  * the operation.
+  *
+- * This restart plugin will restart an FTP operation if a noticable
++ * This restart plugin will restart an FTP operation if a noticeable
+  * fault has occurred---a connection timing out, a failure by the server
+  * to process a command, a protocol error, an authentication error.
+  *
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client_throughput_nl_plugin.c globus_ftp_client-5.2/globus_ftp_client_throughput_nl_plugin.c
+--- globus_ftp_client-5.2.orig/globus_ftp_client_throughput_nl_plugin.c	2006-01-19 06:54:53.000000000 +0100
++++ globus_ftp_client-5.2/globus_ftp_client_throughput_nl_plugin.c	2010-01-23 08:46:26.471282688 +0100
+@@ -526,6 +526,8 @@
+  * provides by using this function to set these callbacks.  Note that
+  * the callbacks are defined the same as in the throughput plugin
+  *
++ * @param plugin
++ *
+  * @param begin_cb
+  *        the callback to be called upon the start of a transfer
+  *
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client_throughput_nl_plugin.h globus_ftp_client-5.2/globus_ftp_client_throughput_nl_plugin.h
+--- globus_ftp_client-5.2.orig/globus_ftp_client_throughput_nl_plugin.h	2006-01-19 06:54:53.000000000 +0100
++++ globus_ftp_client-5.2/globus_ftp_client_throughput_nl_plugin.h	2010-01-23 08:46:26.471282688 +0100
+@@ -39,32 +39,32 @@
+  * TransferPerfTotal : This event type will be sent everytime a throughput
+  *      plugin total callback is received.
+  *
+- * URL.SOURCE   <string>  Source url of transfer
+- * URL.DEST     <string>  Dest url of transfer
+- * BYTES        <int>     Total bytes transfered thus far
+- * BW.CURRENT   <float>   Current (instantaneous) bandwidth
+- * BW.AVG       <float>   Average (instantaneous) bandwidth
++ * - URL.SOURCE   <string>  Source url of transfer
++ * - URL.DEST     <string>  Dest url of transfer
++ * - BYTES        <int>     Total bytes transfered thus far
++ * - BW.CURRENT   <float>   Current (instantaneous) bandwidth
++ * - BW.AVG       <float>   Average (instantaneous) bandwidth
+  *
+  * TransferPerfStripe  : This event type will be sent everytime a throughput
+  *      plugin stripe callback is received.
+  *
+- * URL.SOURCE   <string>  Source url of transfer
+- * URL.DEST     <string>  Dest url of transfer
+- * INDEX        <int>     The stripe index the event applies to
+- * BYTES        <int>     Total bytes transfered thus far on this stripe
+- * BW.CURRENT   <float>   Current (instantaneous) bandwidth on this stripe
+- * BW.AVG       <float>   Average (instantaneous) bandwidth on this stripe
++ * - URL.SOURCE   <string>  Source url of transfer
++ * - URL.DEST     <string>  Dest url of transfer
++ * - INDEX        <int>     The stripe index the event applies to
++ * - BYTES        <int>     Total bytes transfered thus far on this stripe
++ * - BW.CURRENT   <float>   Current (instantaneous) bandwidth on this stripe
++ * - BW.AVG       <float>   Average (instantaneous) bandwidth on this stripe
+  *
+  * TransferBegin  : This event type will be sent everytime a throughput
+  *      plugin begin callback is received.
+  *
+- * URL.SOURCE   <string>  Source url of transfer
+- * URL.DEST     <string>  Dest url of transfer
++ * - URL.SOURCE   <string>  Source url of transfer
++ * - URL.DEST     <string>  Dest url of transfer
+  *
+  * TransferEnd  : This event type will be sent everytime a throughput
+  *      plugin complete callback is received.
+  *
+- * SUCCESS      <bool>    Completion status
++ * - SUCCESS      <bool>    Completion status
+  *
+  */
+ 
+diff -ur globus_ftp_client-5.2.orig/globus_ftp_client_transfer.c globus_ftp_client-5.2/globus_ftp_client_transfer.c
+--- globus_ftp_client-5.2.orig/globus_ftp_client_transfer.c	2008-09-23 01:07:47.000000000 +0200
++++ globus_ftp_client-5.2/globus_ftp_client_transfer.c	2010-01-23 08:46:26.473530036 +0100
+@@ -2089,7 +2089,7 @@
+  * aborted, the complete_callback will be invoked with the final
+  * status of the get.
+  *
+- * @param u_handle
++ * @param handle
+  *        An FTP Client handle to use for the get operation.
+  * @param url
+  *	  The URL to download. The URL may be an ftp or gsiftp URL.
+@@ -2799,6 +2799,7 @@
+  *	  Attributes for this file transfer.
+  * @param restart
+  *        Pointer to a restart marker.
++ * @param esto_alg_str
+  * @param complete_callback
+  *        Callback to be invoked once the "put" is completed.
+  * @param callback_arg
+@@ -3346,11 +3347,13 @@
+  *	  The URL to transfer. The URL may be an ftp or gsiftp URL.
+  * @param source_attr
+  *	  Attributes for the souce URL.
++ * @param eret_alg_str
+  * @param dest_url
+  *        The destination URL for the transfer. The URL may be an ftp
+  *        or gsiftp URL.
+  * @param dest_attr
+  *        Attributes for the destination URL.
++ * @param esto_alg_str
+  * @param restart
+  *        Pointer to a restart marker.
+  * @param complete_callback

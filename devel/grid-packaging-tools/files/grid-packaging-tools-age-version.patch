@@ -1,0 +1,24 @@
+diff -ur gpt-3.2.orig/packaging_tools/perl/scripts/gpt_extract_data gpt-3.2/packaging_tools/perl/scripts/gpt_extract_data
+--- gpt-3.2.orig/packaging_tools/perl/scripts/gpt_extract_data	2004-05-20 19:42:17.000000000 +0200
++++ gpt-3.2/packaging_tools/perl/scripts/gpt_extract_data	2008-06-22 22:20:27.000000000 +0200
+@@ -65,7 +65,8 @@
+ 
+ print "GPT_NAME='$pkg->{'Name'}'\n" if defined $name;
+ print "GPT_MAJOR_VERSION='$pkg->{'Version'}->{'major'}'
+-GPT_MINOR_VERSION='$pkg->{'Version'}->{'minor'}'\n" if defined $version;
++GPT_MINOR_VERSION='$pkg->{'Version'}->{'minor'}'
++GPT_AGE_VERSION='$pkg->{'Version'}->{'age'}'\n" if defined $version;
+ 
+ print "GPT_CFLAGS='$pkg->{'cflags'}'
+ GPT_INCLUDES='$pkg->{'external_includes'}'
+@@ -96,8 +97,8 @@
+ 
+ =item version
+ 
+-Print out version numbers as GPT_MAJOR_VERSION and GPT_MINOR_VERSION
+-variables.
++Print out version numbers as GPT_MAJOR_VERSION, GPT_MINOR_VERSION and
++GPT_AGE_VERSION variables.
+ 
+ =item build_env
+ 

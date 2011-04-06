@@ -1,0 +1,49 @@
+diff -ur globus_proxy_utils-2.5.orig/programs/grid_cert_diagnostics.c globus_proxy_utils-2.5/programs/grid_cert_diagnostics.c
+--- globus_proxy_utils-2.5.orig/programs/grid_cert_diagnostics.c	2008-08-20 20:08:04.000000000 +0200
++++ globus_proxy_utils-2.5/programs/grid_cert_diagnostics.c	2009-05-09 13:54:37.000000000 +0200
+@@ -3,6 +3,9 @@
+ #include "globus_gsi_credential.h"
+ #include "globus_gss_assist.h"
+ #include "openssl/bn.h"
++#ifdef WIN32
++#include "openssl/applink.c"
++#endif
+ 
+ char *
+ indent_string(const char * str)
+diff -ur globus_proxy_utils-2.5.orig/programs/grid_proxy_destroy.c globus_proxy_utils-2.5/programs/grid_proxy_destroy.c
+--- globus_proxy_utils-2.5.orig/programs/grid_proxy_destroy.c	2009-05-09 14:10:54.000000000 +0200
++++ globus_proxy_utils-2.5/programs/grid_proxy_destroy.c	2009-05-09 13:54:08.000000000 +0200
+@@ -34,7 +34,7 @@
+ #include "globus_gsi_credential.h"
+ #include "globus_gsi_system_config.h"
+ #ifdef WIN32
+-#include "globus_gssapi_config.h"
++#include "openssl/applink.c"
+ #endif
+ 
+ int                                     debug = 0;
+diff -ur globus_proxy_utils-2.5.orig/programs/grid_proxy_info.c globus_proxy_utils-2.5/programs/grid_proxy_info.c
+--- globus_proxy_utils-2.5.orig/programs/grid_proxy_info.c	2009-05-09 14:10:54.000000000 +0200
++++ globus_proxy_utils-2.5/programs/grid_proxy_info.c	2009-05-09 13:53:41.000000000 +0200
+@@ -34,7 +34,7 @@
+ #include "globus_gsi_credential.h"
+ #include "globus_openssl.h"
+ #ifdef WIN32
+-#include "globus_gssapi_config.h"
++#include "openssl/applink.c"
+ #endif
+ 
+ int                                     debug = 0;
+diff -ur globus_proxy_utils-2.5.orig/programs/grid_proxy_init.c globus_proxy_utils-2.5/programs/grid_proxy_init.c
+--- globus_proxy_utils-2.5.orig/programs/grid_proxy_init.c	2009-05-09 14:10:54.000000000 +0200
++++ globus_proxy_utils-2.5/programs/grid_proxy_init.c	2009-05-09 13:52:56.000000000 +0200
+@@ -36,7 +36,7 @@
+ #include "proxycertinfo.h"
+ #include "openssl/asn1.h"
+ #ifdef WIN32
+-#include "globus_gssapi_config.h"
++#include "openssl/applink.c"
+ #endif
+ 
+ #define SHORT_USAGE_FORMAT \

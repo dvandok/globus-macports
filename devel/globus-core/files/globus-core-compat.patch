@@ -1,0 +1,20 @@
+diff -ur globus_core-5.15.orig/pkgdata/Makefile.am globus_core-5.15/pkgdata/Makefile.am
+--- globus_core-5.15.orig/pkgdata/Makefile.am	2006-01-12 18:12:52.000000000 +0100
++++ globus_core-5.15/pkgdata/Makefile.am	2009-06-15 14:57:39.000000000 +0200
+@@ -44,12 +44,12 @@
+ 
+ install-pkgDATA: $(pkg_DATA)
+ 	@$(NORMAL_INSTALL)
+-	test -z "$(pkgdir)" || $(mkdir_p) "$(DESTDIR)$(pkgdir)";
++	test -z "$(pkgdir)" || $(mkinstalldirs) "$(DESTDIR)$(pkgdir)";
+ 	@list='$(pkg_DATA)'; for p in $$list; do \
+ 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+-	  f=$(am__strip_dir) \
+-	  echo " $(pkgDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(pkgdir)/$$f'"; \
+-	  $(pkgDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(pkgdir)/$$f"; \
++	  f=`echo $$p | sed -e 's|^.*/||'`; \
++	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(pkgdir)/$$f'"; \
++	  $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(pkgdir)/$$f"; \
+ 	done || true
+ 
+ 

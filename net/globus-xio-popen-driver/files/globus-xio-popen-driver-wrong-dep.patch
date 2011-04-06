@@ -1,0 +1,33 @@
+diff -ur globus_xio_popen_driver-0.2.orig/pkgdata/pkg_data_src.gpt.in globus_xio_popen_driver-0.2/pkgdata/pkg_data_src.gpt.in
+--- globus_xio_popen_driver-0.2.orig/pkgdata/pkg_data_src.gpt.in	2006-12-07 23:58:11.000000000 +0100
++++ globus_xio_popen_driver-0.2/pkgdata/pkg_data_src.gpt.in	2008-10-21 11:46:51.000000000 +0200
+@@ -18,7 +18,7 @@
+ 
+         </Source_Dependencies>
+ 
+-        <Source_Dependencies Type="pgm_link">
++        <Source_Dependencies Type="lib_link">
+             <Dependency Name="globus_xio">
+                 <Version>
+                     <Simple_Version Major="0"/>
+@@ -26,14 +26,6 @@
+             </Dependency>
+         </Source_Dependencies>
+ 
+-        <Source_Dependencies Type="doc_runtime">
+-            <Dependency Name="globus_xio" Package="doc">
+-                <Version>
+-                    <Simple_Version Major="0"/>
+-                </Version>
+-            </Dependency>
+-        </Source_Dependencies>
+-
+         <With_Flavors build="yes"/>
+ 
+         <Build_Environment>
+@@ -46,5 +38,3 @@
+     </src_pkg>
+ 
+ </gpt_package_metadata>
+-~
+-~

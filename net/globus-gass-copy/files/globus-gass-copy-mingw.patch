@@ -1,0 +1,59 @@
+diff -ur globus_gass_copy-5.3.orig/globus_gass_copy_glob.c globus_gass_copy-5.3/globus_gass_copy_glob.c
+--- globus_gass_copy-5.3.orig/globus_gass_copy_glob.c	2009-07-16 21:28:09.000000000 +0200
++++ globus_gass_copy-5.3/globus_gass_copy_glob.c	2010-03-07 17:56:00.679553650 +0100
+@@ -1428,7 +1428,11 @@
+         goto error_null_path;
+     }
+     
++#ifndef TARGET_ARCH_WIN32
+     rc = mkdir(parsed_url.url_path, 0777);
++#else
++    rc = mkdir(parsed_url.url_path);
++#endif
+ 
+     if(rc != 0)
+     {
+diff -ur globus_gass_copy-5.3.orig/globus_url_copy.c globus_gass_copy-5.3/globus_url_copy.c
+--- globus_gass_copy-5.3.orig/globus_url_copy.c	2009-12-18 06:51:45.000000000 +0100
++++ globus_gass_copy-5.3/globus_url_copy.c	2010-03-07 18:01:03.183300955 +0100
+@@ -48,6 +48,9 @@
+  */
+ #include "globus_io.h"
+ #include "version.h"  /* provides local_version */
++#ifdef WIN32
++#include "openssl/applink.c"
++#endif
+ 
+ #define GUC_URL_ENC_CHAR "#;:=+ ,"
+ 
+@@ -1196,13 +1199,21 @@
+     globus_l_guc_src_dst_pair_t *       url_pair;
+     FILE *                              dumpfile;
+     char *                              dumptmp;
++#ifdef WIN32
++    char *                              dumptmp2;
++#endif
+     int                                 dumpfd;
+     int                                 i;
+     globus_l_guc_transfer_t *           transfer_info;
+ 
+     guc_info = (globus_l_guc_info_t *) user_arg;
+     dumptmp = globus_common_create_string("%s.XXXXXX", guc_info->dumpfile);
++#ifdef WIN32
++    dumptmp2 = mktemp(dumptmp);
++    dumpfd = open(dumptmp2, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
++#else
+     dumpfd = mkstemp(dumptmp);
++#endif
+     if(dumpfd < 0)
+     {
+         return;
+@@ -1477,7 +1488,7 @@
+     int                                     i;
+     globus_callback_handle_t                dumpfile_handle;
+ 
+-    setenv("GLOBUS_CALLBACK_POLLING_THREADS", "1", 1);
++    globus_libc_setenv("GLOBUS_CALLBACK_POLLING_THREADS", "1", 1);
+     err = globus_module_activate(GLOBUS_GASS_COPY_MODULE);
+     if( err != GLOBUS_SUCCESS )
+     {

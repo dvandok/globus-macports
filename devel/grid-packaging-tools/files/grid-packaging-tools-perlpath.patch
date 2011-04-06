@@ -1,0 +1,388 @@
+diff -ur gpt.orig/packaging_tools/configure gpt/packaging_tools/configure
+--- gpt.orig/packaging_tools/configure	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/configure	2008-10-04 10:57:47.000000000 +0200
+@@ -273,7 +273,7 @@
+ PACKAGE_BUGREPORT=''
+ 
+ ac_unique_file="Makefile.am"
+-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE am__leading_dot PERL POD2MAN TAR GUNZIP GZIP LN_S GPT_LOCATION LIBOBJS LTLIBOBJS'
++ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE am__leading_dot PERL POD2MAN perlmoduledir TAR GUNZIP GZIP LN_S GPT_LOCATION LIBOBJS LTLIBOBJS'
+ ac_subst_files=''
+ 
+ # Initialize some variables set by options.
+@@ -796,7 +796,10 @@
+ Optional Packages:
+   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+- --with-perl=<path>     specify path to perl binary
++  --with-perl=PATH        path to perl binary
++  --with-perlmoduledir=DIR
++                          perl module installation directory
++                          [PREFIX/lib/perl]
+ 
+ _ACEOF
+ fi
+@@ -1842,7 +1845,34 @@
+ 
+ 
+ 
+-#echo "POD2MAN=$POD2MAN"
++
++# Check whether --with-perlmoduledir was given.
++if test "${with_perlmoduledir+set}" = set; then
++  withval=$with_perlmoduledir;
++    case $withval in
++    no)
++        echo "--with-perlmoduledir requires an argument" >&2
++        exit 1
++        ;;
++    yes)
++        echo "--with-perlmoduledir requires an argument" >&2
++        exit 1
++        ;;
++    *)
++        perlmoduledir=$withval
++        ;;
++    esac
++
++else
++
++    perlmoduledir='${prefix}/lib/perl'
++
++
++fi
++
++
++
++
+ 
+ # checking for the GPT_LOCATION
+ 
+@@ -2675,6 +2705,7 @@
+ s,@am__leading_dot@,$am__leading_dot,;t t
+ s,@PERL@,$PERL,;t t
+ s,@POD2MAN@,$POD2MAN,;t t
++s,@perlmoduledir@,$perlmoduledir,;t t
+ s,@TAR@,$TAR,;t t
+ s,@GUNZIP@,$GUNZIP,;t t
+ s,@GZIP@,$GZIP,;t t
+diff -ur gpt.orig/packaging_tools/configure.ac gpt/packaging_tools/configure.ac
+--- gpt.orig/packaging_tools/configure.ac	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/configure.ac	2008-10-04 10:57:47.000000000 +0200
+@@ -8,7 +8,7 @@
+ 
+ AC_ARG_WITH([perl],
+ 	
+-[ --with-perl=<path>     specify path to perl binary ],
++AC_HELP_STRING([--with-perl=PATH], [path to perl binary]),
+ [
+ 	case $withval in
+ 	no)
+@@ -21,7 +21,6 @@
+ 		;;
+ 	*)
+                 PERL=$withval
+-                AC_SUBST(PERL) 
+                 POD2MAN=`echo $PERL | sed 's!bin/perl!bin/pod2man!'`
+                 if ! test -f $POD2MAN; then
+                  POD2MAN=
+@@ -35,11 +34,36 @@
+ ]
+ )
+ 
++AC_SUBST(PERL)
++AC_SUBST(POD2MAN)
+ 
+ 
+-AC_SUBST(POD2MAN)
++AC_ARG_WITH([perlmoduledir],
++
++AC_HELP_STRING([--with-perlmoduledir=DIR],
++[perl module installation directory [[PREFIX/lib/perl]]]),
++[
++    case $withval in
++    no)
++        echo "--with-perlmoduledir requires an argument" >&2
++        exit 1
++        ;;
++    yes)
++        echo "--with-perlmoduledir requires an argument" >&2
++        exit 1
++        ;;
++    *)
++        perlmoduledir=$withval
++        ;;
++    esac
++],
++[
++    perlmoduledir='${prefix}/lib/perl'
++]
++)
++
++AC_SUBST(perlmoduledir)
+ 
+-#echo "POD2MAN=$POD2MAN"
+ 
+ # checking for the GPT_LOCATION
+ 
+diff -ur gpt.orig/packaging_tools/Makefile.am gpt/packaging_tools/Makefile.am
+--- gpt.orig/packaging_tools/Makefile.am	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/Makefile.am	2008-10-04 10:57:47.000000000 +0200
+@@ -39,7 +39,7 @@
+ 
+ gptexecshare_SCRIPTS = config.guess
+ 
+-gptmodulesdir = ${prefix}/lib/perl/Grid/GPT
++gptmodulesdir = $(perlmoduledir)/Grid/GPT
+ 
+ gptmodules_DATA = \
+ 	perl/GPT/Algorithms.pm \
+@@ -175,7 +175,9 @@
+ 
+ install-localize:
+ 	@echo "Localizing scripts to $(PERL)"
++	PERLLIB=$(DESTDIR)$(perlmoduledir) \
+ 	$(PERL) $(DESTDIR)$(sbindir)/gpt-config -perl=$(PERL) \
++	-location=$(DESTDIR)$(prefix) \
+ 	-probe \
+ 	-ignore-errors
+ 
+diff -ur gpt.orig/packaging_tools/Makefile.in gpt/packaging_tools/Makefile.in
+--- gpt.orig/packaging_tools/Makefile.in	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/Makefile.in	2008-10-04 10:57:47.000000000 +0200
+@@ -98,6 +98,7 @@
+ localstatedir = @localstatedir@
+ mandir = @mandir@
+ oldincludedir = @oldincludedir@
++perlmoduledir = @perlmoduledir@
+ prefix = $(GPT_LOCATION)
+ program_transform_name = @program_transform_name@
+ sbindir = @sbindir@
+@@ -148,7 +149,7 @@
+ 
+ gptexecshare_SCRIPTS = config.guess
+ 
+-gptmodulesdir = ${prefix}/lib/perl/Grid/GPT
++gptmodulesdir = $(perlmoduledir)/Grid/GPT
+ 
+ gptmodules_DATA = \
+ 	perl/GPT/Algorithms.pm \
+@@ -840,7 +841,9 @@
+ 
+ install-localize:
+ 	@echo "Localizing scripts to $(PERL)"
++	PERLLIB=$(DESTDIR)$(perlmoduledir) \
+ 	$(PERL) $(DESTDIR)$(sbindir)/gpt-config -perl=$(PERL) \
++	-location=$(DESTDIR)$(prefix) \
+ 	-probe \
+ 	-ignore-errors
+ 
+diff -ur gpt.orig/packaging_tools/perl/GPT/Localize.pm gpt/packaging_tools/perl/GPT/Localize.pm
+--- gpt.orig/packaging_tools/perl/GPT/Localize.pm	2007-06-24 22:26:36.000000000 +0200
++++ gpt/packaging_tools/perl/GPT/Localize.pm	2008-10-04 10:57:47.000000000 +0200
+@@ -49,7 +49,6 @@
+ sub new {
+   my ($that, %args)  = @_;
+ 
+-  push @INC, 
+   my $class = ref($that) || $that;
+   my $me  = {
+              ignore_errors => $args{'ignore_errors'},
+@@ -328,14 +327,16 @@
+ sub localize {
+   my($me) = @_;
+ 
+-  my $gpath = $me->{'gpath'};
++  my $pmpath;
+ 
+-  require Grid::GPT::FilelistFunctions;
+-  Grid::GPT::FilelistFunctions::mkinstalldir("$gpath/var/lib/perl/Grid/GPT/");
++  foreach my $dir (@INC) {
++    next unless ( -e "$dir/Grid/GPT/LocalEnv.pm.in" );
++    $pmpath = $dir;
++    last;
++  }
+ 
+-  open INFILE, "$gpath/lib/perl/Grid/GPT/LocalEnv.pm.in";
+-  open OUTFILE, ">$gpath/var/lib/perl/Grid/GPT/LocalEnv.pm";
+-  my $link = ">$gpath/var/lib/perl/Grid/GPT/LocalEnv.pm";
++  open INFILE, "$pmpath/Grid/GPT/LocalEnv.pm.in";
++  open OUTFILE, ">$pmpath/Grid/GPT/LocalEnv.pm";
+ 
+   for my $l (<INFILE>) {
+     while (my ($n,$v) = each(%{$me->{'substitutions'}})) {
+diff -ur gpt.orig/packaging_tools/perl/GPT/PkgMngmt/Archive.pm gpt/packaging_tools/perl/GPT/PkgMngmt/Archive.pm
+--- gpt.orig/packaging_tools/perl/GPT/PkgMngmt/Archive.pm	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/PkgMngmt/Archive.pm	2008-10-04 10:57:47.000000000 +0200
+@@ -75,21 +75,6 @@
+     
+     return if defined $gtar;
+ 
+-    my $gpath = $ENV{GPT_LOCATION};
+-
+-    if (!defined($gpath))
+-      {
+-        $gpath = $ENV{GLOBUS_LOCATION};
+-      }
+-
+-    if (!defined($gpath))
+-      {
+-        die "GPT_LOCATION or needs to be set before running this script";
+-      }
+-
+-    # Add path to LocalEnv module to @INC
+-    push @INC,"$gpath/var/lib/perl";
+-
+     die "ERROR: GPT is not configured. Use gpt-config\n" 
+       if ! defined eval ("require Grid::GPT::LocalEnv;");
+ 
+@@ -110,24 +95,6 @@
+ sub new {
+   my ($class, %arg) = @_;
+ 
+-
+-
+-
+-  my $gpath = $ENV{GPT_LOCATION};
+-
+-  if (!defined($gpath))
+-    {
+-      $gpath = $ENV{GLOBUS_LOCATION};
+-    }
+-
+-  if (!defined($gpath))
+-    {
+-      die "GPT_LOCATION or needs to be set before running this script";
+-    }
+-
+-  # Add path to LocalEnv module to @INC
+-  push @INC,"$gpath/var/lib/perl";
+-
+   die "ERROR: GPT is not configured. Use gpt-config\n" 
+     if ! defined eval ("require Grid::GPT::LocalEnv;");
+ 
+diff -ur gpt.orig/packaging_tools/perl/GPT/PkgMngmt/BuildMacros.pm gpt/packaging_tools/perl/GPT/PkgMngmt/BuildMacros.pm
+--- gpt.orig/packaging_tools/perl/GPT/PkgMngmt/BuildMacros.pm	2006-03-16 19:27:23.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/PkgMngmt/BuildMacros.pm	2008-10-04 10:57:47.000000000 +0200
+@@ -21,21 +21,6 @@
+ 
+ # Preloaded methods go here.
+ sub find_make {
+-  my $gpath = $ENV{GPT_LOCATION};
+-
+-  if (!defined($gpath))
+-    {
+-      $gpath = $ENV{GLOBUS_LOCATION};
+-    }
+-
+-  if (!defined($gpath))
+-    {
+-      die "GPT_LOCATION or needs to be set before running this script";
+-    }
+-
+-  # Add path to LocalEnv module to @INC
+-  push @INC,"$gpath/var/lib/perl";
+-
+   die "ERROR: GPT is not configured. Use gpt-config\n" 
+     if ! defined eval ("require Grid::GPT::LocalEnv;");
+ 
+diff -ur gpt.orig/packaging_tools/perl/GPT/PkgMngmt/ExpandSource.pm gpt/packaging_tools/perl/GPT/PkgMngmt/ExpandSource.pm
+--- gpt.orig/packaging_tools/perl/GPT/PkgMngmt/ExpandSource.pm	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/PkgMngmt/ExpandSource.pm	2008-10-04 10:57:47.000000000 +0200
+@@ -61,21 +61,6 @@
+ 
+     return if defined $gtar;
+ 
+-    my $gpath = $ENV{GPT_LOCATION};
+-
+-    if (!defined($gpath))
+-      {
+-        $gpath = $ENV{GLOBUS_LOCATION};
+-      }
+-
+-    if (!defined($gpath))
+-      {
+-        die "GPT_LOCATION or needs to be set before running this script";
+-      }
+-
+-    # Add path to LocalEnv module to @INC
+-    push @INC,"$gpath/var/lib/perl";
+-
+     die "ERROR: GPT is not configured. Use gpt-config\n" 
+       if ! defined eval ("require Grid::GPT::LocalEnv;");
+ 
+diff -ur gpt.orig/packaging_tools/perl/GPT/PkgMngmt.pm gpt/packaging_tools/perl/GPT/PkgMngmt.pm
+--- gpt.orig/packaging_tools/perl/GPT/PkgMngmt.pm	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/PkgMngmt.pm	2008-10-04 10:57:47.000000000 +0200
+@@ -23,21 +23,6 @@
+ 
+     return $rpm if defined $rpm;
+ 
+-    my $gpath = $ENV{GPT_LOCATION};
+-    
+-    if (!defined($gpath))
+-      {
+-        $gpath = $ENV{GLOBUS_LOCATION};
+-      }
+-
+-    if (!defined($gpath))
+-      {
+-        die "GPT_LOCATION or needs to be set before running this script";
+-      }
+-
+-    # Add path to LocalEnv module to @INC
+-    push @INC,"$gpath/var/lib/perl";
+-
+     die "ERROR: GPT is not configured. Use gpt-config\n" 
+       if ! defined eval ("require Grid::GPT::LocalEnv;");
+ 
+@@ -86,21 +71,6 @@
+     
+     return if defined $gtar;
+ 
+-    my $gpath = $ENV{GPT_LOCATION};
+-
+-    if (!defined($gpath))
+-      {
+-        $gpath = $ENV{GLOBUS_LOCATION};
+-      }
+-
+-    if (!defined($gpath))
+-      {
+-        die "GPT_LOCATION or needs to be set before running this script";
+-      }
+-
+-    # Add path to LocalEnv module to @INC
+-    push @INC,"$gpath/var/lib/perl";
+-
+     die "ERROR: GPT is not configured. Use gpt-config\n" 
+       if ! defined eval ("require Grid::GPT::LocalEnv;");
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-bundle gpt/packaging_tools/perl/scripts/gpt-bundle
+--- gpt.orig/packaging_tools/perl/scripts/gpt-bundle	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-bundle	2008-10-04 10:57:47.000000000 +0200
+@@ -811,9 +811,6 @@
+ 
+   if (! defined $arch) 
+   {
+-  # Add path to LocalEnv module to @INC
+-  push @INC,"$gpath/var/lib/perl";
+-
+   die "ERROR: GPT is not configured. Use gpt-config\n" 
+     if ! defined eval ("require Grid::GPT::LocalEnv;");
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-config gpt/packaging_tools/perl/scripts/gpt-config
+--- gpt.orig/packaging_tools/perl/scripts/gpt-config	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-config	2008-10-04 10:57:47.000000000 +0200
+@@ -82,11 +82,6 @@
+   exit 0;
+ }
+ 
+-# Add path to LocalEnv module to @INC
+-
+-push @INC,"$gpath/var/lib/perl";
+-
+-
+ if (defined $list) {
+   die "ERROR: GPT has not been configured\n" 
+     if ! defined eval "require Grid::GPT::LocalEnv;";

@@ -1,0 +1,58 @@
+diff -ur globus_ftp_control-2.10.orig/globus_ftp_control_data.c globus_ftp_control-2.10/globus_ftp_control_data.c
+--- globus_ftp_control-2.10.orig/globus_ftp_control_data.c	2009-05-31 12:50:38.000000000 +0200
++++ globus_ftp_control-2.10/globus_ftp_control_data.c	2009-05-31 09:56:02.000000000 +0200
+@@ -5210,8 +5210,8 @@
+         }
+ 
+         user_arg = GLOBUS_NULL;
+-        sprintf(strmsg, "StripedLayout=Blocked;BlockSize=%d;",
+-            layout->round_robin.block_size);
++        sprintf(strmsg, "StripedLayout=Blocked;BlockSize=%ld;",
++                (long) layout->round_robin.block_size);
+     }
+     else if(layout->mode == GLOBUS_FTP_CONTROL_STRIPING_PARTITIONED)
+     {
+@@ -8408,8 +8408,8 @@
+         {
+             /* faking memory allocation */
+             char  tag_str[128];
+-            sprintf(tag_str, "MODE=S TYPE=%c NBYTES=%d",
+-                    dc_handle->type, nl_nbytes);
++            sprintf(tag_str, "MODE=S TYPE=%c NBYTES=%ld",
++                    dc_handle->type, (long) nl_nbytes);
+             globus_netlogger_write(
+                 &dc_handle->nl_ftp_handle,
+                 GFTP_NL_EVENT_SENT_DATA,
+@@ -8613,8 +8613,8 @@
+             if(dc_handle->nl_ftp_handle_set)
+             {
+                 char tag_str[128];
+-                sprintf(tag_str, "MODE=S TYPE=%c NBYTES=%d",
+-                        dc_handle->type, nl_nbytes);
++                sprintf(tag_str, "MODE=S TYPE=%c NBYTES=%ld",
++                        dc_handle->type, (long) nl_nbytes);
+                 globus_netlogger_write(
+                     &dc_handle->nl_ftp_handle,
+                     GFTP_NL_EVENT_RECEIVED_DATA,
+@@ -9453,8 +9453,8 @@
+             if(dc_handle->nl_ftp_handle_set)
+             {
+                 char tag_str[128];
+-                sprintf(tag_str, "MODE=E TYPE=%c NBYTES=%d",
+-                         dc_handle->type, nl_bytes);
++                sprintf(tag_str, "MODE=E TYPE=%c NBYTES=%ld",
++                        dc_handle->type, (long) nl_bytes);
+                 globus_netlogger_write(
+                     &dc_handle->nl_ftp_handle,
+                     GFTP_NL_EVENT_RECEIVED_DATA,
+@@ -9932,8 +9932,8 @@
+         {
+             /* faking memory allocation */
+             char tag_str[128];
+-            sprintf(tag_str, "MODE=E TYPE=%c NBYTES=%d",
+-                    dc_handle->type, nl_bytes);
++            sprintf(tag_str, "MODE=E TYPE=%c NBYTES=%ld",
++                    dc_handle->type, (long) nl_bytes);
+             globus_netlogger_write(
+                 &dc_handle->nl_ftp_handle,
+                 GFTP_NL_EVENT_SENT_DATA,

@@ -1,0 +1,117 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+# $Id$
+
+if {$build_arch == "x86_64" || $build_arch == "ppc64"} {
+    set flavor gcc64pthr
+} else {
+    set flavor gcc32pthr
+}
+
+PortSystem              1.0
+
+name                    globus-proxy-utils
+set _name               [ string map {"-" "_"} $name ]
+version                 3.7
+revision                1
+platforms               darwin
+categories              net
+license                 Apache 2.0
+maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+homepage                http://www.globus.org/
+
+description             Globus Toolkit - Globus GSI Proxy Utility Programs
+long_description        The Globus Toolkit is an open source software \
+                        toolkit used for building Grid systems and \
+                        applications. It is being developed by the \
+                        Globus Alliance and many others all over the \
+                        world. A growing number of projects and \
+                        companies are using the Globus Toolkit to \
+                        unlock the potential of grids for their \
+                        cause. The ${name} package contains: \
+                        Globus GSI Proxy Utility Programs
+
+master_sites            http://www.grid.tsl.uu.se/repos/globus/source
+
+distfiles               ${_name}-${version}.tar.gz
+
+checksums               ${_name}-${version}.tar.gz \
+                            md5 a89e32302a8c1078ac5fe536060d71f3 \
+                            sha1 c06a821945758cd453aea0f51d4914180e3b5fb6 \
+                            rmd160 72a3beb49f8724a0a5ce8a6199ab509369032ef8
+
+patchfiles              ${name}-mingw.patch \
+                        ${name}-oid.patch
+
+depends_run             port:globus-common \
+                        port:globus-gsi-callback \
+                        port:globus-gsi-cert-utils \
+                        port:globus-gsi-credential \
+                        port:globus-gsi-openssl-error \
+                        port:globus-gsi-proxy-core \
+                        port:globus-gsi-proxy-ssl \
+                        port:globus-gsi-sysconfig \
+                        port:globus-gss-assist \
+                        port:globus-openssl \
+                        port:globus-openssl-module
+
+depends_build           port:grid-packaging-tools \
+                        port:globus-gsi-proxy-ssl \
+                        port:globus-gsi-credential \
+                        port:globus-gsi-callback \
+                        port:globus-openssl-module \
+                        port:globus-gss-assist \
+                        port:globus-gsi-openssl-error \
+                        port:globus-openssl \
+                        port:globus-gsi-proxy-core \
+                        port:globus-core \
+                        port:globus-gsi-cert-utils \
+                        port:globus-common \
+                        port:globus-gsi-sysconfig
+
+worksrcdir              ${_name}-${version}
+
+patch.pre_args          -p1
+
+configure.env-append    GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+configure.post_args     --with-flavor=${flavor}
+
+build.env-append        GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+pre-configure {
+    # Remove files that should be replaced during bootstrap
+    eval file delete -force \
+        [ glob -nocomplain ${worksrcpath}/doxygen/Doxyfile* ] dummy
+    file delete -force ${worksrcpath}/doxygen/Makefile.am
+    file delete -force ${worksrcpath}/pkgdata/Makefile.am
+    eval file delete -force \
+        [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
+    file delete -force ${worksrcpath}/autom4te.cache
+
+    # Remove flavor tags
+    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
+        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
+        reinplace -E \
+            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
+            $file
+        reinplace -E \
+            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
+            $file
+    }
+    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
+        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
+
+    system "cd $worksrcpath && \
+        GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
+        ${prefix}/share/globus/globus-bootstrap.sh"
+}
+
+post-destroot {
+    # Install license file
+    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
+    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
+        ${destroot}${prefix}/share/doc/${name}-${version}
+}

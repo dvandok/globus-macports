@@ -1,0 +1,12 @@
+diff -ur globus_io-6.3.orig/globus_io_xio_compat.c globus_io-6.3/globus_io_xio_compat.c
+--- globus_io-6.3.orig/globus_io_xio_compat.c	2008-03-12 20:01:10.000000000 +0100
++++ globus_io-6.3/globus_io_xio_compat.c	2009-06-04 01:09:16.000000000 +0200
+@@ -978,7 +978,7 @@
+     bounce_info = (globus_l_io_bounce_t *) user_arg;
+     
+     if(globus_l_io_should_bounce(bounce_info) ||
+-       handle != NULL && bounce_info->handle->attr->authz_data.callback)
++       (handle != NULL && bounce_info->handle->attr->authz_data.callback))
+     {
+         bounce_info->error = result == GLOBUS_SUCCESS 
+             ? GLOBUS_NULL : globus_error_get(result);

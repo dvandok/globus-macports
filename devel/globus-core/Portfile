@@ -1,0 +1,126 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+# $Id$
+
+set perl_vendor_lib [ exec sh -c "eval \"\`perl -V:installvendorlib\`\" ; echo \$installvendorlib" ]
+
+if {$build_arch == "x86_64" || $build_arch == "ppc64"} {
+    set flavor gcc64pthr
+    set enable64 yes
+} else {
+    set flavor gcc32pthr
+    set enable64 no
+}
+
+PortSystem              1.0
+
+name                    globus-core
+set _name               [ string map {"-" "_"} $name ]
+version                 5.16
+revision                1
+platforms               darwin
+categories              devel
+license                 Apache 2.0
+maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+homepage                http://www.globus.org/
+
+description             Globus Toolkit - Globus Core
+long_description        The Globus Toolkit is an open source software \
+                        toolkit used for building Grid systems and \
+                        applications. It is being developed by the \
+                        Globus Alliance and many others all over the \
+                        world. A growing number of projects and \
+                        companies are using the Globus Toolkit to \
+                        unlock the potential of grids for their \
+                        cause. The ${name} package contains: \
+                        Globus Core
+
+master_sites            http://www.grid.tsl.uu.se/repos/globus/source
+
+distfiles               ${_name}-${version}.tar.gz \
+                        globus-gpt2pkg-config
+
+checksums               ${_name}-${version}.tar.gz \
+                            md5 27ea6f4c8468471875dc2362b2160f2c \
+                            sha1 969fd662b2133981c9330865394665b017b550de \
+                            rmd160 dac612138bfcc638d894fe9044dbf395bb2014bf
+
+patchfiles              ${name}-conf.patch \
+                        ${name}-usr.patch \
+                        ${name}-func.patch \
+                        ${name}-gnusource.patch \
+                        ${name}-age-version.patch \
+                        ${name}-bootstrap-shebang.patch \
+                        ${name}-helpstring.patch \
+                        ${name}-doxygen.patch \
+                        ${name}-compat.patch \
+                        ${name}-libtool.patch \
+                        ${name}-ar-ranlib.patch \
+                        ${name}-mingw.patch \
+                        ${name}-platforms.patch \
+                        ${name}-fedora.patch
+
+depends_run             port:p5-xml-dom \
+                        port:p5-xml-parser
+
+depends_build           port:grid-packaging-tools \
+                        port:p5-xml-dom \
+                        port:p5-xml-parser
+
+worksrcdir              ${_name}-${version}
+
+patch.pre_args          -p1
+
+configure.env-append    GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+configure.post_args     --includedir=${prefix}/include/globus \
+                        --libexecdir='\${datadir}/globus' \
+                        --with-threads=pthreads \
+                        --with-flavor=${flavor} \
+                        --enable-64bit=${enable64} \
+                        --with-setupdir='\${datadir}/globus/setup' \
+                        --with-testdir='\${datadir}/globus/test' \
+                        --with-flavorincludedir='\${libdir}/globus/include' \
+                        --with-perlmoduledir=${perl_vendor_lib} \
+                        --with-doxygendir='\${datadir}/globus/doxygen' \
+                        --with-newgpt
+
+build.env-append        GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+pre-configure {
+    file delete -force ${worksrcpath}/autom4te.cache
+    reinplace "s/libtoolize/glibtoolize/g" ${worksrcpath}/bootstrap
+    system "cd ${worksrcpath} && \
+        GLOBUS_LOCATION=${prefix} GPT_LOCATION=${prefix} ./bootstrap"
+}
+
+post-destroot {
+    # These scripts are intended to be sourced, not executed
+    system "chmod 644 ${destroot}${prefix}/share/globus/globus-build-env-*.sh"
+
+    # Add -Wl,--as-needed to the libtool script if supported
+    reinplace "s! -shared ! \${wl}--as-needed&!g" \
+        ${destroot}${prefix}/sbin/libtool-${flavor}
+
+    # Install the GPT metadata to pkg-config file converter
+    xinstall ${filespath}/globus-gpt2pkg-config \
+        ${destroot}${prefix}/share/globus/globus-gpt2pkg-config
+
+    # Generate pkg-config file from GPT metadata
+    file mkdir ${destroot}${prefix}/lib/pkgconfig
+    system "${destroot}${prefix}/share/globus/globus-gpt2pkg-config \
+        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
+        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
+
+    # Don't use /usr/bin/env
+    foreach file [ glob ${destroot}${prefix}/sbin/globus-* ] {
+        reinplace "s!/usr/bin/env perl!/opt/local/bin/perl!" ${file}
+    }
+
+    # Install license file
+    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
+    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
+        ${destroot}${prefix}/share/doc/${name}-${version}
+}

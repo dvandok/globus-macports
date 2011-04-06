@@ -1,0 +1,469 @@
+diff -Nur globus_core-5.15.orig/aclocal/automake_rules globus_core-5.15/aclocal/automake_rules
+--- globus_core-5.15.orig/aclocal/automake_rules	2001-06-04 21:46:01.000000000 +0200
++++ globus_core-5.15/aclocal/automake_rules	2008-10-12 14:44:40.000000000 +0200
+@@ -4,15 +4,15 @@
+ 
+ filelist-am:
+ 
+-link: link-recursive link-libLTLIBRARIES link-libLIBRARIES link-libexecPROGRAMS link-libexecSCRIPTS link-etcDATA link-binPROGRAMS link-binSCRIPTS link-sbinPROGRAMS link-sbinSCRIPTS link-includeHEADERS link-shareDATA link-setupDATA link-setupPROGRAMS link-setupSCRIPTS link-testDATA link-testPROGRAMS link-testSCRIPTS link-scriptsysconfPROGRAMS link-scriptsysconfSCRIPTS link-flavorincludeHEADERS link-pkgDATA link-aclocalDATA link-doxygenDATA link-docDATA 
++link: link-recursive link-libLTLIBRARIES link-libLIBRARIES link-libexecPROGRAMS link-libexecSCRIPTS link-etcDATA link-binPROGRAMS link-binSCRIPTS link-sbinPROGRAMS link-sbinSCRIPTS link-includeHEADERS link-shareDATA link-setupDATA link-setupPROGRAMS link-setupSCRIPTS link-testDATA link-testPROGRAMS link-testSCRIPTS link-scriptsysconfPROGRAMS link-scriptsysconfSCRIPTS link-flavorincludeHEADERS link-pkgDATA link-aclocalDATA link-perlmoduleDATA link-doxygenDATA link-docDATA 
+ 	:
+ 
+-unlink: unlink-recursive unlink-libLTLIBRARIES unlink-libLIBRARIES unlink-libexecPROGRAMS unlink-libexecSCRIPTS unlink-etcDATA unlink-binPROGRAMS unlink-binSCRIPTS unlink-sbinPROGRAMS unlink-sbinSCRIPTS unlink-includeHEADERS unlink-shareDATA unlink-setupDATA unlink-setupPROGRAMS unlink-setupSCRIPTS unlink-testDATA unlink-testPROGRAMS unlink-testSCRIPTS unlink-scriptsysconfPROGRAMS unlink-scriptsysconfSCRIPTS unlink-flavorincludeHEADERS unlink-pkgDATA unlink-aclocalDATA unlink-doxygenDATA unlink-docDATA 
++unlink: unlink-recursive unlink-libLTLIBRARIES unlink-libLIBRARIES unlink-libexecPROGRAMS unlink-libexecSCRIPTS unlink-etcDATA unlink-binPROGRAMS unlink-binSCRIPTS unlink-sbinPROGRAMS unlink-sbinSCRIPTS unlink-includeHEADERS unlink-shareDATA unlink-setupDATA unlink-setupPROGRAMS unlink-setupSCRIPTS unlink-testDATA unlink-testPROGRAMS unlink-testSCRIPTS unlink-scriptsysconfPROGRAMS unlink-scriptsysconfSCRIPTS unlink-flavorincludeHEADERS unlink-pkgDATA unlink-aclocalDATA unlink-perlmoduleDATA unlink-doxygenDATA unlink-docDATA 
+ 	:
+ 
+-.PHONY: link unlink link-recursive unlink-recursive link-am unlink-am filelist-amlink-libLTLIBRARIES unlink-libLTLIBRARIES filelist-libLTLIBRARIES link-libLIBRARIES unlink-libLIBRARIES filelist-libLIBRARIES link-libexecPROGRAMS unlink-libexecPROGRAMS filelist-libexecPROGRAMS link-libexecSCRIPTS unlink-libexecSCRIPTS filelist-libexecSCRIPTS link-etcDATA unlink-etcDATA filelist-etcDATA link-binPROGRAMS unlink-binPROGRAMS filelist-binPROGRAMS link-binSCRIPTS unlink-binSCRIPTS filelist-binSCRIPTS link-sbinPROGRAMS unlink-sbinPROGRAMS filelist-sbinPROGRAMS link-sbinSCRIPTS unlink-sbinSCRIPTS filelist-sbinSCRIPTS link-includeHEADERS unlink-includeHEADERS filelist-includeHEADERS link-shareDATA unlink-shareDATA filelist-shareDATA link-setupDATA unlink-setupDATA filelist-setupDATA link-setupPROGRAMS unlink-setupPROGRAMS filelist-setupPROGRAMS link-setupSCRIPTS unlink-setupSCRIPTS filelist-setupSCRIPTS link-testDATA unlink-testDATA filelist-testDATA link-testPROGRAMS unlink-testPROGRAMS filelist-testPROGRAMS link-testSCRIPTS unlink-testSCRIPTS filelist-testSCRIPTS link-scriptsysconfPROGRAMS unlink-scriptsysconfPROGRAMS filelist-scriptsysconfPROGRAMS link-scriptsysconfSCRIPTS unlink-scriptsysconfSCRIPTS filelist-scriptsysconfSCRIPTS link-flavorincludeHEADERS unlink-flavorincludeHEADERS filelist-flavorincludeHEADERS link-pkgDATA unlink-pkgDATA filelist-pkgDATA link-aclocalDATA unlink-aclocalDATA filelist-aclocalDATA link-doxygenDATA unlink-doxygenDATA filelist-doxygenDATA link-docDATA unlink-docDATA filelist-docDATA 
++.PHONY: link unlink link-recursive unlink-recursive link-am unlink-am filelist-amlink-libLTLIBRARIES unlink-libLTLIBRARIES filelist-libLTLIBRARIES link-libLIBRARIES unlink-libLIBRARIES filelist-libLIBRARIES link-libexecPROGRAMS unlink-libexecPROGRAMS filelist-libexecPROGRAMS link-libexecSCRIPTS unlink-libexecSCRIPTS filelist-libexecSCRIPTS link-etcDATA unlink-etcDATA filelist-etcDATA link-binPROGRAMS unlink-binPROGRAMS filelist-binPROGRAMS link-binSCRIPTS unlink-binSCRIPTS filelist-binSCRIPTS link-sbinPROGRAMS unlink-sbinPROGRAMS filelist-sbinPROGRAMS link-sbinSCRIPTS unlink-sbinSCRIPTS filelist-sbinSCRIPTS link-includeHEADERS unlink-includeHEADERS filelist-includeHEADERS link-shareDATA unlink-shareDATA filelist-shareDATA link-setupDATA unlink-setupDATA filelist-setupDATA link-setupPROGRAMS unlink-setupPROGRAMS filelist-setupPROGRAMS link-setupSCRIPTS unlink-setupSCRIPTS filelist-setupSCRIPTS link-testDATA unlink-testDATA filelist-testDATA link-testPROGRAMS unlink-testPROGRAMS filelist-testPROGRAMS link-testSCRIPTS unlink-testSCRIPTS filelist-testSCRIPTS link-scriptsysconfPROGRAMS unlink-scriptsysconfPROGRAMS filelist-scriptsysconfPROGRAMS link-scriptsysconfSCRIPTS unlink-scriptsysconfSCRIPTS filelist-scriptsysconfSCRIPTS link-flavorincludeHEADERS unlink-flavorincludeHEADERS filelist-flavorincludeHEADERS link-pkgDATA unlink-pkgDATA filelist-pkgDATA link-aclocalDATA unlink-aclocalDATA filelist-aclocalDATA link-perlmoduleDATA unlink-perlmoduleDATA filelist-perlmoduleDATA link-doxygenDATA unlink-doxygenDATA filelist-doxygenDATA link-docDATA unlink-docDATA filelist-docDATA 
+ 
+-filelist: filelist-recursive filelist-libLTLIBRARIES filelist-libLIBRARIES filelist-libexecPROGRAMS filelist-libexecSCRIPTS filelist-etcDATA filelist-binPROGRAMS filelist-binSCRIPTS filelist-sbinPROGRAMS filelist-sbinSCRIPTS filelist-includeHEADERS filelist-shareDATA filelist-setupDATA filelist-setupPROGRAMS filelist-setupSCRIPTS filelist-testDATA filelist-testPROGRAMS filelist-testSCRIPTS filelist-scriptsysconfPROGRAMS filelist-scriptsysconfSCRIPTS filelist-flavorincludeHEADERS filelist-pkgDATA filelist-aclocalDATA filelist-doxygenDATA filelist-docDATA 
++filelist: filelist-recursive filelist-libLTLIBRARIES filelist-libLIBRARIES filelist-libexecPROGRAMS filelist-libexecSCRIPTS filelist-etcDATA filelist-binPROGRAMS filelist-binSCRIPTS filelist-sbinPROGRAMS filelist-sbinSCRIPTS filelist-includeHEADERS filelist-shareDATA filelist-setupDATA filelist-setupPROGRAMS filelist-setupSCRIPTS filelist-testDATA filelist-testPROGRAMS filelist-testSCRIPTS filelist-scriptsysconfPROGRAMS filelist-scriptsysconfSCRIPTS filelist-flavorincludeHEADERS filelist-pkgDATA filelist-aclocalDATA filelist-perlmoduleDATA filelist-doxygenDATA filelist-docDATA 
+ 	:
+ 
+ 
+@@ -1097,6 +1097,59 @@
+ 
+ 
+ 
++link-perlmoduleDATA: $(perlmodule_DATA)
++	@$(NORMAL_INSTALL)
++	@$(mkinstalldirs) $(DESTDIR)$(perlmoduledir)
++	@list='$(perlmodule_DATA)'; for p in $$list; do \
++	  mydir=`pwd`; \
++	  target_p=$(DESTDIR)$(perlmoduledir)/$$p; \
++	  if test -f $(srcdir)/$$p; then \
++		cd $(srcdir); \
++		fullsrcdir=`pwd`; \
++		cd $$mydir; \
++		if test -f $$target_p -a ! -h $$target_p; then \
++			echo "mv $$target_p $$target_p.$(LINK_BAK)"; \
++			mv $$target_p $$target_p.$(LINK_BAK); \
++		fi; \
++		if test ! -h $$target_p; then \
++			echo "ln -s $$fullsrcdir/$$p $$target_p"; \
++			ln -s $$fullsrcdir/$$p $$target_p; \
++		fi; \
++	  else if test -f $$p; then \
++		if test -f $$target_p -a ! -h $$target_p; then \
++			echo "mv $$target_p $$target_p.$(LINK_BAK)"; \
++			mv $$target_p $$target_p.$(LINK_BAK); \
++		fi; \
++		if test ! -h $$target_p; then \
++			echo "ln -s $$mydir/$$p $$target_p"; \
++			ln -s $$mydir/$$p $$target_p; \
++		fi; \
++	  fi; fi; \
++	done
++
++unlink-perlmoduleDATA:
++	@$(NORMAL_UNINSTALL)
++	@list='$(perlmodule_DATA)'; for p in $$list; do \
++	target_p=$(DESTDIR)$(perlmoduledir)/$$p; \
++	if test -h $$target_p; then \
++		echo "rm $$target_p"; \
++		rm $$target_p; \
++	fi; \
++	if test -f $$target_p.$(LINK_BAK); then \
++		echo "mv $$target_p.$(LINK_BAK) $$target_p"; \
++		mv $$target_p.$(LINK_BAK) $$target_p; \
++	fi; \
++	done
++
++filelist-perlmoduleDATA:
++	@list='$(perlmodule_DATA)'; for p in $$list; do \
++	  echo "$(DESTDIR)$(perlmoduledir)/$$p" >> $(FILELIST_FILE); \
++	done
++
++
++
++
++
+ link-doxygenDATA: $(doxygen_DATA)
+ 	@$(NORMAL_INSTALL)
+ 	@$(mkinstalldirs) $(DESTDIR)$(doxygendir)
+diff -Nur globus_core-5.15.orig/aclocal/automake_targets globus_core-5.15/aclocal/automake_targets
+--- globus_core-5.15.orig/aclocal/automake_targets	2002-07-03 21:19:28.000000000 +0200
++++ globus_core-5.15/aclocal/automake_targets	2008-10-12 14:40:31.000000000 +0200
+@@ -1,30 +1,30 @@
+ ## Special globus installation directories
+ 
+-setupdir = $(GLOBUS_LOCATION)/setup/globus
++setupdir = @setupdir@
+ ## setup = [ DATA,PROGRAMS,SCRIPTS ]
+ 
+-testdir = $(GLOBUS_LOCATION)/test/$(PACKAGE)
++testdir = @testdir@
+ ## test = [ DATA,PROGRAMS,SCRIPTS ]
+ 
+-scriptsysconfdir = $(GLOBUS_LOCATION)/etc
++scriptsysconfdir = ${sysconfdir}
+ ## scriptsysconf = [ PROGRAMS,SCRIPTS ]
+ 
+-flavorincludedir = $(GLOBUS_LOCATION)/include/$(GLOBUS_FLAVOR_NAME)
++flavorincludedir = @flavorincludedir@
+ ## flavorinclude = [ HEADERS ]
+ 
+-pkgdir = $(GLOBUS_LOCATION)/etc/globus_packages/$(PACKAGE)
++pkgdir = @pkgdir@
+ ## pkg = [ DATA ]
+ 
+-aclocaldir = $(GLOBUS_LOCATION)/share/globus_aclocal
++aclocaldir = @aclocaldir@
+ ## aclocal = [ DATA ]
+ 
+-amdirdir = $(GLOBUS_LOCATION)/share/globus_amdir
+-## amdir = [ DATA ]
++perlmoduledir = @perlmoduledir@
++## perlmodule = [ DATA ]
+ 
+-doxygendir = $(GLOBUS_LOCATION)/share/doxygen
++doxygendir = @doxygendir@
+ ## doxygen = [ DATA ]
+ 
+-docdir = $(GLOBUS_LOCATION)/share/doc
++docdir = ${datadir}/doc
+ ## doc = [ DATA ]
+ 
+ LINK_BAK = orig
+diff -Nur globus_core-5.15.orig/aclocal/Doxyfile.in globus_core-5.15/aclocal/Doxyfile.in
+--- globus_core-5.15.orig/aclocal/Doxyfile.in	2004-03-14 07:29:13.000000000 +0100
++++ globus_core-5.15/aclocal/Doxyfile.in	2008-10-12 14:40:31.000000000 +0200
+@@ -13,7 +13,7 @@
+ # Include the standard part of the doxygen configuration:
+ #
+ 
+-@INCLUDE_PATH = @prefix@/share/doxygen
++@INCLUDE_PATH = @doxygendir@
+ 
+ @INCLUDE = Doxyfile.include
+ 
+@@ -64,27 +64,27 @@
+ # each generated HTML page. If it is left blank doxygen will generate a 
+ # standard header.
+ 
+-HTML_HEADER            = @prefix@/share/doxygen/globus_head.html
++HTML_HEADER            = @doxygendir@/globus_head.html
+ 
+ # The HTML_FOOTER tag can be used to specify a personal HTML footer for 
+ # each generated HTML page. If it is left blank doxygen will generate a 
+ # standard footer.
+ 
+-HTML_FOOTER            = @prefix@/share/doxygen/globus_foot.html
++HTML_FOOTER            = @doxygendir@/globus_foot.html
+ 
+ # The HTML_STYLESHEET tag can be used to specify a user defined cascading 
+ # style sheet that is used by each HTML page. It can be used to 
+ # fine-tune the look of the HTML output. If the tag is left blank doxygen 
+ # will generate a default style sheet 
+ 
+-HTML_STYLESHEET        = @prefix@/share/doxygen/globus.css
++HTML_STYLESHEET        = @doxygendir@/globus.css
+ 
+ # The LATEX_HEADER tag can be used to specify a personal LaTeX header for 
+ # the generated latex document. The header should contain everything until 
+ # the first chapter. If it is left blank doxygen will generate a 
+ # standard header. Notice: only use this tag if you know what you are doing! 
+ 
+-LATEX_HEADER           = @prefix@/share/doxygen/globus_head.tex
++LATEX_HEADER           = @doxygendir@/globus_head.tex
+ 
+ # The PREDEFINED tag can be used to specify one or more macro names that 
+ # are defined before the preprocessor is started (similar to the -D option of 
+diff -Nur globus_core-5.15.orig/aclocal/Doxyfile-internal.in globus_core-5.15/aclocal/Doxyfile-internal.in
+--- globus_core-5.15.orig/aclocal/Doxyfile-internal.in	2004-03-14 07:29:13.000000000 +0100
++++ globus_core-5.15/aclocal/Doxyfile-internal.in	2008-10-12 14:40:31.000000000 +0200
+@@ -13,7 +13,7 @@
+ # Include the standard part of the doxygen configuration:
+ #
+ 
+-@INCLUDE_PATH = @prefix@/share/doxygen
++@INCLUDE_PATH = @doxygendir@
+ 
+ @INCLUDE = Doxyfile-internal.include
+ 
+@@ -65,27 +65,27 @@
+ # each generated HTML page. If it is left blank doxygen will generate a 
+ # standard header.
+ 
+-HTML_HEADER            = @prefix@/share/doxygen/globus_head.html
++HTML_HEADER            = @doxygendir@/globus_head.html
+ 
+ # The HTML_FOOTER tag can be used to specify a personal HTML footer for 
+ # each generated HTML page. If it is left blank doxygen will generate a 
+ # standard footer.
+ 
+-HTML_FOOTER            = @prefix@/share/doxygen/globus_foot.html
++HTML_FOOTER            = @doxygendir@/globus_foot.html
+ 
+ # The HTML_STYLESHEET tag can be used to specify a user defined cascading 
+ # style sheet that is used by each HTML page. It can be used to 
+ # fine-tune the look of the HTML output. If the tag is left blank doxygen 
+ # will generate a default style sheet 
+ 
+-HTML_STYLESHEET        = @prefix@/share/doxygen/globus.css
++HTML_STYLESHEET        = @doxygendir@/globus.css
+ 
+ # The LATEX_HEADER tag can be used to specify a personal LaTeX header for 
+ # the generated latex document. The header should contain everything until 
+ # the first chapter. If it is left blank doxygen will generate a 
+ # standard header. Notice: only use this tag if you know what you are doing! 
+ 
+-LATEX_HEADER           = @prefix@/share/doxygen/globus_head.tex
++LATEX_HEADER           = @doxygendir@/globus_head.tex
+ 
+ # The PREDEFINED tag can be used to specify one or more macro names that 
+ # are defined before the preprocessor is started (similar to the -D option of 
+diff -Nur globus_core-5.15.orig/aclocal/globus_package.m4 globus_core-5.15/aclocal/globus_package.m4
+--- globus_core-5.15.orig/aclocal/globus_package.m4	2005-11-02 23:25:24.000000000 +0100
++++ globus_core-5.15/aclocal/globus_package.m4	2008-10-12 14:40:31.000000000 +0200
+@@ -70,13 +70,21 @@
+ 
+ # get the environment scripts
+ 
+-if test "x$GLOBUS_FLAVOR_NAME" != "xnoflavor" ; then
+-	. $GLOBUS_LOCATION/libexec/globus-build-env-$GLOBUS_FLAVOR_NAME.sh
+-fi
++. $GLOBUS_LOCATION/libexec/globus-build-env-$GLOBUS_FLAVOR_NAME.sh
+ 
+ prefix='$(GLOBUS_LOCATION)'
+ exec_prefix='$(GLOBUS_LOCATION)'
+ 
++# doxygendir must have absolute path...
++saveprefix=$prefix
++if test x$prefix = "xNONE" ; then
++    prefix=$ac_default_prefix
++fi
++while echo "$doxygendir" | grep -q '\$' ; do
++    eval doxygendir=$doxygendir
++done
++prefix=$saveprefix
++
+ AC_SUBST(CC)
+ AC_SUBST(CPP)
+ AC_SUBST(CFLAGS)
+@@ -102,6 +110,13 @@
+ AC_SUBST(OBJEXT)
+ AC_SUBST(EXEEXT)
+ AC_SUBST(OBJECT_MODE)
++AC_SUBST(setupdir)
++AC_SUBST(testdir)
++AC_SUBST(flavorincludedir)
++AC_SUBST(pkgdir)
++AC_SUBST(aclocaldir)
++AC_SUBST(perlmoduledir)
++AC_SUBST(doxygendir)
+ 
+ 
+ define([AM_PROG_LIBTOOL],[
+diff -Nur globus_core-5.15.orig/config/accompiler.m4 globus_core-5.15/config/accompiler.m4
+--- globus_core-5.15.orig/config/accompiler.m4	2008-03-04 01:39:39.000000000 +0100
++++ globus_core-5.15/config/accompiler.m4	2008-10-12 14:48:41.000000000 +0200
+@@ -171,10 +171,26 @@
+ dnl LAC_COMPILERS_SET_ALL_VARS(THREAD-TYPE)
+ AC_DEFUN([LAC_COMPILERS_SET_ALL_VARS],
+ [
++lac_includedir='$includedir'
++while echo "$lac_includedir" | grep -q '\$' ; do
++    eval lac_includedir=$lac_includedir
++done
++lac_includedir=`echo $lac_includedir | sed s!^NONE!$ac_default_prefix!`
++lac_flavorincludedir='$flavorincludedir'
++while echo "$lac_flavorincludedir" | grep -q '\$' ; do
++    eval lac_flavorincludedir=$lac_flavorincludedir
++done
++lac_flavorincludedir=`echo $lac_flavorincludedir | sed s!^NONE!$ac_default_prefix!`
++lac_libdir='$libdir'
++while echo "$lac_libdir" | grep -q '\$' ; do
++    eval lac_libdir=$lac_libdir
++done
++lac_libdir=`echo $lac_libdir | sed s!^NONE!$ac_default_prefix!`
++
+ lac_CFLAGS="$CFLAGS "
+-lac_CPPFLAGS="$CPPFLAGS -I$GLOBUS_LOCATION/include -I$GLOBUS_LOCATION/include/$globus_cv_flavor"
++lac_CPPFLAGS="$CPPFLAGS -I$lac_includedir -I$lac_flavorincludedir"
+ lac_CXXFLAGS="$CXXFLAGS "
+-lac_LDFLAGS="$LDFLAGS -L$GLOBUS_LOCATION/lib"
++lac_LDFLAGS="$LDFLAGS -L$lac_libdir"
+ lac_LIBS="$LIBS "
+ lac_F77FLAGS="$F77FLAGS "
+ lac_F90FLAGS="$F90FLAGS "
+diff -Nur globus_core-5.15.orig/configure.in globus_core-5.15/configure.in
+--- globus_core-5.15.orig/configure.in	2005-07-28 21:38:23.000000000 +0200
++++ globus_core-5.15/configure.in	2008-10-12 14:41:21.000000000 +0200
+@@ -46,6 +46,101 @@
+      -o "$globus_cv_flavor" = "yes" ; then
+     AC_MSG_ERROR([A flavor description string must be specified!])
+ fi
++  
++AC_ARG_WITH([setupdir],
++AC_HELP_STRING([--with-setupdir=DIR],
++[setup installation directory [[PREFIX/setup/globus]]]),
++[
++    if test x$withval = "xno" -o x$withval = "xyes" ; then
++        AC_MSG_ERROR([--with-setupdir requires an argument])
++    fi
++    setupdir=$withval
++],
++[
++    setupdir='${prefix}/setup/globus'
++])
++AC_SUBST(setupdir)
++
++AC_ARG_WITH([testdir],
++AC_HELP_STRING([--with-testdir=DIR],
++[test installation directory [[PREFIX/test/PACKAGE]]]),
++[
++    if test x$withval = "xno" -o x$withval = "xyes" ; then
++        AC_MSG_ERROR([--with-testdir requires an argument])
++    fi
++    testdir=$withval
++],
++[
++    testdir='${prefix}/test/${PACKAGE}'
++])
++AC_SUBST(testdir)
++
++AC_ARG_WITH([flavorincludedir],
++AC_HELP_STRING([--with-flavorincludedir=DIR],
++[flavored header installation directory [[INCLUDEDIR/FLAVOR]]]),
++[
++    if test x$withval = "xno" -o x$withval = "xyes" ; then
++        AC_MSG_ERROR([--with-flavorincludedir requires an argument])
++    fi
++    flavorincludedir=$withval
++],
++[
++    flavorincludedir='${includedir}/${GLOBUS_FLAVOR_NAME}'
++])
++AC_SUBST(flavorincludedir)
++
++AC_ARG_WITH([perlmoduledir],
++AC_HELP_STRING([--with-perlmoduledir=DIR],
++[perl module directory [[PREFIX/lib/perl]]]),
++[
++    if test x$withval = "xno" -o x$withval = "xyes" ; then
++        AC_MSG_ERROR([--with-perlmoduledir requires an argument])
++    fi
++    perlmoduledir=$withval
++],
++[
++    perlmoduledir='${prefix}/lib/perl'
++])
++AC_SUBST(perlmoduledir)
++
++AC_ARG_WITH([doxygendir],
++AC_HELP_STRING([--with-doxygendir=DIR],
++[doxygen installation directory [[DATADIR/doxygen]]]),
++[
++    if test x$withval = "xno" -o x$withval = "xyes" ; then
++        AC_MSG_ERROR([--with-doxygendir requires an argument])
++    fi
++    doxygendir=$withval
++],
++[
++    doxygendir='${datadir}/doxygen'
++])
++AC_SUBST(doxygendir)
++
++AC_ARG_WITH([newgpt],
++AC_HELP_STRING([--with-newgpt], [Use installation paths from new GPT]),
++[
++    if test x$withval = "xno" ; then
++        aclocaldir='${datadir}/globus_aclocal'
++        pkgdir='${sysconfdir}/globus_packages/${PACKAGE}'
++        flavordir='${sysconfdir}/globus_core'
++    else
++        aclocaldir='${datadir}/globus/aclocal'
++        pkgdir='${datadir}/globus/packages/${PACKAGE}'
++        flavordir='${datadir}/globus/flavors'
++    fi
++],
++[
++    aclocaldir='${datadir}/globus_aclocal'
++    pkgdir='${sysconfdir}/globus_packages/${PACKAGE}'
++    flavordir='${sysconfdir}/globus_core'
++])
++AC_SUBST(aclocaldir)
++AC_SUBST(pkgdir)
++AC_SUBST(flavordir)
++
++GLOBUS_FLAVOR_NAME=$globus_cv_flavor
++AC_SUBST(GLOBUS_FLAVOR_NAME)
+ 
+ LAC_COMPILERS
+ LAC_TARGET_ARCH
+@@ -62,9 +157,6 @@
+     AC_DEFINE(BUILD_STATIC_ONLY)
+ fi
+ 
+-GLOBUS_FLAVOR_NAME=$globus_cv_flavor
+-AC_SUBST(GLOBUS_FLAVOR_NAME)
+-
+ dnl define FILELIST_FILE variable
+ FILELIST_FILE=`pwd`;
+ FILELIST_FILE="$FILELIST_FILE/pkgdata/master.filelist"
+@@ -125,7 +217,8 @@
+ fi
+ 
+ AC_OUTPUT(Makefile
+-       	scripts/globus-build-env-$GLOBUS_FLAVOR_NAME.sh:scripts/globus-build-env.sh.in
++	scripts/globus-build-env-$GLOBUS_FLAVOR_NAME.sh:scripts/globus-build-env.sh.in
++	scripts/globus-build-env-noflavor.sh
+ 	scripts/Makefile
+ 	aclocal/Makefile
+ 	aclocal/automake_config
+diff -Nur globus_core-5.15.orig/pkgdata/Makefile.am globus_core-5.15/pkgdata/Makefile.am
+--- globus_core-5.15.orig/pkgdata/Makefile.am	2006-01-12 18:12:52.000000000 +0100
++++ globus_core-5.15/pkgdata/Makefile.am	2008-10-12 14:40:31.000000000 +0200
+@@ -1,6 +1,6 @@
+ include $(top_srcdir)/aclocal/automake_targets
+ 
+-flavordir = $(GLOBUS_LOCATION)/etc/$(PACKAGE)
++flavordir = @flavordir@
+ 
+ FILELIST_FILES = noflavor_data.filelist \
+ 	$(GLOBUS_FLAVOR_NAME)_dev.filelist \
+diff -Nur globus_core-5.15.orig/scripts/globus-build-env-noflavor.sh.in globus_core-5.15/scripts/globus-build-env-noflavor.sh.in
+--- globus_core-5.15.orig/scripts/globus-build-env-noflavor.sh.in	1970-01-01 01:00:00.000000000 +0100
++++ globus_core-5.15/scripts/globus-build-env-noflavor.sh.in	2008-10-12 14:40:31.000000000 +0200
+@@ -0,0 +1,9 @@
++libexecdir='@libexecdir@'
++setupdir='@setupdir@'
++testdir='@testdir@'
++includedir='@includedir@'
++flavorincludedir='@flavorincludedir@'
++pkgdir='@pkgdir@'
++aclocaldir='@aclocaldir@'
++perlmoduledir='@perlmoduledir@'
++doxygendir='@doxygendir@'
+diff -Nur globus_core-5.15.orig/scripts/globus-build-env.sh.in globus_core-5.15/scripts/globus-build-env.sh.in
+--- globus_core-5.15.orig/scripts/globus-build-env.sh.in	2006-01-19 06:54:29.000000000 +0100
++++ globus_core-5.15/scripts/globus-build-env.sh.in	2008-10-12 14:40:31.000000000 +0200
+@@ -61,3 +61,13 @@
+ GLOBUS_THREADS="@GLOBUS_THREADS@"
+ GLOBUS_HOST="@GLOBUS_HOST@"
+ GLOBUS_DEBUG="@GLOBUS_DEBUG@"
++
++libexecdir='@libexecdir@'
++setupdir='@setupdir@'
++testdir='@testdir@'
++includedir='@includedir@'
++flavorincludedir='@flavorincludedir@'
++pkgdir='@pkgdir@'
++aclocaldir='@aclocaldir@'
++perlmoduledir='@perlmoduledir@'
++doxygendir='@doxygendir@'
+diff -Nur globus_core-5.15.orig/scripts/Makefile.am globus_core-5.15/scripts/Makefile.am
+--- globus_core-5.15.orig/scripts/Makefile.am	2002-09-24 23:34:09.000000000 +0200
++++ globus_core-5.15/scripts/Makefile.am	2008-10-12 14:40:31.000000000 +0200
+@@ -1,8 +1,10 @@
+ include $(top_srcdir)/aclocal/automake_targets
+ libexec_SCRIPTS = \
+ 	globus-build-env-$(GLOBUS_FLAVOR_NAME).sh \
++	globus-build-env-noflavor.sh \
+ 	globus-bootstrap.sh
+ 
+ EXTRA_DIST = \
+ 	globus-build-env.sh.in \
++	globus-build-env-noflavor.sh.in \
+ 	globus-bootstrap.sh

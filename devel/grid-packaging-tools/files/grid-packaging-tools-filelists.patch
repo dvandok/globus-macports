@@ -1,0 +1,187 @@
+diff -ur gpt.orig/packaging_tools/perl/GPT/Filelist.pm gpt/packaging_tools/perl/GPT/Filelist.pm
+--- gpt.orig/packaging_tools/perl/GPT/Filelist.pm	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/Filelist.pm	2008-12-15 09:10:15.000000000 +0100
+@@ -115,7 +115,9 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'name'} =~ /\.h$/ and $_->{'dir'} =~ m!include/$f!) {
++    if ($_->{'name'} =~ /\.h$/
++	and ($_->{'dir'} =~ m!include/$f! or
++	     $_->{'dir'} =~ m!lib(64)?(/.*)?/include!)) {
+       push @newlist, $_;
+     }
+   }
+@@ -127,7 +129,9 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'name'} =~ /\.h$/ and $_->{'dir'} !~ m!include/$f!) {
++    if ($_->{'name'} =~ /\.h$/
++	and ($_->{'dir'} !~ m!include/$f! and
++	     $_->{'dir'} !~ m!lib(64)?(/.*)?/include!)) {
+       push @newlist, $_;
+     }
+   }
+@@ -151,7 +155,7 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'dir'} =~ m!^/setup/!) {
++    if ($_->{'dir'} =~ m!(?:/|^)setup(?:/|$)!) {
+       push @newlist, $_;
+     }
+   }
+@@ -163,7 +167,11 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'name'} =~ /\.a$/ and $_->{'dir'} =~ m!lib/*$!) {
++    if ( ( $_->{'name'} =~ m!\.a$!
++           or $_->{'name'} =~ m!^[^.]*\.so$!
++           or $_->{'name'} =~ m!^[^.]*\.sl$!
++           or $_->{'name'} =~ m!^[^.]*\.dylib$! )
++         and $_->{'name'} =~ m!^lib!) {
+       push @newlist, $_;
+     }
+   }
+@@ -175,9 +183,9 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ( ( $_->{'name'} =~ m!\.so! 
+-           or $_->{'name'} =~ m!\.sl!
+-           or $_->{'name'} =~ m!\.dylib! ) 
++    if ( ( $_->{'name'} =~ m!(?:\.so\.|\.[^.]+\.so)!
++           or $_->{'name'} =~ m!(?:\.sl\.|\.[^.]+\.sl)!
++           or $_->{'name'} =~ m!(?:\.dylib\.|\.[^.]+\.dylib)! )
+          and $_->{'name'} =~ m!^lib!) {
+       push @newlist, $_;
+     }
+@@ -214,7 +222,7 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'dir'} =~ m!(?:/|^)(?:share/doc|man)(?:/|$)!) {
++    if ($_->{'dir'} =~ m!(?:/|^)(?:share/doc|man|share/man)(?:/|$)!) {
+       push @newlist, $_;
+     }
+   }
+@@ -226,7 +234,7 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'dir'} !~ m!(?:/|^)(?:share/doc|man|s?bin|libexec|include|lib|setup|share/globus/packages)(?:/|$)!) {
++    if ($_->{'dir'} !~ m!(?:/|^)(?:share/doc|man|share/man|s?bin|libexec|include|lib(64)?|setup|share/globus/packages)(?:/|$)!) {
+       push @newlist, $_;
+     }
+   }
+diff -ur gpt.orig/packaging_tools/perl/GPT/FilelistSort.pm gpt/packaging_tools/perl/GPT/FilelistSort.pm
+--- gpt.orig/packaging_tools/perl/GPT/FilelistSort.pm	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/FilelistSort.pm	2008-12-15 09:11:00.000000000 +0100
+@@ -112,7 +112,9 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'name'} =~ /\.h$/ and $_->{'dir'} =~ m!include/$f!) {
++    if ($_->{'name'} =~ /\.h$/
++	and ($_->{'dir'} =~ m!include/$f! or
++	     $_->{'dir'} =~ m!lib(64)?(/.*)?/include!)) {
+       push @newlist, $_;
+     }
+   }
+@@ -124,7 +126,9 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'name'} =~ /\.h$/ and $_->{'dir'} !~ m!include/$f!) {
++    if ($_->{'name'} =~ /\.h$/
++	and ($_->{'dir'} !~ m!include/$f! and
++	     $_->{'dir'} !~ m!lib(64)?(/.*)?/include!)) {
+       push @newlist, $_;
+     }
+   }
+@@ -148,7 +152,7 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'dir'} =~ m!^/setup/!) {
++    if ($_->{'dir'} =~ m!(?:/|^)setup(?:/|$)!) {
+       push @newlist, $_;
+     }
+   }
+@@ -160,9 +164,11 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    # Changed to allow for lib/subdir/lib.a while still allowing
+-    # lib/lib.a, where apparently the dir is just lib, not lib/
+-    if ($_->{'name'} =~ /\.a$/ and $_->{'dir'} =~ m!lib$|lib/!) {
++    if ( ( $_->{'name'} =~ m!\.a$!
++           or $_->{'name'} =~ m!^[^.]*\.so$!
++           or $_->{'name'} =~ m!^[^.]*\.sl$!
++           or $_->{'name'} =~ m!^[^.]*\.dylib$! )
++         and $_->{'name'} =~ m!^lib!) {
+       push @newlist, $_;
+     }
+   }
+@@ -174,9 +180,9 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ( ( $_->{'name'} =~ m!\.so! 
+-           or $_->{'name'} =~ m!\.sl! 
+-           or $_->{'name'} =~ m!\.dylib! ) 
++    if ( ( $_->{'name'} =~ m!(?:\.so\.|\.[^.]+\.so)!
++           or $_->{'name'} =~ m!(?:\.sl\.|\.[^.]+\.sl)!
++           or $_->{'name'} =~ m!(?:\.dylib\.|\.[^.]+\.dylib)! )
+          and $_->{'name'} =~ m!^lib!) {
+       push @newlist, $_;
+     }
+@@ -213,7 +219,7 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'dir'} =~ m!(?:/|^)(?:share/doc|man)(?:/|$)!) {
++    if ($_->{'dir'} =~ m!(?:/|^)(?:share/doc|man|share/man)(?:/|$)!) {
+       push @newlist, $_;
+     }
+   }
+@@ -225,7 +231,7 @@
+   my $list = $self->{'list'};
+   my @newlist;
+   for (@{$list}) {
+-    if ($_->{'dir'} !~ m!(?:/|^)(?:share/doc|man|s?bin|libexec|include|lib|setup|share/globus/packages)(?:/|$)!) {
++    if ($_->{'dir'} !~ m!(?:/|^)(?:share/doc|man|share/man|s?bin|libexec|include|lib(64)?|setup|share/globus/packages)(?:/|$)!) {
+       push @newlist, $_;
+     }
+   }
+diff -ur gpt.orig/packaging_tools/perl/GPT/MyFilelists.pm gpt/packaging_tools/perl/GPT/MyFilelists.pm
+--- gpt.orig/packaging_tools/perl/GPT/MyFilelists.pm	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/MyFilelists.pm	2008-12-15 09:07:13.000000000 +0100
+@@ -68,6 +68,12 @@
+   push @$result, @$list;
+   $me->{'filelist'}->reset();
+ 
++  $me->{'filelist'}->flavored_files() if defined $me->{'mangling'};
++  $me->{'filelist'}->extract_libtool_libs();
++  $list = $me->{'filelist'}->get_list();
++  push @$result, @$list;
++  $me->{'filelist'}->reset();
++
+   $me->{'filelist'}->extract_perl_modules();
+   $list = $me->{'filelist'}->get_list();
+   push @$result, @$list;
+@@ -85,12 +91,6 @@
+   push @$result, @$list;
+   $me->{'filelist'}->reset();
+ 
+-  $me->{'filelist'}->flavored_files() if defined $me->{'mangling'};
+-  $me->{'filelist'}->extract_libtool_libs();
+-  $list = $me->{'filelist'}->get_list();
+-  push @$result, @$list;
+-  $me->{'filelist'}->reset();
+-
+   $me->{'filelist'}->flavored_headers() if defined $me->{'mangling'};
+   $me->{'filelist'}->add_package_metadata_files('dev');
+   $list = $me->{'filelist'}->get_list();

@@ -1,0 +1,35 @@
+diff -ur globus_callout-0.7.orig/library/globus_callout.c globus_callout-0.7/library/globus_callout.c
+--- globus_callout-0.7.orig/library/globus_callout.c	2009-05-09 23:08:13.000000000 +0200
++++ globus_callout-0.7/library/globus_callout.c	2009-05-13 07:06:42.000000000 +0200
+@@ -649,6 +649,8 @@
+     va_list                             ap;
+     int                                 rc;
+     char *                              dlerror;
++    char *                              flavor_start;
++    char *                              file;
+     static char *                       _function_name_ =
+         "globus_callout_handle_call_type";
+     GLOBUS_I_CALLOUT_DEBUG_ENTER;
+@@ -712,6 +714,22 @@
+             
+             if(*dlhandle == NULL)
+             {
++                flavor_start = strrchr(current_datum->file, '_');
++                if (flavor_start) {
++                    file = strdup(current_datum->file);
++                    if(file == NULL)
++                        {
++                            GLOBUS_CALLOUT_MALLOC_ERROR(result);
++                            goto exit;
++                        }
++                    file[flavor_start - current_datum->file] = '\0';
++                    *dlhandle = lt_dlopenext(file);
++                    free(file);
++                }
++            }
++
++            if(*dlhandle == NULL)
++            {
+                 GLOBUS_CALLOUT_ERROR_RESULT(
+                     result,
+                     GLOBUS_CALLOUT_ERROR_WITH_DL,

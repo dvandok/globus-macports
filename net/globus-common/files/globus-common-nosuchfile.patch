@@ -1,0 +1,12 @@
+diff -ur globus_common-10.2.orig/library/Makefile.am globus_common-10.2/library/Makefile.am
+--- globus_common-10.2.orig/library/Makefile.am	2006-01-13 22:24:29.000000000 +0100
++++ globus_common-10.2/library/Makefile.am	2008-10-11 12:11:57.000000000 +0200
+@@ -157,7 +157,6 @@
+ 	globus_thread_sproc.c \
+ 	globus_thread_sproc.h
+ 
+-EXTRA_HEADERS = \
+-        globus_netos_dir.h
++EXTRA_HEADERS =
+ 
+ include $(top_srcdir)/globus_automake_post

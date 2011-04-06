@@ -1,0 +1,204 @@
+diff -ur gpt.orig/packaging_tools/configure gpt/packaging_tools/configure
+--- gpt.orig/packaging_tools/configure	2008-10-04 16:28:13.000000000 +0200
++++ gpt/packaging_tools/configure	2008-10-04 16:33:32.000000000 +0200
+@@ -273,7 +273,7 @@
+ PACKAGE_BUGREPORT=''
+ 
+ ac_unique_file="Makefile.am"
+-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE am__leading_dot PERL POD2MAN perlmoduledir TAR GUNZIP GZIP LN_S ENABLE_COMPAT_TRUE ENABLE_COMPAT_FALSE LIBOBJS LTLIBOBJS'
++ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE am__leading_dot PERL POD2MAN perlmoduledir TAR GUNZIP GZIP LN_S ENABLE_COMPAT_TRUE ENABLE_COMPAT_FALSE LIBOBJS LTLIBOBJS'
+ ac_subst_files=''
+ 
+ # Initialize some variables set by options.
+@@ -1277,88 +1277,7 @@
+ ac_config_sub="$SHELL $ac_aux_dir/config.sub"
+ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
+ 
+-# Make sure we can run config.sub.
+-$ac_config_sub sun4 >/dev/null 2>&1 ||
+-  { { echo "$as_me:$LINENO: error: cannot run $ac_config_sub" >&5
+-echo "$as_me: error: cannot run $ac_config_sub" >&2;}
+-   { (exit 1); exit 1; }; }
+-
+-echo "$as_me:$LINENO: checking build system type" >&5
+-echo $ECHO_N "checking build system type... $ECHO_C" >&6
+-if test "${ac_cv_build+set}" = set; then
+-  echo $ECHO_N "(cached) $ECHO_C" >&6
+-else
+-  ac_cv_build_alias=$build_alias
+-test -z "$ac_cv_build_alias" &&
+-  ac_cv_build_alias=`$ac_config_guess`
+-test -z "$ac_cv_build_alias" &&
+-  { { echo "$as_me:$LINENO: error: cannot guess build type; you must specify one" >&5
+-echo "$as_me: error: cannot guess build type; you must specify one" >&2;}
+-   { (exit 1); exit 1; }; }
+-ac_cv_build=`$ac_config_sub $ac_cv_build_alias` ||
+-  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_build_alias failed" >&5
+-echo "$as_me: error: $ac_config_sub $ac_cv_build_alias failed" >&2;}
+-   { (exit 1); exit 1; }; }
+-
+-fi
+-echo "$as_me:$LINENO: result: $ac_cv_build" >&5
+-echo "${ECHO_T}$ac_cv_build" >&6
+-build=$ac_cv_build
+-build_cpu=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+-build_vendor=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+-build_os=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+-
+-
+-echo "$as_me:$LINENO: checking host system type" >&5
+-echo $ECHO_N "checking host system type... $ECHO_C" >&6
+-if test "${ac_cv_host+set}" = set; then
+-  echo $ECHO_N "(cached) $ECHO_C" >&6
+-else
+-  ac_cv_host_alias=$host_alias
+-test -z "$ac_cv_host_alias" &&
+-  ac_cv_host_alias=$ac_cv_build_alias
+-ac_cv_host=`$ac_config_sub $ac_cv_host_alias` ||
+-  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_host_alias failed" >&5
+-echo "$as_me: error: $ac_config_sub $ac_cv_host_alias failed" >&2;}
+-   { (exit 1); exit 1; }; }
+-
+-fi
+-echo "$as_me:$LINENO: result: $ac_cv_host" >&5
+-echo "${ECHO_T}$ac_cv_host" >&6
+-host=$ac_cv_host
+-host_cpu=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+-host_vendor=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+-host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+-
+-
+-echo "$as_me:$LINENO: checking target system type" >&5
+-echo $ECHO_N "checking target system type... $ECHO_C" >&6
+-if test "${ac_cv_target+set}" = set; then
+-  echo $ECHO_N "(cached) $ECHO_C" >&6
+-else
+-  ac_cv_target_alias=$target_alias
+-test "x$ac_cv_target_alias" = "x" &&
+-  ac_cv_target_alias=$ac_cv_host_alias
+-ac_cv_target=`$ac_config_sub $ac_cv_target_alias` ||
+-  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_target_alias failed" >&5
+-echo "$as_me: error: $ac_config_sub $ac_cv_target_alias failed" >&2;}
+-   { (exit 1); exit 1; }; }
+-
+-fi
+-echo "$as_me:$LINENO: result: $ac_cv_target" >&5
+-echo "${ECHO_T}$ac_cv_target" >&6
+-target=$ac_cv_target
+-target_cpu=`echo $ac_cv_target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+-target_vendor=`echo $ac_cv_target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+-target_os=`echo $ac_cv_target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+-
+ 
+-# The aliases save the names the user supplied, while $host etc.
+-# will get canonicalized.
+-test -n "$target_alias" &&
+-  test "$program_prefix$program_suffix$program_transform_name" = \
+-    NONENONEs,x,x, &&
+-  program_prefix=${target_alias}-
+ am__api_version="1.7"
+ # Find a good install program.  We prefer a C program (faster),
+ # so one script is as good as another.  But avoid the broken or
+@@ -1736,7 +1655,6 @@
+ 
+ 
+ 
+-echo $target > ./etc/gpt/gnu_target
+ 
+ 
+ # Check whether --with-perl or --without-perl was given.
+@@ -2692,18 +2610,6 @@
+ s,@ECHO_N@,$ECHO_N,;t t
+ s,@ECHO_T@,$ECHO_T,;t t
+ s,@LIBS@,$LIBS,;t t
+-s,@build@,$build,;t t
+-s,@build_cpu@,$build_cpu,;t t
+-s,@build_vendor@,$build_vendor,;t t
+-s,@build_os@,$build_os,;t t
+-s,@host@,$host,;t t
+-s,@host_cpu@,$host_cpu,;t t
+-s,@host_vendor@,$host_vendor,;t t
+-s,@host_os@,$host_os,;t t
+-s,@target@,$target,;t t
+-s,@target_cpu@,$target_cpu,;t t
+-s,@target_vendor@,$target_vendor,;t t
+-s,@target_os@,$target_os,;t t
+ s,@INSTALL_PROGRAM@,$INSTALL_PROGRAM,;t t
+ s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t
+ s,@INSTALL_DATA@,$INSTALL_DATA,;t t
+diff -ur gpt.orig/packaging_tools/configure.ac gpt/packaging_tools/configure.ac
+--- gpt.orig/packaging_tools/configure.ac	2008-10-04 16:28:13.000000000 +0200
++++ gpt/packaging_tools/configure.ac	2008-10-04 16:31:10.000000000 +0200
+@@ -1,10 +1,8 @@
+ AC_REVISION($Revision: 1.1.1.1 $)
+ AC_INIT(gpt, 3.2)
+ AC_CONFIG_SRCDIR(Makefile.am)
+-AC_CANONICAL_SYSTEM
+ AM_INIT_AUTOMAKE([ no-installman ])
+ 
+-echo $target > ./etc/gpt/gnu_target
+ 
+ AC_ARG_WITH([perl],
+ 	
+diff -ur gpt.orig/packaging_tools/Makefile.in gpt/packaging_tools/Makefile.in
+--- gpt.orig/packaging_tools/Makefile.in	2008-10-04 16:28:18.000000000 +0200
++++ gpt/packaging_tools/Makefile.in	2008-10-04 16:34:21.000000000 +0200
+@@ -35,9 +35,6 @@
+ NORMAL_UNINSTALL = :
+ PRE_UNINSTALL = :
+ POST_UNINSTALL = :
+-build_triplet = @build@
+-host_triplet = @host@
+-target_triplet = @target@
+ ACLOCAL = @ACLOCAL@
+ AMTAR = @AMTAR@
+ AUTOCONF = @AUTOCONF@
+@@ -79,18 +76,10 @@
+ ac_ct_STRIP = @ac_ct_STRIP@
+ am__leading_dot = @am__leading_dot@
+ bindir = @bindir@
+-build = @build@
+ build_alias = @build_alias@
+-build_cpu = @build_cpu@
+-build_os = @build_os@
+-build_vendor = @build_vendor@
+ datadir = @datadir@
+ exec_prefix = @exec_prefix@
+-host = @host@
+ host_alias = @host_alias@
+-host_cpu = @host_cpu@
+-host_os = @host_os@
+-host_vendor = @host_vendor@
+ includedir = @includedir@
+ infodir = @infodir@
+ install_sh = @install_sh@
+@@ -105,11 +94,7 @@
+ sbindir = @sbindir@
+ sharedstatedir = @sharedstatedir@
+ sysconfdir = @sysconfdir@
+-target = @target@
+ target_alias = @target_alias@
+-target_cpu = @target_cpu@
+-target_os = @target_os@
+-target_vendor = @target_vendor@
+ sbin_SCRIPTS = \
+ 	perl/scripts/gpt-build \
+ 	perl/scripts/gpt_build_config \
+diff -ur gpt.orig/packaging_tools/perl/GPT/LocalEnv.pm.in gpt/packaging_tools/perl/GPT/LocalEnv.pm.in
+--- gpt.orig/packaging_tools/perl/GPT/LocalEnv.pm.in	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/LocalEnv.pm.in	2008-10-04 16:31:10.000000000 +0200
+@@ -41,7 +41,13 @@
+ 
+ }
+ 
+-sub get_target {return "@target@"}
++sub get_target {
++    my $gpath = $ENV{'GPT_LOCATION'};
++    $gpath = '/usr' if ! defined $gpath;
++    require Grid::GPT::Localize;
++    return Grid::GPT::Localize::get_target($gpath);
++}
++
+ sub use_system_tar {return "@systar@"}
+ 
+ sub listconfig {

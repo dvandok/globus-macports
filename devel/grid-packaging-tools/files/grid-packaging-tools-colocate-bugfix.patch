@@ -1,0 +1,12 @@
+diff -ur gpt-3.2.orig/packaging_tools/perl/GPT/V1/Package.pm gpt-3.2/packaging_tools/perl/GPT/V1/Package.pm
+--- gpt-3.2.orig/packaging_tools/perl/GPT/V1/Package.pm	2004-05-20 19:42:17.000000000 +0200
++++ gpt-3.2/packaging_tools/perl/GPT/V1/Package.pm	2008-06-23 07:09:55.000000000 +0200
+@@ -426,7 +427,7 @@
+ 
+ 	    $converted->{$n} = $self->{$n};
+             next if ! defined $converted->{$n};
+-	    if ($n eq 'pkg_libs') {
++	    if ($n eq 'pkg_libs' and $self->{'ColocateLibraries'} ne 'no') {
+ 	      $converted->{$n} =~ s!(-l\w+)\s+!$ {1}_$flavor !g;
+ 	      $converted->{$n} =~ s!(-l\w+)$!$ {1}_$flavor!;
+ 	    }

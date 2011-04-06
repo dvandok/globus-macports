@@ -1,0 +1,37 @@
+diff -ur globus_callout-0.7.orig/library/globus_callout.c globus_callout-0.7/library/globus_callout.c
+--- globus_callout-0.7.orig/library/globus_callout.c	2006-01-19 06:54:06.000000000 +0100
++++ globus_callout-0.7/library/globus_callout.c	2009-05-09 23:08:13.000000000 +0200
+@@ -29,16 +29,16 @@
+ #include "globus_callout_constants.h"
+ #include "globus_i_callout.h"
+ 
++#ifndef BUILD_STATIC_ONLY
+ #ifdef WIN32
+ #include "globus_libtool_windows.h"
++#else
++#include <ltdl.h>
++#endif
+ #endif
+ 
+ #include "version.h"
+ 
+-/* ToDo: HACK! This is undefined on the Windows side so do this for now */
+-#ifdef WIN32
+-#define flavor "win32dbg"
+-#endif
+ #define GLOBUS_I_CALLOUT_HASH_SIZE 64
+ 
+ static void
+diff -ur globus_callout-0.7.orig/library/globus_i_callout.h globus_callout-0.7/library/globus_i_callout.h
+--- globus_callout-0.7.orig/library/globus_i_callout.h	2006-01-19 06:54:06.000000000 +0100
++++ globus_callout-0.7/library/globus_i_callout.h	2009-05-09 23:04:37.000000000 +0200
+@@ -29,9 +29,6 @@
+ #define _GLOBUS_I_CALLOUT_H_
+ 
+ #include "globus_callout.h"
+-#if !defined(WIN32) && !defined(BUILD_STATIC_ONLY)
+-#include <ltdl.h>
+-#endif
+ 
+ /* DEBUG MACROS */
+ 

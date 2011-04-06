@@ -1,0 +1,45 @@
+diff -ur globus_common-10.2.orig/scripts/globus-makefile-header globus_common-10.2/scripts/globus-makefile-header
+--- globus_common-10.2.orig/scripts/globus-makefile-header	2008-02-20 17:03:35.000000000 +0100
++++ globus_common-10.2/scripts/globus-makefile-header	2009-11-08 13:35:49.109079788 +0100
+@@ -68,7 +68,11 @@
+ }
+ else
+ {
+-    $environment = "gpt1";
++    print "globus-makefile-header requires the GPT perl module.\n";
++    print "If you want to use it you have to install the grid-packaging-tools package.\n";
++    print "Consider using alternatives like pkg-config instead.\n";
++
++    exit 1;
+ }
+ 
+ #
+@@ -111,28 +115,6 @@
+ }
+ @pkgs = buildMultiArg(@pkgs);
+ 
+-if ($environment eq "gpt1")
+-{
+-    my($argstring, $pkgstr);
+-
+-    $argstring = "-flavor=$flavor ";
+-
+-    if ($static)
+-    {
+-        $argstring .= "-link=static ";
+-    }
+-
+-    $pkgstr = join(' ', @pkgs);
+-    if (length($pkgstr) > 0)
+-    {
+-        $argstring .= "$pkgstr ";
+-    }
+-
+-    action("$globus_path/bin/globus-makefile-header.gpt1 $argstring");
+-
+-    exit;
+-}
+-
+ if ( grep(/^ANY$/, @pkgs) )
+ {
+     @pkgs = ("ANY");

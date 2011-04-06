@@ -1,0 +1,20 @@
+diff -ur gpt.orig/packaging_tools/amdir/pkgdata_Makefile.am gpt/packaging_tools/amdir/pkgdata_Makefile.am
+--- gpt.orig/packaging_tools/amdir/pkgdata_Makefile.am	2006-07-26 21:16:59.000000000 +0200
++++ gpt/packaging_tools/amdir/pkgdata_Makefile.am	2008-12-09 00:38:30.000000000 +0100
+@@ -52,12 +52,12 @@
+ # kind of metadata file is missing by calling "true"
+ install-pkgDATA: $(pkg_DATA)
+ 	@$(NORMAL_INSTALL)
+-	test -z "$(pkgdir)" || $(mkdir_p) "$(DESTDIR)$(pkgdir)";
++	test -z "$(pkgdir)" || $(mkinstalldirs) "$(DESTDIR)$(pkgdir)";
+ 	@list='$(pkg_DATA)'; for p in $$list; do \
+ 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+-	  f=$(am__strip_dir) \
+-	  echo " $(pkgDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(pkgdir)/$$f'"; \
+-	  $(pkgDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(pkgdir)/$$f"; \
++	  f=`echo $$p | sed -e 's|^.*/||'`; \
++	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(pkgdir)/$$f'"; \
++	  $(INSTALL_DATA) "$$d$$p" "$(DESTDIR)$(pkgdir)/$$f"; \
+ 	done || true
+ 
+ $(METADATA_FILES): pkg_data_src.gpt

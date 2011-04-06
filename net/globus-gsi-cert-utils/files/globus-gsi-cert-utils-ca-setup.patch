@@ -1,0 +1,19 @@
+diff -ur globus_gsi_cert_utils-6.4.orig/programs/grid-cert-request.in globus_gsi_cert_utils-6.4/programs/grid-cert-request.in
+--- globus_gsi_cert_utils-6.4.orig/programs/grid-cert-request.in	2008-10-15 17:19:43.000000000 +0200
++++ globus_gsi_cert_utils-6.4/programs/grid-cert-request.in	2010-02-06 09:05:18.525154538 +0100
+@@ -865,9 +865,12 @@
+         echo "    \${GLOBUS_LOCATION}/etc/globus-user-ssl.conf"
+         echo "    \${GLOBUS_LOCATION}/etc/globus-host-ssl.conf"
+         echo ""
+-        echo "Can't find valid CA config files. Please make sure"
+-        echo "that the grid administrator has installed a CA setup "
+-        echo "package and run gpt-postinstall."
++        echo "Can't find valid CA config files."
++        echo "Not all CAs use this tool to generate certificate requests."
++        echo "If your CA is using this tool, make sure that you have installed"
++        echo "your CA's setup package."
++        echo "If your CA is not using this tool, consult the CA documentation"
++        echo "to find the right way to request a certificate."
+     fi
+ 
+     echo ""

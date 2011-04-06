@@ -1,0 +1,16 @@
+diff -ur gpt-3.2.orig/packaging_tools/perl/GPT/V1/XML.pm gpt-3.2/packaging_tools/perl/GPT/V1/XML.pm
+--- gpt-3.2.orig/packaging_tools/perl/GPT/V1/XML.pm	2004-05-20 19:42:17.000000000 +0200
++++ gpt-3.2/packaging_tools/perl/GPT/V1/XML.pm	2008-07-02 07:48:13.000000000 +0200
+@@ -275,10 +275,10 @@
+   my ($self, $tag) = @_;
+   local *FILE = *{$self->{'FILE'}};
+   
+-  print FILE "<$tag->{'name'} ";
++  print FILE "<$tag->{'name'}";
+ 
+   for my $a (sort keys %{$tag->{attributes}}) {
+-    print FILE "$a=\"$tag->{attributes}->{$a}\" ";
++    print FILE " $a=\"$tag->{attributes}->{$a}\"";
+   }
+ 
+   if (@{$tag->{'contents'}} == 0) {

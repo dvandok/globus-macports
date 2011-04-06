@@ -1,0 +1,171 @@
+diff -ur globus_core-5.14.orig/aclocal/acdoxygen.m4 globus_core-5.14/aclocal/acdoxygen.m4
+--- globus_core-5.14.orig/aclocal/acdoxygen.m4	2004-08-24 17:37:02.000000000 +0200
++++ globus_core-5.14/aclocal/acdoxygen.m4	2008-10-05 21:47:10.000000000 +0200
+@@ -65,9 +65,7 @@
+ AC_DEFUN([LAC_DOXYGEN],dnl
+ [
+     AC_ARG_ENABLE(doxygen,
+-    changequote(<<, >>)dnl  
+-<< --enable-doxygen[=PATH]     use Doxygen to generate documentation>>,
+-    changequote([, ])dnl
++    AC_HELP_STRING([--enable-doxygen[[=PATH]]], [use Doxygen to generate documentation]),
+     [
+         if test "$enableval" = "yes"; then
+         AC_PATH_PROG(DOXYGEN,
+@@ -87,8 +85,7 @@
+ 
+ 
+     AC_ARG_ENABLE(internal-doc,
+-    [ --enable-internal-doc        Generate Doxygen documentation for
+-                   internal functions. Requires --enable-doxygen],
++    AC_HELP_STRING([--enable-internal-doc], [Generate Doxygen documentation for internal functions. Requires --enable-doxygen]),
+     [
+     DOXYFILE="Doxyfile-internal"
+     AC_SUBST(DOXYFILE) 
+diff -ur globus_core-5.14.orig/aclocal/globus_package.m4 globus_core-5.14/aclocal/globus_package.m4
+--- globus_core-5.14.orig/aclocal/globus_package.m4	2005-11-02 23:25:24.000000000 +0100
++++ globus_core-5.14/aclocal/globus_package.m4	2008-10-05 17:45:04.000000000 +0200
+@@ -24,7 +24,8 @@
+ fi
+ 
+ AC_ARG_WITH(flavor,
+-	[ --with-flavor=<FL>     Specify the globus build flavor or without-flavor for a flavor independent  ],
++	AC_HELP_STRING([--with-flavor=FLAVOR],
++	[Specify the globus build flavor or --without-flavor for a flavor independent package]),
+ 
+ 	[
+ 	case $withval in
+@@ -132,7 +133,7 @@
+ 
+ 
+ AC_ARG_ENABLE([programs],
+-[   --disable-programs    Don't compile/link programs],
++    AC_HELP_STRING([--disable-programs], [Don't compile/link programs]),
+     [case "${enableval}" in
+         yes) 
+             ENABLE_PROGRAMS=true
+@@ -157,9 +158,7 @@
+ lac_INSURE=$INSURE
+ 
+ AC_ARG_ENABLE(insure,
+- 	changequote(<<, >>)dnl
+-  <<--disable-insure	disable Insure++ >>,
+-	changequote([, ])dnl
++	AC_HELP_STRING([--disable-insure], [disable Insure++]),
+ 	[
+ 		if test "$enableval" = "yes"; then
+ 			lac_INSURE="${INSURE-insure}"
+diff -ur globus_core-5.14.orig/config/accompiler.m4 globus_core-5.14/config/accompiler.m4
+--- globus_core-5.14.orig/config/accompiler.m4	2008-03-04 01:39:39.000000000 +0100
++++ globus_core-5.14/config/accompiler.m4	2008-10-05 17:52:38.000000000 +0200
+@@ -69,31 +69,29 @@
+ AC_DEFUN([LAC_COMPILERS_ARGS],
+ [
+ AC_ARG_WITH(threads,
+-        [  --with-threads=TYPE          build target with threads],
++        AC_HELP_STRING([--with-threads=TYPE], [build target with threads]),
+         [lac_cv_threads_type="$withval"],
+         [lac_cv_threads_type=${lac_cv_threads_type='no'}])
+ 
+ LAC_THREADS_ARGS
+ 
+ AC_ARG_ENABLE(debug,
+-        [  --enable-debug                compile in debugging features],
++        AC_HELP_STRING([--enable-debug], [compile in debugging features]),
+         [lac_cv_debug="$enableval"],
+         [lac_cv_debug=${lac_cv_debug='no'}])
+ 
+ AC_ARG_ENABLE(64bit,
+-        [  --enable-64bit                build 64-bit objects (SGI Irix 6.x, HP HPUX 11.x, IA-64 only)],
++        AC_HELP_STRING([--enable-64bit], [build 64-bit objects (SGI Irix 6.x, HP HPUX 11.x, IA-64 only)]),
+         [lac_cv_build_64bit="$enableval"],
+         [lac_cv_build_64bit=${lac_cv_build_64bit='no'}])
+ 
+ AC_ARG_ENABLE(profiling,
+-        [  --enable-profiling            enable profile build (GCC only)],
++        AC_HELP_STRING([--enable-profiling], [enable profile build (GCC only)]),
+         [lac_cv_build_profile="$enableval"],
+         [lac_cv_build_profile=${lac_cv_build_profile='no'}])
+ 
+ AC_ARG_ENABLE(insure,
+-        changequote(<<, >>)dnl
+-  <<--enable-insure[=PATH]      use Insure++ [default=insure]>>,
+-        changequote([, ])dnl
++        AC_HELP_STRING([--enable-insure[[=PATH]]], [use Insure++ [[default=insure]]]),
+         [
+                 if test "$enableval" = "yes"; then
+                         lac_cv_INSURE="insure"
+diff -ur globus_core-5.14.orig/config/acmp.m4 globus_core-5.14/config/acmp.m4
+--- globus_core-5.14.orig/config/acmp.m4	2004-08-24 17:37:05.000000000 +0200
++++ globus_core-5.14/config/acmp.m4	2008-10-05 19:18:59.000000000 +0200
+@@ -31,8 +31,7 @@
+ AC_DEFUN([LAC_MP_INC_ARGS],
+ [
+ AC_ARG_WITH(mpi-includes,
+-    [  --with-mpi-includes     Specify include flags for MPI
+-                          (example --with-mpi-includes=-I/path/to/mpi/headers)],
++    AC_HELP_STRING([--with-mpi-includes], [Specify include flags for MPI (example --with-mpi-includes=-I/path/to/mpi/headers)]),
+     [if test "$build_arg_mpi" != "yes" ; then
+         AC_MSG_ERROR([you must specify --with-mpi[[=yes]] to use --with-mpi-includes])
+         exit 1
+@@ -46,8 +45,7 @@
+     ])
+ 
+ AC_ARG_WITH(mpi-libs,
+-    [  --with-mpi-libs         Specify libs and LDFLAGS for MPI
+-                          (example --with-mpi-libs=\"-L/path/to/mpi/libs -lmpi\")],
++    AC_HELP_STRING([--with-mpi-libs], [Specify libs and LDFLAGS for MPI (example --with-mpi-libs="-L/path/to/mpi/libs -lmpi")]),
+     [if test "$build_arg_mpi" != "yes" ; then
+         AC_MSG_ERROR([you must specify --with-mpi[[=yes]] to use --with-mpi-libs])
+         exit 1
+@@ -64,7 +62,7 @@
+ AC_DEFUN([LAC_MP_ARGS],
+ [
+ AC_ARG_WITH(mpi,
+-    [  --with-mpi              include the MPI protocols],
++    AC_HELP_STRING([--with-mpi], [include the MPI protocols]),
+     [if test "$withval" = "yes" ; then
+         build_arg_mpi='yes'
+      else
+diff -ur globus_core-5.14.orig/config/acthreads.m4 globus_core-5.14/config/acthreads.m4
+--- globus_core-5.14.orig/config/acthreads.m4	2006-01-17 23:17:49.000000000 +0100
++++ globus_core-5.14/config/acthreads.m4	2008-10-05 18:26:04.000000000 +0200
+@@ -21,11 +21,11 @@
+ AC_BEFORE([$0], [LAC_THREADS])
+ 
+ AC_ARG_WITH(thread-library,
+-        [  --with-thread-library=PATH    path to thread library files],
++        AC_HELP_STRING([--with-thread-library=PATH], [path to thread library files]),
+         [lac_thread_library_path="$withval"],
+         [lac_thread_library_path=${lac_thread_library_path=''}])
+ AC_ARG_WITH(thread-includes,
+-        [  --with-thread-includes=PATH   path to thread include files],
++        AC_HELP_STRING([--with-thread-includes=PATH], [path to thread include files]),
+         [lac_thread_include_path="$withval"],
+         [lac_thread_include_path=${lac_thread_include_path=''}])
+ ])
+diff -ur globus_core-5.14.orig/configure.in globus_core-5.14/configure.in
+--- globus_core-5.14.orig/configure.in	2005-07-28 21:38:23.000000000 +0200
++++ globus_core-5.14/configure.in	2008-10-05 22:08:33.000000000 +0200
+@@ -36,7 +36,7 @@
+ 
+ AC_ARG_WITH(
+     flavor,
+-    [  --with-flavor                 Globus flavor string],
++    AC_HELP_STRING([--with-flavor=FLAVOR], [Globus flavor string]),
+     [globus_cv_flavor="$withval"],
+     [globus_cv_flavor="notset"])
+ 
+@@ -76,9 +76,9 @@
+ fi
+ 
+ 
+-AC_ARG_ENABLE(internal-doc,
+-[  --enable-am-depends		Enable automake dependency caching.
+-				(Requires gcc, developers only)],
++AC_ARG_ENABLE(am-depends,
++AC_HELP_STRING([--enable-am-depends],
++[Enable automake dependency caching. (Requires gcc, developers only)]),
+ [
+ 	if test "X$GCC" = "Xyes"; then
+ 		AUTOMAKE_OPTS=""

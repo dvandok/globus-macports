@@ -1,0 +1,144 @@
+diff -ur globus_ftp_client-3.14.orig/globus_ftp_client_debug_plugin.c globus_ftp_client-3.14/globus_ftp_client_debug_plugin.c
+--- globus_ftp_client-3.14.orig/globus_ftp_client_debug_plugin.c	2007-06-01 19:23:06.000000000 +0200
++++ globus_ftp_client-3.14/globus_ftp_client_debug_plugin.c	2008-12-30 19:53:32.000000000 +0100
+@@ -1329,7 +1329,7 @@
+     GLOBUS_L_FTP_CLIENT_DEBUG_PLUGIN_RETURN(plugin);
+ 
+     result = globus_ftp_client_plugin_get_plugin_specific(plugin,
+-	                                                  (void **) &d);
++	                                                  (void **) (void *) &d);
+     if(result != GLOBUS_SUCCESS)
+     {
+ 	return result;
+diff -ur globus_ftp_client-3.14.orig/globus_ftp_client_perf_plugin.c globus_ftp_client-3.14/globus_ftp_client_perf_plugin.c
+--- globus_ftp_client-3.14.orig/globus_ftp_client_perf_plugin.c	2006-01-19 06:54:53.000000000 +0100
++++ globus_ftp_client-3.14/globus_ftp_client_perf_plugin.c	2008-12-30 19:53:32.000000000 +0100
+@@ -720,7 +720,7 @@
+ 
+     result = globus_ftp_client_plugin_get_plugin_specific(
+               plugin,
+-              (void **) &ps);
++              (void **) (void *) &ps);
+ 
+     if(result != GLOBUS_SUCCESS)
+     {
+@@ -767,7 +767,7 @@
+ 
+     result = globus_ftp_client_plugin_get_plugin_specific(
+         plugin,
+-        (void **) &ps);
++        (void **) (void *) &ps);
+ 
+     if(result != GLOBUS_SUCCESS)
+     {
+@@ -827,7 +827,7 @@
+ 
+     result = globus_ftp_client_plugin_get_plugin_specific(
+         plugin,
+-        (void **) &ps);
++        (void **) (void *) &ps);
+ 
+     if(result != GLOBUS_SUCCESS)
+     {
+diff -ur globus_ftp_client-3.14.orig/globus_ftp_client_restart_marker_plugin.c globus_ftp_client-3.14/globus_ftp_client_restart_marker_plugin.c
+--- globus_ftp_client-3.14.orig/globus_ftp_client_restart_marker_plugin.c	2006-01-19 06:54:53.000000000 +0100
++++ globus_ftp_client-3.14/globus_ftp_client_restart_marker_plugin.c	2008-12-30 19:53:32.000000000 +0100
+@@ -722,7 +722,7 @@
+ 
+     result = globus_ftp_client_plugin_get_plugin_specific(
+         plugin,
+-        (void **) &ps);
++        (void **) (void *) &ps);
+ 
+     if(result != GLOBUS_SUCCESS)
+     {
+diff -ur globus_ftp_client-3.14.orig/globus_ftp_client_restart_plugin.c globus_ftp_client-3.14/globus_ftp_client_restart_plugin.c
+--- globus_ftp_client-3.14.orig/globus_ftp_client_restart_plugin.c	2008-09-18 10:52:41.000000000 +0200
++++ globus_ftp_client-3.14/globus_ftp_client_restart_plugin.c	2008-12-30 19:53:32.000000000 +0100
+@@ -396,7 +396,7 @@
+ 	goto free_exit;
+     }
+     result = globus_ftp_client_plugin_get_plugin_specific(newguy,
+-	                                                  (void **) &newd);
++	                                                  (void **) (void *) &newd);
+     if(result != GLOBUS_SUCCESS)
+     {
+ 	goto destroy_exit;
+@@ -1234,7 +1234,7 @@
+     globus_result_t                     result;
+ 
+     result = globus_ftp_client_plugin_get_plugin_specific(
+-        plugin, (void **) &d);
++        plugin, (void **) (void *) &d);
+     if(result != GLOBUS_SUCCESS)
+     {
+         return result;
+@@ -1455,7 +1455,7 @@
+     GLOBUS_L_FTP_CLIENT_RESTART_PLUGIN_RETURN(plugin);
+ 
+     result = globus_ftp_client_plugin_get_plugin_specific(plugin,
+-	                                                  (void **) &d);
++	                                                  (void **) (void *) &d);
+     if(result != GLOBUS_SUCCESS)
+     {
+         return result;
+diff -ur globus_ftp_client-3.14.orig/globus_ftp_client_throughput_nl_plugin.c globus_ftp_client-3.14/globus_ftp_client_throughput_nl_plugin.c
+--- globus_ftp_client-3.14.orig/globus_ftp_client_throughput_nl_plugin.c	2006-01-19 06:54:53.000000000 +0100
++++ globus_ftp_client-3.14/globus_ftp_client_throughput_nl_plugin.c	2008-12-30 19:53:32.000000000 +0100
+@@ -339,7 +339,7 @@
+     {
+         globus_ftp_client_throughput_plugin_get_user_specific(
+             plugin,
+-            (void **) &info);
++            (void **) (void *) &info);
+         info->destroy_handle = GLOBUS_TRUE;
+     }
+     else
+@@ -494,7 +494,7 @@
+ 
+     result = globus_ftp_client_throughput_plugin_get_user_specific(
+               plugin,
+-              (void **) &info);
++              (void **) (void *) &info);
+ 
+     if(result != GLOBUS_SUCCESS)
+     {
+@@ -576,7 +576,7 @@
+ 
+     result = globus_ftp_client_throughput_plugin_get_user_specific(
+               plugin,
+-              (void **) &info);
++              (void **) (void *) &info);
+ 
+     if(result != GLOBUS_SUCCESS)
+     {
+diff -ur globus_ftp_client-3.14.orig/globus_ftp_client_throughput_plugin.c globus_ftp_client-3.14/globus_ftp_client_throughput_plugin.c
+--- globus_ftp_client-3.14.orig/globus_ftp_client_throughput_plugin.c	2006-01-19 06:54:53.000000000 +0100
++++ globus_ftp_client-3.14/globus_ftp_client_throughput_plugin.c	2008-12-30 19:53:32.000000000 +0100
+@@ -635,7 +635,7 @@
+ 
+     result = globus_ftp_client_perf_plugin_get_user_specific(
+               plugin,
+-              (void **) &info);
++              (void **) (void *) &info);
+ 
+     if(result != GLOBUS_SUCCESS)
+     {
+@@ -682,7 +682,7 @@
+ 
+     result = globus_ftp_client_perf_plugin_get_user_specific(
+               plugin,
+-              (void **) &info);
++              (void **) (void *) &info);
+ 
+     if(result != GLOBUS_SUCCESS)
+     {
+@@ -749,7 +749,7 @@
+ 
+     result = globus_ftp_client_perf_plugin_get_user_specific(
+         plugin,
+-        (void **) &info);
++        (void **) (void *) &info);
+ 
+     if(result != GLOBUS_SUCCESS)
+     {

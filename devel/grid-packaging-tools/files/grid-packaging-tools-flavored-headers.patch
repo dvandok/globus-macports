@@ -1,0 +1,11 @@
+--- gpt-3.2.orig/packaging_tools/perl/GPT/MyFilelists.pm	2004-05-20 19:42:17.000000000 +0200
++++ gpt-3.2/packaging_tools/perl/GPT/MyFilelists.pm	2008-06-22 22:20:27.000000000 +0200
+@@ -91,7 +91,7 @@
+   push @$result, @$list;
+   $me->{'filelist'}->reset();
+ 
+-  $me->{'filelist'}->flavored_headers() if defined $me->{'mangling'};
++  $me->{'filelist'}->flavored_headers();
+   $me->{'filelist'}->add_package_metadata_files('dev');
+   $list = $me->{'filelist'}->get_list();
+   push @$result, @$list;

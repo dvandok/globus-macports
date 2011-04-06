@@ -1,0 +1,12 @@
+diff -ur gpt.orig/packaging_tools/etc/gpt_autoconf_macros.m4 gpt/packaging_tools/etc/gpt_autoconf_macros.m4
+--- gpt.orig/packaging_tools/etc/gpt_autoconf_macros.m4	2009-03-16 19:17:35.000000000 +0100
++++ gpt/packaging_tools/etc/gpt_autoconf_macros.m4	2009-03-16 19:20:49.000000000 +0100
+@@ -76,7 +76,7 @@
+ 	GPT_LIBS="$GPT_CONFIG_PKG_LIBS $GPT_CONFIG_LIBS"
+ 	GPT_LDFLAGS="$GPT_CONFIG_STATIC_LINKLINE $GPT_LDFLAGS"
+ 	GPT_PGM_LINKS="$GPT_CONFIG_PGM_LINKS $GPT_CONFIG_LIBS"
+-	GPT_LIB_LINKS="$GPT_CONFIG_LIB_LINKS $GPT_CONFIG_LIBS"
++	GPT_LIB_LINKS="-version-info $GPT_MAJOR_VERSION:$GPT_MINOR_VERSION:$GPT_AGE_VERSION $GPT_CONFIG_LIB_LINKS $GPT_CONFIG_LIBS"
+ 
+ 
+ 

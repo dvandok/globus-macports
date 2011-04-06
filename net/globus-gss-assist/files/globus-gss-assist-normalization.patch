@@ -1,0 +1,42 @@
+--- globus_gss_assist-3.5/gridmap.c.orig	2003-01-05 01:19:32.000000000 +0100
++++ globus_gss_assist-3.5/gridmap.c	2003-11-21 12:06:22.000000000 +0100
+@@ -1082,6 +1082,9 @@
+     globus_result_t                     result = GLOBUS_SUCCESS;
+     static char *                       _function_name_ =
+         "globus_i_gss_assist_gridmap_parse_globusid";
++
++    static char *                       hexdigit = "0123456789ABCDEF";
++
+     GLOBUS_I_GSI_GSS_ASSIST_DEBUG_ENTER;
+ 
+     /*
+@@ -1146,7 +1149,7 @@
+          * First, make sure we have enough room in our output buffer.
+          */
+ 
+-	if ((buffer_index + 1 /* for NUL */) >= buffer_len)
++	while ((buffer_index + 4) >= buffer_len)
+ 	{
+ 	    /* Grow buffer */
+ 	    char *tmp_buffer;
+@@ -1169,8 +1172,18 @@
+             
+ 	    buffer = tmp_buffer;
+ 	}
+-        
+-	buffer[buffer_index++] = unparsed_char;
++
++	if ((unparsed_char < ' ') || (unparsed_char > '~'))
++	{
++	    buffer[buffer_index++] = '\\';
++	    buffer[buffer_index++] = 'x';
++	    buffer[buffer_index++] = hexdigit[(unparsed_char >> 4) & 0x0f];
++	    buffer[buffer_index++] = hexdigit[unparsed_char & 0x0f];
++	}
++	else
++	{
++	    buffer[buffer_index++] = unparsed_char;
++	}
+ 	buffer[buffer_index] = NUL;
+ 
+ 	escaped = 0;

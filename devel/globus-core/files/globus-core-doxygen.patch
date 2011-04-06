@@ -1,0 +1,173 @@
+diff -ur globus_core-5.14.orig/aclocal/Doxyfile.in globus_core-5.14/aclocal/Doxyfile.in
+--- globus_core-5.14.orig/aclocal/Doxyfile.in	2008-10-08 10:33:48.000000000 +0200
++++ globus_core-5.14/aclocal/Doxyfile.in	2008-10-08 10:50:16.000000000 +0200
+@@ -77,14 +77,14 @@
+ # fine-tune the look of the HTML output. If the tag is left blank doxygen 
+ # will generate a default style sheet 
+ 
+-HTML_STYLESHEET        = @doxygendir@/globus.css
++HTML_STYLESHEET        = 
+ 
+ # The LATEX_HEADER tag can be used to specify a personal LaTeX header for 
+ # the generated latex document. The header should contain everything until 
+ # the first chapter. If it is left blank doxygen will generate a 
+ # standard header. Notice: only use this tag if you know what you are doing! 
+ 
+-LATEX_HEADER           = @doxygendir@/globus_head.tex
++LATEX_HEADER           = 
+ 
+ # The PREDEFINED tag can be used to specify one or more macro names that 
+ # are defined before the preprocessor is started (similar to the -D option of 
+diff -ur globus_core-5.14.orig/aclocal/Doxyfile-internal.in globus_core-5.14/aclocal/Doxyfile-internal.in
+--- globus_core-5.14.orig/aclocal/Doxyfile-internal.in	2008-10-08 10:33:48.000000000 +0200
++++ globus_core-5.14/aclocal/Doxyfile-internal.in	2008-10-08 10:50:51.000000000 +0200
+@@ -78,14 +78,14 @@
+ # fine-tune the look of the HTML output. If the tag is left blank doxygen 
+ # will generate a default style sheet 
+ 
+-HTML_STYLESHEET        = @doxygendir@/globus.css
++HTML_STYLESHEET        = 
+ 
+ # The LATEX_HEADER tag can be used to specify a personal LaTeX header for 
+ # the generated latex document. The header should contain everything until 
+ # the first chapter. If it is left blank doxygen will generate a 
+ # standard header. Notice: only use this tag if you know what you are doing! 
+ 
+-LATEX_HEADER           = @doxygendir@/globus_head.tex
++LATEX_HEADER           = 
+ 
+ # The PREDEFINED tag can be used to specify one or more macro names that 
+ # are defined before the preprocessor is started (similar to the -D option of 
+diff -ur globus_core-5.14.orig/aclocal/doxygen_Makefile.am globus_core-5.14/aclocal/doxygen_Makefile.am
+--- globus_core-5.14.orig/aclocal/doxygen_Makefile.am	2002-01-04 17:41:38.000000000 +0100
++++ globus_core-5.14/aclocal/doxygen_Makefile.am	2008-10-08 14:53:41.000000000 +0200
+@@ -12,28 +12,35 @@
+ 		        $(PERL) ./doc/html/installdox $(doxygen_installdox) ./doc/html/*;\
+ 		    fi ; \
+ 		fi ; \
++		if test -d doc/latex; then \
++		    (cd doc/latex ; for f in *.tex ; do sed 's/\\doxyref{/{\\bf /g' < $$f > $$f.new ; mv $$f.new $$f ; done ; make) ; \
++		fi \
+ 	fi
+ 
+ install-data-local:
+ 	@if test ! -z "@DOXYGEN@"; then                     \
+-		for dir in `find ./doc/* -type d -print|sed "s,./doc/,,"`; do \
++		for dir in `find ./doc/{html,man} -type d -print|sed "s,./doc/,,"`; do \
+ 			if test -z "`echo $${dir}|sed -n '/^man/ p'`"; then \
+ 				$(INSTALL) -d -m 755 \
+ 					$(DESTDIR)$(docdir)/@PACKAGE@/$${dir}; \
+ 			else \
+ 				$(INSTALL) -d -m 755 \
+-					$(DESTDIR)$(prefix)/$${dir}; \
++					$(DESTDIR)$(mandir)/../$${dir}; \
+ 			fi \
+ 		done; \
+-		for file in `find ./doc -type f -print|sed "s,./doc/,,"`; do \
++		for file in `find ./doc/{html,man} -type f -print|sed "s,./doc/,,"`; do \
+ 			if test -z "`echo $${file}|sed -n '/^man/ p'`"; then \
+ 				$(INSTALL) -m 644 ./doc/$${file} \
+ 					$(DESTDIR)$(docdir)/@PACKAGE@/$${file}; \
+ 			else \
+ 				$(INSTALL) -m 644 ./doc/$${file} \
+-					$(DESTDIR)$(prefix)/$${file};\
++					$(DESTDIR)$(mandir)/../$${file};\
+ 			fi \
+-		done \
++		done; \
++		if test -f doc/latex/refman.pdf; then \
++			$(INSTALL) -m 644 doc/latex/refman.pdf \
++				$(DESTDIR)$(docdir)/@PACKAGE@; \
++		fi \
+ 	fi
+ 
+ clean-data-local:
+@@ -43,10 +50,13 @@
+ 
+ filelist:
+ 	@if test ! -z "@DOXYGEN@"; then \
+-		find ./doc -type f -print| \
+-		sed "s,./doc/man,$(prefix)/man,"| \
++		find ./doc/{man,html} -type f -print| \
++		sed "s,./doc/man,$(mandir),"| \
+ 		sed "s,./doc,$(docdir)/@PACKAGE@," \
+ 		>> $(FILELIST_FILE); \
++		if test -f doc/latex/refman.pdf; then \
++			echo $(docdir)/@PACKAGE@/refman.pdf >> $(FILELIST_FILE); \
++		fi \
+ 	fi
+ 
+ dist-hook: all-local
+diff -ur globus_core-5.14.orig/doxygen/Doxyfile.include globus_core-5.14/doxygen/Doxyfile.include
+--- globus_core-5.14.orig/doxygen/Doxyfile.include	2004-03-14 07:29:15.000000000 +0100
++++ globus_core-5.14/doxygen/Doxyfile.include	2008-10-08 10:34:25.000000000 +0200
+@@ -451,7 +451,7 @@
+ # by the printer. Possible values are: a4, a4wide, letter, legal and 
+ # executive. If left blank a4wide will be used.
+ 
+-PAPER_TYPE             = letter
++PAPER_TYPE             = 
+ 
+ # The EXTRA_PACKAGES tag can be to specify one or more names of LaTeX 
+ # packages that should be included in the LaTeX output.
+@@ -477,7 +477,7 @@
+ # plain latex in the generated Makefile. Set this option to YES to get a 
+ # higher quality PDF documentation.
+ 
+-USE_PDFLATEX           = NO
++USE_PDFLATEX           = YES
+ 
+ # If the LATEX_BATCHMODE tag is set to YES, doxygen will add the \\batchmode. 
+ # command to the generated LaTeX files. This will instruct LaTeX to keep 
+@@ -547,7 +547,7 @@
+ # only source the real man page, but without them the man command 
+ # would be unable to find the correct page. The default is NO.
+ 
+-MAN_LINKS              = YES
++MAN_LINKS              = NO
+ 
+ #---------------------------------------------------------------------------
+ # Configuration options related to the preprocessor   
+diff -ur globus_core-5.14.orig/doxygen/Doxyfile-internal.include globus_core-5.14/doxygen/Doxyfile-internal.include
+--- globus_core-5.14.orig/doxygen/Doxyfile-internal.include	2004-03-14 07:29:15.000000000 +0100
++++ globus_core-5.14/doxygen/Doxyfile-internal.include	2008-10-08 10:35:32.000000000 +0200
+@@ -436,7 +436,7 @@
+ # by the printer. Possible values are: a4, a4wide, letter, legal and 
+ # executive. If left blank a4wide will be used. 
+ 
+-PAPER_TYPE             = letter
++PAPER_TYPE             = 
+ 
+ # The EXTRA_PACKAGES tag can be to specify one or more names of LaTeX 
+ # packages that should be included in the LaTeX output. 
+diff -ur globus_core-5.14.orig/doxygen/globus_head.html globus_core-5.14/doxygen/globus_head.html
+--- globus_core-5.14.orig/doxygen/globus_head.html	2001-04-17 20:51:29.000000000 +0200
++++ globus_core-5.14/doxygen/globus_head.html	2008-10-08 10:48:54.000000000 +0200
+@@ -1,9 +1,11 @@
+ <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+ <html><head><meta name="robots" content="noindex">
++<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+ <!-- THIS FILE IS AUTOMATICALLY GENERATED FROM THE GLOBUS SOURCE CODE
+      DO NOT MODIFY.
+ -->
+ <title>Globus Reference Manual</title>
+-<link href="globus.css" title="Globus" rel="stylesheet" type="text/css">
++<link href="doxygen.css" rel="stylesheet" type="text/css">
++<link href="tabs.css" rel="stylesheet" type="text/css">
+ </head>
+ <body>
+diff -ur globus_core-5.14.orig/doxygen/Makefile.am globus_core-5.14/doxygen/Makefile.am
+--- globus_core-5.14.orig/doxygen/Makefile.am	2005-12-07 10:37:42.000000000 +0100
++++ globus_core-5.14/doxygen/Makefile.am	2008-10-08 10:54:20.000000000 +0200
+@@ -2,10 +2,8 @@
+ 
+ doxygen_DATA = Doxyfile-internal.include \
+ 	Doxyfile.include \
+-	globus.css \
+ 	globus_foot.html \
+-	globus_head.html \
+-	globus_head.tex
++	globus_head.html
+ 
+ sbin_SCRIPTS = \
+     globus-build-doxygen-dependencies \

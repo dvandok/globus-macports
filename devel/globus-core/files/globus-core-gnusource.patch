@@ -1,0 +1,26 @@
+diff -ur globus_core-5.15.orig/configure.in globus_core-5.15/configure.in
+--- globus_core-5.15.orig/configure.in	2008-10-11 21:48:29.000000000 +0200
++++ globus_core-5.15/configure.in	2008-10-11 21:49:04.000000000 +0200
+@@ -8,6 +8,8 @@
+ 
+ ac_default_prefix=${GLOBUS_LOCATION:-$ac_default_prefix}
+ 
++AC_GNU_SOURCE
++
+ # save CC and CFLAGS, so AC_PROG_CC can detect and use a compiler
+ # up to the point where we want to pick a compiler based on the
+ # flavor  (see config/accompiler.m4)
+diff -ur globus_core-5.15.orig/globus_config.h.in globus_core-5.15/globus_config.h.in
+--- globus_core-5.15.orig/globus_config.h.in	2007-02-20 22:15:34.000000000 +0100
++++ globus_core-5.15/globus_config.h.in	2008-10-11 21:49:04.000000000 +0200
+@@ -14,6 +14,10 @@
+  * limitations under the License.
+  */
+ 
++#ifndef _GNU_SOURCE
++#undef _GNU_SOURCE
++#endif
++
+ #undef HAVE_EXTERNALTHREADS
+ #undef HAVE_PTHREAD
+ #undef HAVE_PTHREAD_DRAFT_10

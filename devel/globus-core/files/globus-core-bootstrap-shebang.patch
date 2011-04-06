@@ -1,0 +1,9 @@
+diff -ur globus_core-5.14.orig/scripts/globus-bootstrap.sh globus_core-5.14/scripts/globus-bootstrap.sh
+--- globus_core-5.14.orig/scripts/globus-bootstrap.sh	2008-10-08 16:34:56.000000000 +0200
++++ globus_core-5.14/scripts/globus-bootstrap.sh	2008-10-08 16:39:29.000000000 +0200
+@@ -1,4 +1,4 @@
+- 
++#!/bin/sh 
+ 
+ # 
+ # Copyright 1999-2006 University of Chicago

@@ -1,0 +1,24 @@
+diff -ur globus_common-11.2.orig/library/globus_callback.h globus_common-11.2/library/globus_callback.h
+--- globus_common-11.2.orig/library/globus_callback.h	2010-01-21 18:06:42.865531109 +0100
++++ globus_common-11.2/library/globus_callback.h	2010-01-21 18:06:31.889284460 +0100
+@@ -16,7 +16,7 @@
+ 
+ #ifndef GLOBUS_INCLUDE_GLOBUS_CALLBACK
+ #define GLOBUS_INCLUDE_GLOBUS_CALLBACK
+-/**
++/*
+  * @file globus_callback.h Globus Callback API
+  *
+  * $Source: /home/globdev/CVS/globus-packages/common/source/library/globus_callback.h,v $
+diff -ur globus_common-11.2.orig/library/globus_thread_common.h globus_common-11.2/library/globus_thread_common.h
+--- globus_common-11.2.orig/library/globus_thread_common.h	2010-01-21 18:06:42.866529977 +0100
++++ globus_common-11.2/library/globus_thread_common.h	2010-01-21 18:06:31.890530356 +0100
+@@ -14,7 +14,7 @@
+  * limitations under the License.
+  */
+ 
+-/**
++/*
+  * @file globus_thread_common.h Common Thread Interface
+  *
+  * $Source: /home/globdev/CVS/globus-packages/common/source/library/globus_thread_common.h,v $

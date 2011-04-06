@@ -1,0 +1,15 @@
+diff -ur globus_openssl_module-0.6.orig/library/globus_openssl.c globus_openssl_module-0.6/library/globus_openssl.c
+--- globus_openssl_module-0.6.orig/library/globus_openssl.c	2009-05-06 15:04:12.000000000 +0200
++++ globus_openssl_module-0.6/library/globus_openssl.c	2009-05-06 15:06:05.000000000 +0200
+@@ -188,11 +188,7 @@
+ static unsigned long
+ globus_l_openssl_thread_id(void)
+ {
+-#ifndef TARGET_ARCH_WIN32
+     return (unsigned long) globus_thread_self();
+-#else
+-    return (unsigned long) globus_thread_get_threadID_as_long();
+-#endif
+ }
+ /* globus_l_openssl_thread_id() */
+ 

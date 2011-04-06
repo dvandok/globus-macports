@@ -1,0 +1,500 @@
+diff -ur gpt.orig/packaging_tools/Makefile.am gpt/packaging_tools/Makefile.am
+--- gpt.orig/packaging_tools/Makefile.am	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/Makefile.am	2008-10-04 14:58:13.000000000 +0200
+@@ -182,11 +182,12 @@
+ 
+ install-pod2man:
+ 	@if test "X$(POD2MAN)" != "X"; then \
+-		$(mkinstalldirs) $(DESTDIR)man/man1; \
++		$(mkinstalldirs) $(DESTDIR)$(mandir)/man8; \
+ 		list='$(sbin_SCRIPTS)'; for p in $$list; do \
++			grep -q ^= $$p || continue; \
+ 	  		script=`echo $$p | sed 's!perl/scripts/!!'`; \
+-	  		echo "Generating $(DESTDIR)$(prefix)/man/man1/$$script.1"; \
+-	  		$(POD2MAN) $$p > $(DESTDIR)$(prefix)/man/man1/$$script.1; \
++	  		echo "Generating $(DESTDIR)$(mandir)/man8/$$script.8"; \
++	  		$(POD2MAN) --section 8 $$p > $(DESTDIR)$(mandir)/man8/$$script.8; \
+ 		done \
+ 	else \
+ 		echo "Skipping Man page installation"; \
+diff -ur gpt.orig/packaging_tools/Makefile.in gpt/packaging_tools/Makefile.in
+--- gpt.orig/packaging_tools/Makefile.in	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/Makefile.in	2008-10-04 14:58:13.000000000 +0200
+@@ -846,11 +846,12 @@
+ 
+ install-pod2man:
+ 	@if test "X$(POD2MAN)" != "X"; then \
+-		$(mkinstalldirs) $(DESTDIR)man/man1; \
++		$(mkinstalldirs) $(DESTDIR)$(mandir)/man8; \
+ 		list='$(sbin_SCRIPTS)'; for p in $$list; do \
++			grep -q ^= $$p || continue; \
+ 	  		script=`echo $$p | sed 's!perl/scripts/!!'`; \
+-	  		echo "Generating $(DESTDIR)$(prefix)/man/man1/$$script.1"; \
+-	  		$(POD2MAN) $$p > $(DESTDIR)$(prefix)/man/man1/$$script.1; \
++	  		echo "Generating $(DESTDIR)$(mandir)/man8/$$script.8"; \
++	  		$(POD2MAN) --section 8 $$p > $(DESTDIR)$(mandir)/man8/$$script.8; \
+ 		done \
+ 	else \
+ 		echo "Skipping Man page installation"; \
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-build gpt/packaging_tools/perl/scripts/gpt-build
+--- gpt.orig/packaging_tools/perl/scripts/gpt-build	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-build	2008-10-04 15:05:17.000000000 +0200
+@@ -620,7 +620,7 @@
+ pkg_data_src.gpt.  If no instructions are found the script uses the
+ default instructions described in I<Grid::GPT::PkgMngmt::Build>.
+ 
+-Multiple packages can be built by passing in multiple i<-srcdir>
++Multiple packages can be built by passing in multiple I<-srcdir>
+ arguments or multiple source packages and or bundles.  For now these
+ have to be passed in in dependent order ie. if package foo needs
+ package fee's headers to build then fee should come first.
+@@ -634,7 +634,7 @@
+ Build flavors are character string labels that represent a set of
+ compiler and linker options defined during the building of the
+ globus_core package. Predefined flavors can be listed by using the
+-B<globus_flavor_configuration> script.  Packages can be built with any
++B<gpt-flavor-configuration> script.  Packages can be built with any
+ installed flavor.  globus_core can only be built with pre-defined
+ flavors.  globus_core needs to be built by hand
+ (i.e. ./configure|make|make install) to install a custom build flavor.
+@@ -770,7 +770,7 @@
+ 
+ =head1 SEE ALSO
+ 
+-gpt-pkg(1) gpt-bundle(1) gpt-install(1) BuildMacros(3)
++gpt-pkg(8) gpt-bundle(8) gpt-install(8) BuildMacros(3)
+ 
+ =head1 AUTHOR
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_build_config gpt/packaging_tools/perl/scripts/gpt_build_config
+--- gpt.orig/packaging_tools/perl/scripts/gpt_build_config	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt_build_config	2008-10-04 14:58:13.000000000 +0200
+@@ -177,15 +177,15 @@
+ 
+ =head1 NAME
+ 
+-B<globus_build_config> - Returns a minimized list of ldflags from a list of globus packages and external libraries.
++B<gpt_build_config> - Returns a minimized list of ldflags from a list of globus packages and external libraries.
+ 
+ =head1 SYNOPSIS
+ 
+-globus_build_config -src <source metadata file>  CB-f <globus_flavor_name> -link [static|shared] 
++gpt_build_config -src <source metadata file> -f <globus_flavor_name> -link [static|shared] 
+ 
+ =head1 DESCRIPTION
+ 
+-B<globus_build_config.pl> creates a file in it's current directory named
++B<gpt_build_config> creates a file in it's current directory named
+ gpt_build_temp.sh that contains a list of necessary flags assembled from 
+ the build environment metadata of the packages on which the source metadata 
+ depends.  
+@@ -194,7 +194,7 @@
+ 
+ =head1 LINK ORDER
+ 
+-The flag list returned by B<globus_build_config.pl> is assembled in
++The flag list returned by B<gpt_build_config> is assembled in
+ dependent order.  A dependency between two libraries occurs when one
+ library needs the symbols of another library in order to link
+ correctly.  For most linkers the library providing the symbols has to
+@@ -203,7 +203,7 @@
+ 
+    -L/opt/Xpm/lib -lXpm -L/usr/lib/X11 -lXm -lX
+ 
+-B<gpt_build_config> assumes that the library Xpm is dependent on Xm which in turn is dependent on X.  In addition, B<globus_build_config.pl> assumes that Xpm is located in /opt/Xpm/lib and Xm and X are both located in /usr/lib/X11.
++B<gpt_build_config> assumes that the library Xpm is dependent on Xm which in turn is dependent on X.  In addition, B<gpt_build_config> assumes that Xpm is located in /opt/Xpm/lib and Xm and X are both located in /usr/lib/X11.
+ 
+ =head1 BUGS
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-bundle gpt/packaging_tools/perl/scripts/gpt-bundle
+--- gpt.orig/packaging_tools/perl/scripts/gpt-bundle	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-bundle	2008-10-04 15:06:03.000000000 +0200
+@@ -1106,7 +1106,7 @@
+ 
+ =head1 SEE ALSO
+ 
+-gpt-build(1) gpt-install(1) gpt-pkg(1) 
++gpt-build(8) gpt-install(8) gpt-pkg(8) 
+ 
+ =head1 AUTHOR
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-convert-bundle-old2new gpt/packaging_tools/perl/scripts/gpt-convert-bundle-old2new
+--- gpt.orig/packaging_tools/perl/scripts/gpt-convert-bundle-old2new	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-convert-bundle-old2new	2008-10-04 15:08:42.000000000 +0200
+@@ -165,7 +165,7 @@
+ 
+ =head1 SEE ALSO
+ 
+-globus-build(1) globus-install(1) 
++globus-build(8) globus-install(8) 
+ 
+ =head1 AUTHOR
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-deps gpt/packaging_tools/perl/scripts/gpt-deps
+--- gpt.orig/packaging_tools/perl/scripts/gpt-deps	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-deps	2008-10-04 15:06:27.000000000 +0200
+@@ -182,7 +182,7 @@
+ 
+ =head1 SEE ALSO
+ 
+-gpt-install(1) gpt-verify(1) gpt-query(1) gpt-postinstall(1)
++gpt-install(8) gpt-verify(8) gpt-query(8) gpt-postinstall(8)
+ 
+ =head1 AUTHOR
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_generate_bin_pkg_data gpt/packaging_tools/perl/scripts/gpt_generate_bin_pkg_data
+--- gpt.orig/packaging_tools/perl/scripts/gpt_generate_bin_pkg_data	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt_generate_bin_pkg_data	2008-10-04 14:58:13.000000000 +0200
+@@ -79,65 +79,3 @@
+ }
+ 
+ __END__
+-
+-=head1 NAME
+-
+-B<globus_build_config.pl> - Returns a minimized list of ldflags from a list of globus packages and external libraries.
+-
+-=head1 SYNOPSIS
+-
+-globus_build_config.pl  [--ldflags="<extra ld flags>"] --flavor=<globus_flavor_name> <dependent packages list>
+-
+-=head1 DESCRIPTION
+-
+-B<globus_build_config.pl> returns a list of ldflags.  It builds this
+-list from the ld flags passed in as well as from scanning the
+-build_dependencies file of each package passed in as a dependency.
+-This scanning is done recursively to cover the entire dependency tree.
+-This script is based on the shell script gnome_config.
+-
+-=head1 LINK ORDER
+-
+-The flag list returned by B<globus_build_config.pl> is assembled in
+-dependent order.  A dependency between two libraries occurs when one
+-library needs the symbols of another library in order to link
+-correctly.  For most linkers the library providing the symbols has to
+-be linked after the library that needs the symbols.  For
+-example, from the line:
+-
+-   -L/opt/Xpm/lib -lXpm -L/usr/lib/X11 -lXm -lX
+-
+-B<globus_build_config.pl> assumes that the library Xpm is dependent on Xm which in turn is dependent on X.  In addition, B<globus_build_config.pl> assumes that Xpm is located in /opt/Xpm/lib and Xm and X are both located in /usr/lib/X11.
+-
+-=head1 MINIMIZATION
+-
+-B<globus_build_config.pl> makes sure that every library is listed only once.  The purpose of this is to reduce the size of the linking command and make the linking behavior more predictable.  Here is an example of minimization:
+-
+-     Before: -lm -L/home/mystuff/lib -lXm -L$(GLOBUS_INSTALL_PATH)/lib \
+--lfum_$(GLOBUS_FLAVOR_NAME) -lm -L/opt/dum/lib -ldee \
+--L$(GLOBUS_INSTALL_PATH)/lib -lfoo_$(GLOBUS_FLAVOR_NAME) -lm -L/usr/local/lib \
+--lX -L$(GLOBUS_INSTALL_PATH)/lib -lfee_$(GLOBUS_FLAVOR_NAME) -lm -L/opt/dum/lib \
+--ldum
+-
+-     After: -L/home/mystuff/lib -lXm -L$(GLOBUS_INSTALL_PATH)/lib \
+--lfum_$(GLOBUS_FLAVOR_NAME) -L/opt/dum/lib -ldee -L$(GLOBUS_INSTALL_PATH)/lib \
+--lfoo_$(GLOBUS_FLAVOR_NAME) -L/usr/local/lib -lX -L$(GLOBUS_INSTALL_PATH)/lib \
+--lfee_$(GLOBUS_FLAVOR_NAME)  -lm -L/opt/dum/lib -ldum
+-
+-Notice that in the After, -lm is listed only once near the end of the list.
+-
+-=head1 BUGS
+-
+-Circular dependencies between libraries are not supported.  These
+-dependencies are usually resolved by listing one of the libraries
+-before and after its co-dependent library (ie. -lfoo -lfee -lfoo).
+-B<globus_build_config.pl> will eliminate the first -lfoo because of
+-minimization.
+-
+-
+-=head1 AUTHOR
+-
+-Michael Bletzinger E<lt>mbletzin.ncsa.uiuc.eduE<gt> and Eric Blau
+-E<lt>eblau.ncsa.uiuc.eduE<gt>
+-
+-=cut
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-pkg gpt/packaging_tools/perl/scripts/gpt-pkg
+--- gpt.orig/packaging_tools/perl/scripts/gpt-pkg	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-pkg	2008-10-04 15:08:24.000000000 +0200
+@@ -237,7 +237,7 @@
+ 
+ =head1 SEE ALSO
+ 
+-gpt-bundle(1) gpt-install(1) gpt-build(1)
++gpt-bundle(8) gpt-install(8) gpt-build(8)
+ 
+ =head1 AUTHOR
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-query gpt/packaging_tools/perl/scripts/gpt-query
+--- gpt.orig/packaging_tools/perl/scripts/gpt-query	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-query	2008-10-04 15:04:33.000000000 +0200
+@@ -461,7 +461,7 @@
+ 
+ =head1 SEE ALSO
+ 
+-gpt-install(1) gpt-uninstall(1) gpt-verify(1) gpt-postinstall(1)
++gpt-install(8) gpt-uninstall(8) gpt-verify(8) gpt-postinstall(8)
+ 
+ =head1 AUTHOR
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_save_flavor gpt/packaging_tools/perl/scripts/gpt_save_flavor
+--- gpt.orig/packaging_tools/perl/scripts/gpt_save_flavor	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt_save_flavor	2008-10-04 14:58:13.000000000 +0200
+@@ -75,65 +75,3 @@
+ 
+ 
+ __END__
+-
+-=head1 NAME
+-
+-B<globus_build_config.pl> - Returns a minimized list of ldflags from a list of globus packages and external libraries.
+-
+-=head1 SYNOPSIS
+-
+-globus_build_config.pl  [--ldflags="<extra ld flags>"] --flavor=<globus_flavor_name> <dependent packages list>
+-
+-=head1 DESCRIPTION
+-
+-B<globus_build_config.pl> returns a list of ldflags.  It builds this
+-list from the ld flags passed in as well as from scanning the
+-build_dependencies file of each package passed in as a dependency.
+-This scanning is done recursively to cover the entire dependency tree.
+-This script is based on the shell script gnome_config.
+-
+-=head1 LINK ORDER
+-
+-The flag list returned by B<globus_build_config.pl> is assembled in
+-dependent order.  A dependency between two libraries occurs when one
+-library needs the symbols of another library in order to link
+-correctly.  For most linkers the library providing the symbols has to
+-be linked after the library that needs the symbols.  For
+-example, from the line:
+-
+-   -L/opt/Xpm/lib -lXpm -L/usr/lib/X11 -lXm -lX
+-
+-B<globus_build_config.pl> assumes that the library Xpm is dependent on Xm which in turn is dependent on X.  In addition, B<globus_build_config.pl> assumes that Xpm is located in /opt/Xpm/lib and Xm and X are both located in /usr/lib/X11.
+-
+-=head1 MINIMIZATION
+-
+-B<globus_build_config.pl> makes sure that every library is listed only once.  The purpose of this is to reduce the size of the linking command and make the linking behavior more predictable.  Here is an example of minimization:
+-
+-     Before: -lm -L/home/mystuff/lib -lXm -L$(GLOBUS_INSTALL_PATH)/lib \
+--lfum_$(GLOBUS_FLAVOR_NAME) -lm -L/opt/dum/lib -ldee \
+--L$(GLOBUS_INSTALL_PATH)/lib -lfoo_$(GLOBUS_FLAVOR_NAME) -lm -L/usr/local/lib \
+--lX -L$(GLOBUS_INSTALL_PATH)/lib -lfee_$(GLOBUS_FLAVOR_NAME) -lm -L/opt/dum/lib \
+--ldum
+-
+-     After: -L/home/mystuff/lib -lXm -L$(GLOBUS_INSTALL_PATH)/lib \
+--lfum_$(GLOBUS_FLAVOR_NAME) -L/opt/dum/lib -ldee -L$(GLOBUS_INSTALL_PATH)/lib \
+--lfoo_$(GLOBUS_FLAVOR_NAME) -L/usr/local/lib -lX -L$(GLOBUS_INSTALL_PATH)/lib \
+--lfee_$(GLOBUS_FLAVOR_NAME)  -lm -L/opt/dum/lib -ldum
+-
+-Notice that in the After, -lm is listed only once near the end of the list.
+-
+-=head1 BUGS
+-
+-Circular dependencies between libraries are not supported.  These
+-dependencies are usually resolved by listing one of the libraries
+-before and after its co-dependent library (ie. -lfoo -lfee -lfoo).
+-B<globus_build_config.pl> will eliminate the first -lfoo because of
+-minimization.
+-
+-
+-=head1 AUTHOR
+-
+-Michael Bletzinger E<lt>mbletzin.ncsa.uiuc.eduE<gt> and Eric Blau
+-E<lt>eblau.ncsa.uiuc.eduE<gt>
+-
+-=cut
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-setup gpt/packaging_tools/perl/scripts/gpt-setup
+--- gpt.orig/packaging_tools/perl/scripts/gpt-setup	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-setup	2008-10-04 15:06:46.000000000 +0200
+@@ -42,7 +42,7 @@
+ 
+ # sub pod2usage {
+ #   my $ex = shift;
+-#   print "gpt_setup -name=<Package Name> -version=<Major.Minor.Age> [-nocomments -verbose -help -v ] source_dir build_dir\n";
++#   print "gpt-setup -name=<Package Name> -version=<Major.Minor.Age> [-nocomments -verbose -help -v ] source_dir build_dir\n";
+ #   exit $ex;
+ # }
+ 
+@@ -605,16 +605,16 @@
+ 
+ =head1 NAME
+ 
+-B<gpt_setup> - Create automake and autoconf files to convert
++B<gpt-setup> - Create automake and autoconf files to convert
+ software into a package
+ 
+ =head1 SYNOPSIS
+ 
+-gpt_setup name version [directory_containing_source_code] [build_directory]
++gpt-setup name version [directory_containing_source_code] [build_directory]
+ 
+ =head1 DESCRIPTION
+ 
+-B<gpt_setup> creates Makefile.am files and a configure.in file as well
++B<gpt-setup> creates Makefile.am files and a configure.in file as well
+ as other stuff that is used to convert a software distribution into a
+ globus package.  I<name> is the name of the package. I<version> is the
+ version of the package.  I<directory_containing_source_code> is the
+@@ -623,15 +623,15 @@
+ the resulting binaries (default is the source directory).  The
+ resulting build depends on other files from the globus packaging tools
+ (GPT) as well as the globus_core package.  B<NOTE> that the files that
+-gpt_setup creates need to be edited by hand in order for the packaging
+-to be complete. The idea behind gpt_setup is simple; "It is easier to
++gpt-setup creates need to be edited by hand in order for the packaging
++to be complete. The idea behind gpt-setup is simple; "It is easier to
+ edit than to create.".
+ 
+-=head1 Description of the Files that B<gpt_setup> Creates
++=head1 Description of the Files that B<gpt-setup> Creates
+ 
+ =over 4
+ 
+-=item B<Makefile.am>.  B<gpt_setup> creates a Makefile.am in the top
++=item B<Makefile.am>.  B<gpt-setup> creates a Makefile.am in the top
+ level directory and every subdirectory except for those called CVS or
+ RCS.  The Makefile.am files contain a list of sources, subdirectories,
+ libraries, programs, and scripts.  All libraries will be built as
+@@ -642,21 +642,21 @@
+ directives to include files from globus_core that contain standard
+ make targets and rules.
+ 
+-=item B<configure.in> B<gpt_setup> creates a top level configure.in
++=item B<configure.in> B<gpt-setup> creates a top level configure.in
+ containing the standard GLOBUS_* macros from globus_core. The script
+ detects the occurance of *.in files and headers and adds them to
+ AM_CONFIG_HEADER and AC_OUTPUT.
+ 
+-=item B<bootstrap> B<gpt_setup> creates a top level bootstrap script
++=item B<bootstrap> B<gpt-setup> creates a top level bootstrap script
+ which is used to invoke aclocal, automake, autoheader, and autoconf in
+ the correct order.
+ 
+-=item B<pkgdata> B<gpt_setup> creates a pkgdata directory that contains the following:
++=item B<pkgdata> B<gpt-setup> creates a pkgdata directory that contains the following:
+ 
+ =over 4
+ 
+ =item B<pkg_data_src.gpt.in> is a file that contains the packaging
+-metadata for the newly created package.  B<gpt_setup> inserts the name
++metadata for the newly created package.  B<gpt-setup> inserts the name
+ and version of the package as well as a list of all of the libraries
+ that the package provides.
+ 
+@@ -672,10 +672,10 @@
+ 
+ =back
+ 
+-=head1 Post gpt_setup Tasks (What is Left to the Developer)
++=head1 Post gpt-setup Tasks (What is Left to the Developer)
+ 
+ 
+-B<gpt_setup> does not do everything that is needed to compile a
++B<gpt-setup> does not do everything that is needed to compile a
+ package.  Some tasks need a developer's touch.  Here is a checklist of
+ tasks that may need to be done by hand:
+ 
+@@ -683,7 +683,7 @@
+ 
+ =item  Dependencies need to be added to pkgdata/pkg_data_src.gpt.in
+ 
+-You can use the GUI tool B<gpt_edit> or edit the file by hand.  The
++You can use the GUI tool B<gpt-edit> or edit the file by hand.  The
+ format is explained in B<Package>, B<SourceDependency>, and
+ B<Version>.
+ 
+@@ -698,7 +698,7 @@
+ 
+ =item Source needs to be assigned to programs and libraries in the Makefile.am's.
+ 
+-B<gpt_edit> automatically assigns all source found in a directory to
++B<gpt-edit> automatically assigns all source found in a directory to
+ all of the targets found in a directory.  For example:
+ 
+   Sources = \
+@@ -719,7 +719,7 @@
+ 
+ =item Autoconf defines need to be tested for
+ 
+-Use B<gpt_undefines> to identify all of the preprocesser macros that
++Use B<gpt-undefines> to identify all of the preprocesser macros that
+ are used in the source code which are not defined internally.  This
+ list will highlight the autoconf tests that need to be added to the
+ configure.in script. 
+@@ -728,7 +728,7 @@
+ 
+ =head1 SEE ALSO
+ 
+-gpt_edit(1) gpt_undefines(1) automake(1) autoconf(1) Package(3) Version(3) SourceDependency(3)
++gpt-edit(8) gpt-undefines(8) automake(1) autoconf(1) Package(3) Version(3) SourceDependency(3)
+ 
+ =head1 AUTHOR
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-undefines gpt/packaging_tools/perl/scripts/gpt-undefines
+--- gpt.orig/packaging_tools/perl/scripts/gpt-undefines	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-undefines	2008-10-04 14:58:13.000000000 +0200
+@@ -44,7 +44,7 @@
+ 
+ # sub pod2usage {
+ #   my $ex = shift;
+-#   print "gpt_undefines [-srcdir=PATH -config -disable-undefs -verbose -help] headers containing defines\n";
++#   print "gpt-undefines [-srcdir=PATH -config -disable-undefs -verbose -help] headers containing defines\n";
+ #   exit $ex;
+ # }
+ 
+@@ -207,17 +207,17 @@
+ 
+ =head1 NAME
+ 
+-B<gpt_undefines> - Generate a list of preprocessor macros that are not defined.
++B<gpt-undefines> - Generate a list of preprocessor macros that are not defined.
+ 
+ =head1 SYNOPSIS
+ 
+-gpt_undefines [-srcdir=PATH -config -disable-undefs -verbose -help] headers containing defines
++gpt-undefines [-srcdir=PATH -config -disable-undefs -verbose -help] headers containing defines
+ 
+ =head1 DESCRIPTION
+ 
+-B<gpt_undefines> Generates a list of preprocessor macros that are not
++B<gpt-undefines> Generates a list of preprocessor macros that are not
+ defined internally in the source code.  Macros that are defined in the
+-header files listed during B<gpt_undefines>'s invocation will also be
++header files listed during B<gpt-undefines>'s invocation will also be
+ excluded.
+ 
+ =head1 OPTIONS
+@@ -228,7 +228,7 @@
+ 
+ Use PATH as the directory containing the source code.  Source code in
+ the entire directory tree will be scanned. Default PATH is the
+-directory B<gpt_undefines> was invoked in.
++directory B<gpt-undefines> was invoked in.
+ 
+ =item -config
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-uninstall gpt/packaging_tools/perl/scripts/gpt-uninstall
+--- gpt.orig/packaging_tools/perl/scripts/gpt-uninstall	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-uninstall	2008-10-04 15:03:35.000000000 +0200
+@@ -228,7 +228,7 @@
+ 
+ =head1 SEE ALSO
+ 
+-gpt-install(1) gpt-query(1) gpt-verify(1) gpt-postinstall(1)
++gpt-install(8) gpt-query(8) gpt-verify(8) gpt-postinstall(8)
+ 
+ =head1 AUTHOR
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-verify gpt/packaging_tools/perl/scripts/gpt-verify
+--- gpt.orig/packaging_tools/perl/scripts/gpt-verify	2008-10-04 13:15:47.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-verify	2008-10-04 15:04:09.000000000 +0200
+@@ -261,7 +261,7 @@
+ 
+ =head1 SEE ALSO
+ 
+-gpt-install(1) gpt-uninstall(1) gpt-query(1) gpt-postinstall(1)
++gpt-install(8) gpt-uninstall(8) gpt-query(8) gpt-postinstall(8)
+ 
+ =head1 AUTHOR
+ 

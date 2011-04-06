@@ -1,0 +1,9 @@
+diff -ur gpt-3.2.orig/packaging_tools/etc/gpt-bootstrap.sh gpt-3.2/packaging_tools/etc/gpt-bootstrap.sh
+--- gpt-3.2.orig/packaging_tools/etc/gpt-bootstrap.sh	2004-05-20 19:42:17.000000000 +0200
++++ gpt-3.2/packaging_tools/etc/gpt-bootstrap.sh	2008-06-22 22:20:27.000000000 +0200
+@@ -1,3 +1,5 @@
++#!/bin/sh
++
+ error()
+ {
+     echo ""

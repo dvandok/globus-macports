@@ -1,0 +1,11 @@
+diff -ur globus_gsi_sysconfig-2.2.orig/library/globus_gsi_system_config.c globus_gsi_sysconfig-2.2/library/globus_gsi_system_config.c
+--- globus_gsi_sysconfig-2.2.orig/library/globus_gsi_system_config.c	2008-09-15 18:36:55.000000000 +0200
++++ globus_gsi_sysconfig-2.2/library/globus_gsi_system_config.c	2009-05-06 16:51:12.000000000 +0200
+@@ -91,7 +91,6 @@
+ #endif
+ 
+ #ifdef WIN32
+-#include "winglue.h"
+ #include <io.h>
+ #else
+ #ifdef HAVE_UNISTD_H

@@ -1,0 +1,12 @@
+diff -ur globus_gass_copy-4.14.orig/globus_gass_copy.c globus_gass_copy-4.14/globus_gass_copy.c
+--- globus_gass_copy-4.14.orig/globus_gass_copy.c	2008-03-12 20:01:06.000000000 +0100
++++ globus_gass_copy-4.14/globus_gass_copy.c	2008-10-21 20:47:48.000000000 +0200
+@@ -903,7 +903,7 @@
+  *
+  * @param attr
+  *      A globus_gass_copy attribute structure
+- * @param io_attr
++ * @param gass_attr
+  *      The http/https attributes to be used
+  *
+  * @return

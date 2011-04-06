@@ -1,0 +1,18 @@
+diff -ur globus_xio_gsi_driver-0.6.orig/pkgdata/pkg_data_src.gpt.in globus_xio_gsi_driver-0.6/pkgdata/pkg_data_src.gpt.in
+--- globus_xio_gsi_driver-0.6.orig/pkgdata/pkg_data_src.gpt.in	2010-03-18 10:35:33.000000000 +0100
++++ globus_xio_gsi_driver-0.6/pkgdata/pkg_data_src.gpt.in	2010-04-14 09:32:49.768553050 +0200
+@@ -26,7 +26,7 @@
+             </Dependency>
+         </Source_Dependencies>
+ 
+-        <Source_Dependencies Type="pgm_link">
++        <Source_Dependencies Type="lib_link">
+             <Dependency Name="globus_xio">
+                 <Version>
+                     <Simple_Version Major="0"/>
+@@ -63,5 +63,3 @@
+     </src_pkg>
+ 
+ </gpt_package_metadata>
+-~
+-~

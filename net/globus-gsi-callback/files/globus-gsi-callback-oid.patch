@@ -1,0 +1,14 @@
+diff -ur globus_gsi_callback-2.5.orig/library/globus_gsi_callback.c globus_gsi_callback-2.5/library/globus_gsi_callback.c
+--- globus_gsi_callback-2.5.orig/library/globus_gsi_callback.c	2008-09-11 19:36:54.000000000 +0200
++++ globus_gsi_callback-2.5/library/globus_gsi_callback.c	2010-05-15 20:34:51.521500619 +0200
+@@ -1517,8 +1517,8 @@
+ 
+     GLOBUS_I_GSI_CALLBACK_DEBUG_ENTER;
+ 
+-    pci_NID = OBJ_sn2nid(PROXYCERTINFO_SN);
+-    pci_old_NID = OBJ_sn2nid(PROXYCERTINFO_OLD_SN);
++    pci_NID = OBJ_txt2nid(PROXYCERTINFO_OID);
++    pci_old_NID = OBJ_txt2nid(PROXYCERTINFO_OLD_OID);
+ 
+     while((critical_position = 
+           X509_get_ext_by_critical(x509_context->current_cert, 

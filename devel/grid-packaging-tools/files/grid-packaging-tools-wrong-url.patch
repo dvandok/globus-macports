@@ -1,0 +1,52 @@
+diff -ur gpt.orig/CHANGES gpt/CHANGES
+--- gpt.orig/CHANGES	2006-01-11 17:10:08.000000000 +0100
++++ gpt/CHANGES	2009-03-26 12:58:58.000000000 +0100
+@@ -5,7 +5,7 @@
+ incompatible with Globus Toolkit version 2.x.
+ 
+ Fixes for bugs 157, 168, 177, 223, and 233 see bugzilla link at
+-http://www.gridpackagingtools.org/.
++http://www.gridpackagingtools.com/.
+ 
+ 3.1 -> 3.2
+ Fixed some gpt-build Macro problems.
+@@ -14,7 +14,7 @@
+ incompatible with Globus Toolkit version 2.x.
+ 
+ Fixes for bugs 157, 168, 177, 223, and 233 see bugzilla link at
+-http://www.gridpackagingtools.org/.
++http://www.gridpackagingtools.com/.
+ 
+ 3.0.1 -> 3.1
+ 
+diff -ur gpt.orig/INSTALL gpt/INSTALL
+--- gpt.orig/INSTALL	2006-01-11 17:10:08.000000000 +0100
++++ gpt/INSTALL	2009-03-26 12:58:58.000000000 +0100
+@@ -3,4 +3,4 @@
+ More installation help can be seen by running ./build_gpt -man.  Also
+ the webpage
+ 
+-http://www.gridpackagingtools.org/book/latest-stable/gpt-book.html#setup
++http://www.gridpackagingtools.com/book/latest-stable/gpt-book.html#setup
+diff -ur gpt.orig/LICENSE gpt/LICENSE
+--- gpt.orig/LICENSE	2006-01-11 17:10:08.000000000 +0100
++++ gpt/LICENSE	2009-03-26 13:00:59.000000000 +0100
+@@ -5,7 +5,7 @@
+     Grid Packaging Tools Development Team
+     National Center for Supercomputing Applications
+     University of Illinois
+-    http://wwww.gridpackagingtools.org/ 
++    http://www.gridpackagingtools.com/ 
+ 
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+diff -ur gpt.orig/README gpt/README
+--- gpt.orig/README	2006-01-11 17:10:08.000000000 +0100
++++ gpt/README	2009-03-26 13:00:40.000000000 +0100
+@@ -6,5 +6,5 @@
+ 
+ 
+ Further information on GPT can be found at
+-http://wwww.gridpackagingtools.org/
++http://www.gridpackagingtools.com/
+ 

@@ -1,0 +1,18 @@
+diff -ur globus_core-5.15.orig/config/accompiler.m4 globus_core-5.15/config/accompiler.m4
+--- globus_core-5.15.orig/config/accompiler.m4	2009-05-01 07:37:42.000000000 +0200
++++ globus_core-5.15/config/accompiler.m4	2009-05-01 10:44:12.000000000 +0200
+@@ -1099,12 +1099,11 @@
+ AC_SUBST(cross_compiling)
+ dnl Note that if RANLIB is set appropriately
+ dnl This line should do nothing
+-AC_PATH_PROGS(lac_cv_RANLIB, $lac_cv_RANLIB ranlib true, true)
++AC_PATH_PROGS(lac_cv_RANLIB, $RANLIB ranlib true, true)
+ 
+ dnl Only set AR if it has not been explicitly set earlier
+-AR="$lac_cv_AR"
+ if test "x$lac_cv_AR" = "x"; then
+-    AC_PATH_PROGS(lac_cv_AR, [ar], ar)
++    AC_PATH_PROGS(lac_cv_AR, $AR ar, ar)
+ fi
+ AC_CACHE_VAL(lac_cv_ARFLAGS, lac_cv_ARFLAGS="ruv")
+ NM="$lac_NM"

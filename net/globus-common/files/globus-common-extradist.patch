@@ -1,0 +1,20 @@
+diff -ur globus_common-11.2.orig/programs/Makefile.am globus_common-11.2/programs/Makefile.am
+--- globus_common-11.2.orig/programs/Makefile.am	2010-01-21 17:42:10.644280522 +0100
++++ globus_common-11.2/programs/Makefile.am	2010-01-21 17:51:34.322281411 +0100
+@@ -5,8 +5,6 @@
+ 
+ sbin_PROGRAMS = globus-libc-hostname globus-is-local-user globus-redia
+ 
+-EXTRA_DIST = globus-sh-exec.in globus-version.in
+-
+ INCLUDES = -I$(top_srcdir)/library $(GPT_INCLUDES) 
+ 
+ globus_redia_SOURCES = globus_redia.c
+@@ -25,5 +23,7 @@
+ globus_is_local_user_LDADD = ../library/libglobus_common_$(GLOBUS_FLAVOR_NAME).la @GPT_PGM_LINKS@
+ endif
+ 
++EXTRA_DIST = globus-sh-exec.in globus-version.in
++
+ include $(top_srcdir)/globus_automake_post
+ 

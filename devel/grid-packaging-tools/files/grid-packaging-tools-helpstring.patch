@@ -1,0 +1,12 @@
+diff -ur gpt.orig/packaging_tools/etc/gpt_autoconf_macros.m4 gpt/packaging_tools/etc/gpt_autoconf_macros.m4
+--- gpt.orig/packaging_tools/etc/gpt_autoconf_macros.m4	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/etc/gpt_autoconf_macros.m4	2008-10-05 18:41:41.000000000 +0200
+@@ -27,7 +27,7 @@
+ 	GPT_LINKTYPE="shared"
+ 	# We have to figure out if we're linking only static before build_config
+ 	AC_ARG_ENABLE(static-only,
+-	[ --enable-static-only     Don't do any dynamic linking],
++	AC_HELP_STRING([--enable-static-only], [Don't do any dynamic linking]),
+ 
+ 	[
+ 	case $enableval in

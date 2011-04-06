@@ -1,0 +1,138 @@
+diff -ur globus_common-10.2.orig/library/globus_common_include.h globus_common-10.2/library/globus_common_include.h
+--- globus_common-10.2.orig/library/globus_common_include.h	2008-03-12 20:01:04.000000000 +0100
++++ globus_common-10.2/library/globus_common_include.h	2009-05-10 09:54:07.000000000 +0200
+@@ -95,7 +95,7 @@
+ #endif
+ 
+ #if defined(TARGET_ARCH_WIN32)
+-#   include <Winsock2.h>
++#   include <winsock2.h>
+ #   include <process.h>
+ #   include <io.h>
+ #   include <sys/timeb.h>
+diff -ur globus_common-10.2.orig/library/globus_libc.c globus_common-10.2/library/globus_libc.c
+--- globus_common-10.2.orig/library/globus_libc.c	2008-04-05 05:09:41.000000000 +0200
++++ globus_common-10.2/library/globus_libc.c	2009-05-10 09:54:07.000000000 +0200
+@@ -80,11 +80,13 @@
+     char *                              buffer,
+     size_t                              buflen);
+ 
++#if !defined(TARGET_ARCH_WIN32)
+ static void
+ globus_l_libc_copy_pwd_data_to_buffer(
+     struct passwd *                     pwd,
+     char *                              buffer,
+     size_t                              buflen);
++#endif
+ 
+ /******************************************************************************
+ Function: globus_libc_lock()
+diff -ur globus_common-10.2.orig/library/globus_libc.h globus_common-10.2/library/globus_libc.h
+--- globus_common-10.2.orig/library/globus_libc.h	2008-04-05 05:09:41.000000000 +0200
++++ globus_common-10.2/library/globus_libc.h	2009-05-10 09:54:07.000000000 +0200
+@@ -287,11 +287,13 @@
+     const time_t *timep, 
+     struct tm *result);
+ 
++#if !defined(TARGET_ARCH_WIN32)
+ int globus_libc_getpwnam_r(char *name,
+ 			   struct passwd *pwd,
+ 			   char *buffer,
+ 			   int bufsize,
+ 			   struct passwd **result);
++#endif
+ 
+ int
+ globus_libc_strncasecmp(
+diff -ur globus_common-10.2.orig/library/globus_libtool_windows.c globus_common-10.2/library/globus_libtool_windows.c
+--- globus_common-10.2.orig/library/globus_libtool_windows.c	2008-03-12 20:01:05.000000000 +0100
++++ globus_common-10.2/library/globus_libtool_windows.c	2009-05-10 10:06:04.000000000 +0200
+@@ -68,7 +68,7 @@
+     HANDLE                  hDllHandle;
+     char                    pcFileName[MAX_FILE_NAME_Z];
+     int                     iRefCount;
+-    } DllModule, *pDllModule;
++    } DllModule;
+     
+ 
+ // Static Variables
+@@ -255,6 +255,7 @@
+ lt_dlhandle lt_dlopenext (const char *filename)
+ {
+ pDllModule pModule = NULL;
++char *ffilename = NULL;
+ 
+     // Check Argument
+     if(!filename) {
+@@ -273,8 +274,13 @@
+         return NULL;
+         }
+         
++    // If there will be modules with sonames other than 0 this will not work
++    ffilename = malloc(strlen(filename) + 3);
++    strncpy(ffilename, filename, strlen(filename) + 1);
++    strcat(ffilename, "-0");
++
+     // Is This Module Already Open?
+-    pModule = FindLoadedModuleByName(filename);
++    pModule = FindLoadedModuleByName(ffilename);
+     if(pModule) {
+         // Bump The Reference Count
+         pModule->iRefCount += 1;
+@@ -284,6 +290,7 @@
+         
+         // Return The Address Of The Data Struct As The Handle
+         iLastError = 0;
++        free (ffilename);
+         return (lt_dlhandle) pModule;
+         }
+     
+@@ -292,7 +299,7 @@
+     //       Section Before Doing The Open, But That Would Require A Mechanism
+     //       To Prevent A Second Request For The Same Module To Be Handled While
+     //       A First One Is In Progress - This Is A "Later If Needed" Item
+-    pModule = OpenModule(filename);
++    pModule = OpenModule(ffilename);
+     if(pModule) {
+         // Bump The Reference Count
+         pModule->iRefCount += 1;
+@@ -300,6 +307,7 @@
+         // Return The Module
+         LeaveCriticalSection(&csLibLock);
+         iLastError = 0;
++        free (ffilename);
+         return (lt_dlhandle) pModule;
+         }
+     
+@@ -308,6 +316,7 @@
+         
+     // Not Found Or Opened
+     iLastError = LT_ERROR_DEPLIB_NOT_FOUND;
++    free (ffilename);
+     return (lt_dlhandle) pModule;
+ }
+ 
+@@ -635,7 +644,9 @@
+         }
+     
+     // Try To Load The Library
++    SetDllDirectory(user_search_path);
+     DllHandle = LoadLibrary(NormName);
++    SetDllDirectory(NULL);
+     if(DllHandle == NULL) {
+         return NULL;
+         }    
+diff -ur globus_common-10.2.orig/library/globus_uuid.c globus_common-10.2/library/globus_uuid.c
+--- globus_common-10.2.orig/library/globus_uuid.c	2008-03-12 20:01:05.000000000 +0100
++++ globus_common-10.2/library/globus_uuid.c	2009-05-10 09:54:07.000000000 +0200
+@@ -17,8 +17,8 @@
+ #include "globus_common_include.h"
+ #include "globus_libc.h"
+ #ifdef WIN32
+-#include <Iptypes.h>
+-#include <Iphlpapi.h>
++#include <iptypes.h>
++#include <iphlpapi.h>
+ typedef unsigned __int64 uint64_t;
+ typedef unsigned short uint16_t;
+ typedef unsigned char uint8_t;

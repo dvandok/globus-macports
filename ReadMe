@@ -1,0 +1,22 @@
+You need to do these steps after the ARC installation
+-----------------------------------------------------
+
+Install Grid certificate and private key:
+
+  Copy your usercert.pem file to: $HOME/.globus/usercert.pem
+  Copy your userkey.pem  file to: $HOME/.globus/userkey.pem
+
+
+Other information
+-----------------
+
+Default client.conf, jobs.xml directory location (these directories are hidden by default):
+
+  $HOME/.arc
+
+
+Uninstalling this package
+-------------------------
+
+To uninstall this package simply remove the '__LOCATION__' directory and the file '/etc/paths.d/nordugrid-arc-nox-standalone'.
+Additionally user configuration files might exist in the $HOME/.arc directory, which can safely be removed.

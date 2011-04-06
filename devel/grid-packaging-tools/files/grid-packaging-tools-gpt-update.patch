@@ -1,0 +1,32 @@
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-update gpt/packaging_tools/perl/scripts/gpt-update
+--- gpt.orig/packaging_tools/perl/scripts/gpt-update	2008-10-04 19:39:36.000000000 +0200
++++ gpt/packaging_tools/perl/scripts/gpt-update	2008-10-04 19:51:59.000000000 +0200
+@@ -5,12 +5,7 @@
+     die "GPT requires at least Perl version 5.005";
+ }
+ 
+-system("./gpt_version") == 0
+-         or die "GPT died due to Version mismatch.  Check PATH and GPT_LOCATION\n" ;
+-
+-
+ my $gpath = $ENV{GPT_LOCATION};
+-my $globus_path = $ENV{GLOBUS_LOCATION};
+ 
+ if (!defined($gpath))
+ {
+@@ -19,11 +14,14 @@
+ 
+ if (!defined($gpath))
+ {
+-   error_out("GPT_LOCATION or GLOBUS_LOCATION needs to be set before running this script");
++   error_out("GPT_LOCATION needs to be set before running this script");
+ }
+ 
+ @INC = ("$gpath/lib/perl", "$gpath/lib/perl/$Config{'archname'}", @INC);
+ 
++system("$gpath/sbin/gpt_version") == 0
++         or die "GPT died due to Version mismatch.  Check PATH and GPT_LOCATION\n" ;
++
+ if ( ! ( defined eval "require Grid::GPT::GPTObject" ) )
+ {
+     die("$gpath does not appear to hold a valid GPT installation\n");

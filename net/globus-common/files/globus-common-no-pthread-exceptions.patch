@@ -1,0 +1,17 @@
+diff -ur globus-common-7.30.orig/library/globus_thread_pthreads.h globus-common-7.30/library/globus_thread_pthreads.h
+--- globus-common-7.30.orig/library/globus_thread_pthreads.h	2005-04-19 00:59:37.000000000 +0200
++++ globus-common-7.30/library/globus_thread_pthreads.h	2008-06-30 18:22:33.000000000 +0200
+@@ -57,7 +57,13 @@
+ #include <pthread.h>
+ EXTERN_C_END
+ #else  /* TARGET_ARCH_AIX */
++#if defined __GNUC__ && defined __EXCEPTIONS
++#undef __EXCEPTIONS
+ #include <pthread.h>
++#define __EXCEPTIONS
++#else
++#include <pthread.h>
++#endif
+ #endif /* TARGET_ARCH_AIX */
+ 
+ EXTERN_C_BEGIN

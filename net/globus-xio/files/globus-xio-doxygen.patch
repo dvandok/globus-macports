@@ -1,0 +1,182 @@
+diff -ur globus_xio-2.8.orig/builtins/http/globus_xio_http.h globus_xio-2.8/builtins/http/globus_xio_http.h
+--- globus_xio-2.8.orig/builtins/http/globus_xio_http.h	2008-04-30 20:25:27.000000000 +0200
++++ globus_xio-2.8/builtins/http/globus_xio_http.h	2010-01-22 23:18:47.089529969 +0100
+@@ -30,7 +30,7 @@
+  * @defgroup http_driver Globus XIO HTTP Driver
+  * This driver implements the HTTP/1.0 and HTTP/1.1 protocols within
+  * the Globus XIO framework. It may be used with the tcp driver for
+- * the standard HTTP protcol stack, or may be combined with the gsi
++ * the standard HTTP protocol stack, or may be combined with the gsi
+  * driver for a HTTPS implementation.
+  *
+  * This implementation supports user-defined HTTP headers, persistent
+@@ -403,7 +403,7 @@
+      */
+     /* int *                            status_code,
+        char **                          reason_phrase,
+-       globus_xio_http_version_t *      version,
++       globus_xio_http_version_t *      http_version,
+        globus_hashtable_t *             headers */
+     GLOBUS_XIO_HTTP_GET_RESPONSE
+ 
+@@ -445,8 +445,7 @@
+  * @ingroup http_driver
+  * Valid HTTP versions, used with the
+  * #GLOBUS_XIO_HTTP_ATTR_SET_REQUEST_HTTP_VERSION attribute and the
+- * #GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_HTTP_VERSION, and
+- * #GLOBUS_XIO_HTTP_HANDLE_GET_REQUEST_HTTP_VERSION handle controls.
++ * #GLOBUS_XIO_HTTP_HANDLE_SET_RESPONSE_HTTP_VERSION handle control.
+  */
+ typedef enum
+ {
+diff -ur globus_xio-2.8.orig/builtins/mode_e/globus_xio_mode_e_driver.h globus_xio-2.8/builtins/mode_e/globus_xio_mode_e_driver.h
+--- globus_xio-2.8.orig/builtins/mode_e/globus_xio_mode_e_driver.h	2006-04-21 21:10:39.000000000 +0200
++++ globus_xio-2.8/builtins/mode_e/globus_xio_mode_e_driver.h	2010-01-22 23:14:36.682532474 +0100
+@@ -83,6 +83,7 @@
+  * @defgroup mode_e_driver_envs Env Variables
+  * @ingroup mode_e_driver
+  *
++ * The mode_e driver uses the following environment variable
+  * - GLOBUS_XIO_MODE_E_DEBUG Available if using a debug build.  See 
+  * globus_debug.h for format.  
+  */
+@@ -176,7 +177,7 @@
+      * @param num_streams
+      *      Specifies the number of streams to use.
+      */
+-    /* int					max_connection_count */
++    /* int					num_streams */
+     GLOBUS_XIO_MODE_E_SET_NUM_STREAMS,
+ 
+     /** GlobusVarArgEnum(attr)
+@@ -186,7 +187,7 @@
+      * @param num_streams_out
+      *      The stream count will be stored here.
+      */
+-    /* int *					max_connection_count_out */
++    /* int *					num_streams_out */
+     GLOBUS_XIO_MODE_E_GET_NUM_STREAMS,
+ 
+     /** GlobusVarArgEnum(attr)
+@@ -218,10 +219,9 @@
+      * a data_desc or the driver has to calculate the EODC
+      * @ingroup mode_e_driver_cntls
+      *
+-     * @param eof
+-     *      GLOBUS_TRUE to send EOF (default), GLOBUS_FALSE to not send EOF.
+-     * @param eod_count
+-     *      Specifies the number of EODs that must be received by the server.
++     * @param manual_eodc
++     *      GLOBUS_TRUE to set EODC manually, GLOBUS_FALSE to not set EODC
++     * manually (default).
+      */
+     /* globus_bool_t				manual_eodc */
+     GLOBUS_XIO_MODE_E_SET_MANUAL_EODC,
+@@ -230,7 +230,7 @@
+      * Get MANUAL_EODC flag on the attr.
+      * @ingroup mode_e_driver_cntls
+      *
+-     * @param eof_out
++     * @param manual_eodc_out
+      *      The MANUAL_EODC flag will be stored here.
+      */
+     /* globus_bool_t *				manual_eodc_out */
+@@ -292,7 +292,7 @@
+      *      The stack will be stored here. If none is set, GLOBUS_NULL will be
+      *      set.
+      */
+-    /* globus_xio_attr_t *         attr_out */
++    /* globus_xio_attr_t *         stack_out */
+ 
+     GLOBUS_XIO_MODE_E_GET_STACK_ATTR
+ 
+diff -ur globus_xio-2.8.orig/builtins/ordering/globus_xio_ordering_driver.h globus_xio-2.8/builtins/ordering/globus_xio_ordering_driver.h
+--- globus_xio-2.8.orig/builtins/ordering/globus_xio_ordering_driver.h	2006-08-22 16:00:30.000000000 +0200
++++ globus_xio-2.8/builtins/ordering/globus_xio_ordering_driver.h	2010-01-22 23:14:36.682532474 +0100
+@@ -62,6 +62,7 @@
+  * @defgroup ordering_driver_envs Env Variables
+  * @ingroup ordering_driver
+  *
++ * The ordering driver uses the following environment variable
+  * - GLOBUS_XIO_ORDERING_DEBUG Available if using a debug build.  See
+  * globus_debug.h for format.
+  */
+diff -ur globus_xio-2.8.orig/configure.in globus_xio-2.8/configure.in
+--- globus_xio-2.8.orig/configure.in	2010-01-18 16:46:18.000000000 +0100
++++ globus_xio-2.8/configure.in	2010-01-22 23:14:36.682532474 +0100
+@@ -55,7 +55,7 @@
+ CFLAGS="$CFLAGS -DGLOBUS_BUILTIN"
+ LAC_DOXYGEN("../ $XIO_BUILTIN_DOXY_DIRS", 
+             "*.doc", 
+-            "$GLOBUS_LOCATION/sbin/globus-vararg-enums-doxygen-filter.pl")
++            "${GLOBUS_LOCATION:-/usr}/sbin/globus-vararg-enums-doxygen-filter.pl")
+ 
+ AM_CONFIG_HEADER(config.h)
+ AC_CHECK_FUNCS(sysconf)
+diff -ur globus_xio-2.8.orig/configure.in.in globus_xio-2.8/configure.in.in
+--- globus_xio-2.8.orig/configure.in.in	2004-06-01 18:09:16.000000000 +0200
++++ globus_xio-2.8/configure.in.in	2010-01-22 23:14:36.682532474 +0100
+@@ -55,7 +55,7 @@
+ CFLAGS="$CFLAGS -DGLOBUS_BUILTIN"
+ LAC_DOXYGEN("../ $XIO_BUILTIN_DOXY_DIRS", 
+             "*.doc", 
+-            "$GLOBUS_LOCATION/sbin/globus-vararg-enums-doxygen-filter.pl")
++            "${GLOBUS_LOCATION:-/usr}/sbin/globus-vararg-enums-doxygen-filter.pl")
+ 
+ AM_CONFIG_HEADER(config.h)
+ AC_CHECK_FUNCS(sysconf)
+diff -ur globus_xio-2.8.orig/globus_xio_driver.h globus_xio-2.8/globus_xio_driver.h
+--- globus_xio-2.8.orig/globus_xio_driver.h	2008-01-19 01:02:21.000000000 +0100
++++ globus_xio-2.8/globus_xio_driver.h	2010-01-22 23:16:05.344530468 +0100
+@@ -814,7 +814,7 @@
+  *
+  *  This function will pass a close request down the driver stack.  Upon
+  *  completion of the close operation globus_xio will call the funciton
+- *  pointed to by the cb arguement.
++ *  pointed to by the cb argument.
+  *
+  *  @param op
+  *         The operation to pass along the driver stack for closing.
+@@ -1396,11 +1396,11 @@
+  *  many available parsing functions but the developer is free to right their own
+  *  if the provided ones are not sufficient.  Sample parsing functions follow:
+  *
+- *  - @ref globus_i_xio_attr_string_single_bool
+- *  - @ref globus_i_xio_attr_string_single_float
+- *  - @ref globus_i_xio_attr_string_single_int
+- *  - @ref globus_i_xio_attr_string_single_string
+- *  - @ref globus_i_xio_attr_string_dual_positive_int
++ *  - @ref globus_xio_string_cntl_bool
++ *  - @ref globus_xio_string_cntl_float
++ *  - @ref globus_xio_string_cntl_int
++ *  - @ref globus_xio_string_cntl_string
++ *  - @ref globus_xio_string_cntl_int_int
+  *
+  */
+ /**
+diff -ur globus_xio-2.8.orig/globus_xio.h globus_xio-2.8/globus_xio.h
+--- globus_xio-2.8.orig/globus_xio.h	2009-11-05 23:49:32.000000000 +0100
++++ globus_xio-2.8/globus_xio.h	2010-01-22 23:14:36.683532599 +0100
+@@ -118,7 +118,7 @@
+  */
+ 
+ /**
+- * @addtongroup GLOBUS_XIO_API_ASSIST
++ * @addtogroup GLOBUS_XIO_API_ASSIST
+  *
+  *  \par Timeouts
+  *  A user can set a timeout value for any io operation.  Each IO 
+diff -ur globus_xio-2.8.orig/globus_xio_types.h globus_xio-2.8/globus_xio_types.h
+--- globus_xio-2.8.orig/globus_xio_types.h	2008-03-12 20:01:11.000000000 +0100
++++ globus_xio-2.8/globus_xio_types.h	2010-01-22 23:15:25.878280089 +0100
+@@ -187,8 +187,9 @@
+      * @ingroup GLOBUS_XIO_API
+      *
+      * @param config_string
+-     *      The driver specific paramter string.
++     *      The driver specific parameter string.
+      */
++    /* char *                           config_string */
+     GLOBUS_XIO_SET_STRING_OPTIONS
+     
+ } globus_xio_handle_cmd_t;

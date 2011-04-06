@@ -1,0 +1,75 @@
+diff -ur globus_common-11.2.orig/library/globus_callback.h globus_common-11.2/library/globus_callback.h
+--- globus_common-11.2.orig/library/globus_callback.h	2006-01-19 06:54:13.000000000 +0100
++++ globus_common-11.2/library/globus_callback.h	2010-01-21 21:18:17.972530459 +0100
+@@ -19,10 +19,10 @@
+ /**
+  * @file globus_callback.h Globus Callback API
+  *
+- * $Source: /home/globdev/CVS/globus-packages/common/source/library/globus_callback.h,v $<br />
+- * $Date: 2006/01/19 05:54:13 $<br />
+- * $Revision: 1.12 $<br />
+- * $Author: mlink $<br />
++ * $Source: /home/globdev/CVS/globus-packages/common/source/library/globus_callback.h,v $
++ * $Date: 2006/01/19 05:54:13 $
++ * $Revision: 1.12 $
++ * $Author: mlink $
+  */
+ 
+ /**
+@@ -984,7 +984,7 @@
+  * An example use is for an io poller that sleeps indefinitely on select().  If
+  * the callback library receives a signal that it needs to deliver asap, it
+  * will call the wakeup handler(s), These wakeup handlers must run as though
+- * they were called from a signal handler (dont use any thread utilities).
++ * they were called from a signal handler (don't use any thread utilities).
+  * The io poll example will likely write a single byte to a pipe that select()
+  * is monitoring.
+  * 
+diff -ur globus_common-11.2.orig/library/globus_common.h.in globus_common-11.2/library/globus_common.h.in
+--- globus_common-11.2.orig/library/globus_common.h.in	2008-11-03 21:31:10.000000000 +0100
++++ globus_common-11.2/library/globus_common.h.in	2010-01-21 21:16:09.650283033 +0100
+@@ -44,14 +44,6 @@
+ 
+ EXTERN_C_BEGIN
+ 
+-/* TODO remove this if we ever doxyegenate common fully */
+-/**
+- * @mainpage 
+- *
+- *   @note <b>More globus_common API documentation is available <a href="../../../common/">here</a>.</b>
+- * 
+- */
+- 
+ /******************************************************************************
+ 			       Type definitions
+ ******************************************************************************/
+diff -ur globus_common-11.2.orig/library/globus_thread_common.h globus_common-11.2/library/globus_thread_common.h
+--- globus_common-11.2.orig/library/globus_thread_common.h	2006-01-19 06:54:14.000000000 +0100
++++ globus_common-11.2/library/globus_thread_common.h	2010-01-21 21:16:09.651283298 +0100
+@@ -17,10 +17,10 @@
+ /**
+  * @file globus_thread_common.h Common Thread Interface
+  *
+- * $Source: /home/globdev/CVS/globus-packages/common/source/library/globus_thread_common.h,v $<br />
+- * $Date: 2006/01/19 05:54:14 $<br />
+- * $Revision: 1.6 $<br />
+- * $Author: mlink $<br />
++ * $Source: /home/globdev/CVS/globus-packages/common/source/library/globus_thread_common.h,v $
++ * $Date: 2006/01/19 05:54:14 $
++ * $Revision: 1.6 $
++ * $Author: mlink $
+  */
+ 
+ /******************************************************************************
+diff -ur globus_common-11.2.orig/library/globus_url.h globus_common-11.2/library/globus_url.h
+--- globus_common-11.2.orig/library/globus_url.h	2008-01-23 18:26:04.000000000 +0100
++++ globus_common-11.2/library/globus_url.h	2010-01-21 21:16:09.651283298 +0100
+@@ -67,7 +67,7 @@
+     GLOBUS_URL_SCHEME_X_NEXUS,
+     /** GASS Cache Entry */
+     GLOBUS_URL_SCHEME_X_GASS_CACHE,
+-    /** Any other URL of the form <scheme>://<something */
++    /** Any other URL of the form <scheme>://<something> */
+     GLOBUS_URL_SCHEME_UNKNOWN,
+     GLOBUS_URL_SCHEME_SSHFTP,
+     /** Total number of URL schemes supported */

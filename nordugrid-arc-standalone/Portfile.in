@@ -1,0 +1,42 @@
+# $Id$
+
+PortSystem          1.0
+
+set sourcename nordugrid-arc
+
+name                ${sourcename}-standalone
+version             __VERSION__
+categories          grid
+maintainers         NorduGrid
+description         ${version} release of the Advanced Resource Connector (ARC)
+long_description    \
+        The Advanced Resource Connector (ARC) middleware, introduced by \
+        NorduGrid (www.nordugrid.org), is an open source software solution \
+        enabling production quality computational and data Grids since May \
+        2002.
+
+homepage            http://www.nordugrid.org
+platforms           darwin
+distfiles           ${sourcename}-${version}.tar.gz
+checksums           md5     __MD5__ \
+                    sha1    __SHA1__ \
+                    rmd160  __RMD160__
+
+worksrcdir          ${sourcename}-${version}
+pre-configure       {
+    reinplace "s/@MSGMERGE@ --update/@MSGMERGE@ --update --backup=off/" ${worksrcpath}/po/Makefile.in.in
+}
+configure.env PKG_CONFIG_LIBDIR=${prefix}/lib/pkgconfig
+configure.args-append --disable-xmlsec1 --disable-cppunit --disable-all --enable-hed --enable-arclib-client --enable-credentials-client --enable-data-client --enable-srm-client --enable-doc
+
+post-destroot {
+  system "rm -rf ${destroot}/${prefix}/share/arc/examples/config"
+  system "rm -rf ${destroot}/${prefix}/share/arc/examples/echo"
+  system "rm -rf ${destroot}/${prefix}/share/arc/profiles"
+  system "rm -rf ${destroot}/${prefix}/share/arc/schema"
+  system "rm -rf ${destroot}/${prefix}/share/doc"
+  system "rm -rf ${destroot}/${prefix}/share/man/man8"
+  system "rm -rf ${destroot}/${prefix}/sbin"
+  system "rm -rf ${destroot}/${prefix}/libexec"
+  system "rm -rf ${destroot}/Library"
+}

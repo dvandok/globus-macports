@@ -1,0 +1,275 @@
+diff -ur globus_core-5.15.orig/aclocal/acdoxygen.m4 globus_core-5.15/aclocal/acdoxygen.m4
+--- globus_core-5.15.orig/aclocal/acdoxygen.m4	2004-08-24 17:37:02.000000000 +0200
++++ globus_core-5.15/aclocal/acdoxygen.m4	2008-10-21 09:59:47.000000000 +0200
+@@ -39,7 +39,8 @@
+         lac_tag="${lac_tag_base}.tag"
+             lac_doxygen_tagfiles="$lac_doxygen_tagfiles $x"
+             lac_doxygen_internal_tagfiles="$lac_doxygen_internal_tagfiles ${x}i"
+-        lac_doxygen_installdox="$lac_doxygen_installdox -l${lac_tag}@../../${lac_tag_base}/html"
++            lac_html_dir=`echo ${x} | sed -e 's|.*/\(.*/html\)/.*|../../\1|'`
++            lac_doxygen_installdox="$lac_doxygen_installdox -l${lac_tag}@${lac_html_dir}"
+     fi
+     done
+     AC_SUBST(lac_doxygen_tagfiles)
+@@ -123,7 +124,7 @@
+     LAC_DOXYGEN_PROJECT($GPT_NAME)
+     LAC_DOXYGEN_OUTPUT_TAGFILE($GPT_NAME)
+ 
+-    lac_dep_check="$GLOBUS_LOCATION/sbin/globus-build-doxygen-dependencies"
++    lac_dep_check="${GLOBUS_LOCATION:-/usr}/sbin/globus-build-doxygen-dependencies"
+ 
+     if test ! -x $lac_dep_check ; then
+ 
+diff -ur globus_core-5.15.orig/aclocal/globus_package.m4 globus_core-5.15/aclocal/globus_package.m4
+--- globus_core-5.15.orig/aclocal/globus_package.m4	2008-10-21 09:54:55.000000000 +0200
++++ globus_core-5.15/aclocal/globus_package.m4	2008-10-21 09:57:03.000000000 +0200
+@@ -2,15 +2,8 @@
+ 
+ AM_MAINTAINER_MODE
+ 
+-# checking for the GLOBUS_LOCATION
+-
+-if test "x$GLOBUS_LOCATION" = "x"; then
+-    echo "ERROR Please specify GLOBUS_LOCATION" >&2
+-    exit 1
+-fi
+ if test "x$GPT_LOCATION" = "x"; then
+-    GPT_LOCATION=$GLOBUS_LOCATION
+-    export GPT_LOCATION
++    GPT_LOCATION=/usr
+ fi
+ 
+ #extract whether the package is built with flavors from the src metadata
+@@ -41,7 +34,8 @@
+ 	        echo "Warning: $withval ignored" >&2
+         else
+ 		GLOBUS_FLAVOR_NAME=$withval
+-                if test ! -f "$GLOBUS_LOCATION/etc/globus_core/flavor_$GLOBUS_FLAVOR_NAME.gpt"; then
++		if test ! -f "${GLOBUS_LOCATION:-/usr}/share/globus/flavors/flavor_$GLOBUS_FLAVOR_NAME.gpt" \
++		     -a ! -f "${GLOBUS_LOCATION:-/usr}/etc/globus_core/flavor_$GLOBUS_FLAVOR_NAME.gpt"; then
+ 	                echo "ERROR: Flavor $GLOBUS_FLAVOR_NAME has not been installed" >&2
+ 	                exit 1
+                 fi 
+@@ -70,10 +64,13 @@
+ 
+ # get the environment scripts
+ 
+-. $GLOBUS_LOCATION/libexec/globus-build-env-$GLOBUS_FLAVOR_NAME.sh
++if test -f ${GLOBUS_LOCATION:-/usr}/share/globus/globus-build-env-$GLOBUS_FLAVOR_NAME.sh ; then
++    . ${GLOBUS_LOCATION:-/usr}/share/globus/globus-build-env-$GLOBUS_FLAVOR_NAME.sh
++else
++    . ${GLOBUS_LOCATION:-/usr}/libexec/globus-build-env-$GLOBUS_FLAVOR_NAME.sh
++fi
+ 
+-prefix='$(GLOBUS_LOCATION)'
+-exec_prefix='$(GLOBUS_LOCATION)'
++ac_default_prefix=${GLOBUS_LOCATION:-$ac_default_prefix}
+ 
+ # doxygendir must have absolute path...
+ saveprefix=$prefix
+@@ -120,7 +117,7 @@
+ 
+ 
+ define([AM_PROG_LIBTOOL],[
+-	LIBTOOL='$(SHELL) $(GLOBUS_LOCATION)/sbin/libtool-$(GLOBUS_FLAVOR_NAME)'
++	LIBTOOL='$(SHELL) ${sbindir}/libtool-$(GLOBUS_FLAVOR_NAME)'
+ 	AC_SUBST(LIBTOOL)
+ 	AC_SUBST(LN_S)
+ ])
+diff -ur globus_core-5.15.orig/bootstrap globus_core-5.15/bootstrap
+--- globus_core-5.15.orig/bootstrap	2004-08-24 17:36:59.000000000 +0200
++++ globus_core-5.15/bootstrap	2008-10-21 09:57:03.000000000 +0200
+@@ -1,12 +1,5 @@
+ #! /bin/sh
+ 
+-# checking for the GLOBUS_LOCATION
+-
+-if test "x$GLOBUS_LOCATION" = "x"; then
+-    echo "ERROR Please specify GLOBUS_LOCATION" >&2
+-    exit 1
+-fi
+-
+ error()
+ {
+     echo ""
+@@ -34,20 +27,23 @@
+ fi
+ 
+ # test to see if GPT macros are in a seperate location
+-if test ! -f "$GLOBUS_LOCATION/share/globus_aclocal/gpt_autoconf_macros.m4"; then
+-    if test "x$GPT_LOCATION" = "x"; then
+-        echo "ERROR Globus Packaging Tools not found" >&2
+-        echo "ERROR either set GPT_LOCATION or install them in $GLOBUS_LOCATION" >&2
+-        exit 1
++if test ! -f "${GLOBUS_LOCATION:-/usr}/share/globus/aclocal/gpt_autoconf_macros.m4" \
++     -a ! -f "${GLOBUS_LOCATION:-/usr}/share/globus_aclocal/gpt_autoconf_macros.m4"; then
++    if test -d "${GPT_LOCATION:-/usr}/share/globus/aclocal"; then
++        config="$config -I ${GPT_LOCATION:-/usr}/share/globus/aclocal"
+     else
+-        config="$config -I $GPT_LOCATION/share/globus_aclocal"
++        config="$config -I ${GPT_LOCATION:-/usr}/share/globus_aclocal"
+     fi
+ else
+-    config="$config -I $GLOBUS_LOCATION/share/globus_aclocal"
++    if test -d "${GLOBUS_LOCATION:-/usr}/share/globus/aclocal"; then
++        config="$config -I ${GLOBUS_LOCATION:-/usr}/share/globus/aclocal"
++    else
++        config="$config -I ${GLOBUS_LOCATION:-/usr}/share/globus_aclocal"
++    fi
+ fi
+ 
+ if test "x$GPT_LOCATION" = "x"; then
+-    GPT_LOCATION=$GLOBUS_LOCATION
++    GPT_LOCATION=/usr
+ fi
+ 
+ echo "running aclocal $config"
+diff -ur globus_core-5.15.orig/configure.in globus_core-5.15/configure.in
+--- globus_core-5.15.orig/configure.in	2008-10-21 09:54:55.000000000 +0200
++++ globus_core-5.15/configure.in	2008-10-21 09:57:03.000000000 +0200
+@@ -2,20 +2,11 @@
+ AC_INIT(Makefile.am)
+ AC_CONFIG_AUX_DIR(config)
+ 
+-# checking for the GLOBUS_LOCATION
+-
+-if test "x$GLOBUS_LOCATION" = "x"; then
+-    echo "ERROR Please specify GLOBUS_LOCATION" >&2
+-    exit 1
+-fi
+-
+ if test "x$GPT_LOCATION" = "x"; then
+-    GPT_LOCATION=$GLOBUS_LOCATION
+-    export GPT_LOCATION
++    GPT_LOCATION=/usr
+ fi
+ 
+-prefix='$(GLOBUS_LOCATION)'
+-exec_prefix='$(GLOBUS_LOCATION)'
++ac_default_prefix=${GLOBUS_LOCATION:-$ac_default_prefix}
+ 
+ # save CC and CFLAGS, so AC_PROG_CC can detect and use a compiler
+ # up to the point where we want to pick a compiler based on the
+diff -ur globus_core-5.15.orig/doxygen/globus-build-doxygen-dependencies globus_core-5.15/doxygen/globus-build-doxygen-dependencies
+--- globus_core-5.15.orig/doxygen/globus-build-doxygen-dependencies	2006-01-19 06:54:28.000000000 +0100
++++ globus_core-5.15/doxygen/globus-build-doxygen-dependencies	2008-10-21 09:57:03.000000000 +0200
+@@ -32,8 +32,7 @@
+ 
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+@@ -49,6 +48,12 @@
+ use Cwd;
+ 
+ my $prefix = $ENV{GLOBUS_LOCATION};
++
++if (!defined($prefix))
++{
++  $prefix = "/usr";
++}
++
+ my $srcfile;
+ my $help;
+ my $debug = 0;
+@@ -105,7 +110,8 @@
+             {
+                 print STDERR "Found dependency $name\n" if $debug;
+                 $dependencies{$name} = 1;
+-                $new_pkgfile =
++                $new_pkgfile = -f "$prefix/share/globus/packages/$name/pkg_data_noflavor_doc.gpt" ?
++                    "$prefix/share/globus/packages/$name/pkg_data_noflavor_doc.gpt" :
+                     "$prefix/etc/globus_packages/$name/pkg_data_noflavor_doc.gpt";
+                 foreach(process_package($new_pkgfile, $name))
+                 {
+diff -ur globus_core-5.15.orig/doxygen/globus-update-doxygen-index globus_core-5.15/doxygen/globus-update-doxygen-index
+--- globus_core-5.15.orig/doxygen/globus-update-doxygen-index	2006-09-22 06:48:05.000000000 +0200
++++ globus_core-5.15/doxygen/globus-update-doxygen-index	2008-10-21 09:57:03.000000000 +0200
+@@ -43,11 +43,14 @@
+     $gpt_path = $ENV{GPT_LOCATION};
+     if (!defined($gpt_path))
+     {
+-      $gpt_path = $ENV{GLOBUS_LOCATION};
+-
++      $gpt_path = "/usr";
+     }
+ 
+     $globus_path = $ENV{GLOBUS_LOCATION};
++    if (!defined($globus_path))
++    {
++      $globus_path = "/usr";
++    }
+ 
+     if (!defined($gpt_path) || !defined($globus_path))
+     {
+@@ -95,7 +98,7 @@
+ print "Sorting into functional groups\n";
+ foreach (keys %pkgs) {
+     my $package_factory = new Grid::GPT::PackageFactory();
+-    my @package_files = glob("$globus_path/etc/globus_packages/$_/pkg_data*.gpt");
++    my @package_files = glob("$globus_path/{share/globus/packages,etc/globus_packages}/$_/pkg_data*.gpt");
+     my $package_file = $package_files[0];
+ 
+     if ($package_file eq '') {
+diff -ur globus_core-5.15.orig/scripts/globus-bootstrap.sh globus_core-5.15/scripts/globus-bootstrap.sh
+--- globus_core-5.15.orig/scripts/globus-bootstrap.sh	2006-01-19 06:54:29.000000000 +0100
++++ globus_core-5.15/scripts/globus-bootstrap.sh	2008-10-21 09:57:03.000000000 +0200
+@@ -27,7 +27,11 @@
+             rm ${file}
+         fi
+         echo "installing ${file} link"
+-        ln -s $GLOBUS_LOCATION/share/globus_aclocal/${file} ${file}
++        if test -f ${GLOBUS_LOCATION:-/usr}/share/globus/aclocal/${file} ; then
++            ln -s ${GLOBUS_LOCATION:-/usr}/share/globus/aclocal/${file} ${file}
++        else
++            ln -s ${GLOBUS_LOCATION:-/usr}/share/globus_aclocal/${file} ${file}
++        fi
+     fi
+ done
+ 
+@@ -38,23 +42,36 @@
+     do
+ 	if test ! -h "doxygen/$file" ; then
+ 	    echo "installing doxygen/$file link"
+-	    ln -s $GLOBUS_LOCATION/share/globus_aclocal/$file doxygen/$file
++	    if test -f ${GLOBUS_LOCATION:-/usr}/share/globus/aclocal/$file ; then
++		ln -s ${GLOBUS_LOCATION:-/usr}/share/globus/aclocal/$file doxygen/$file
++	    else
++		ln -s ${GLOBUS_LOCATION:-/usr}/share/globus_aclocal/$file doxygen/$file
++	    fi
+ 	fi
+     done
+     
+     if test ! -h doxygen/Makefile.am ; then
+ 	echo "installing Makefile.am link in doxygen"
+-	ln -s $GLOBUS_LOCATION/share/globus_aclocal/doxygen_Makefile.am \
+-	    doxygen/Makefile.am
++	if test -f ${GLOBUS_LOCATION:-/usr}/share/globus/aclocal/doxygen_Makefile.am ; then
++	    ln -s ${GLOBUS_LOCATION:-/usr}/share/globus/aclocal/doxygen_Makefile.am \
++		doxygen/Makefile.am
++	else
++	    ln -s ${GLOBUS_LOCATION:-/usr}/share/globus_aclocal/doxygen_Makefile.am \
++		doxygen/Makefile.am
++	fi
+     fi
+ fi
+ 
+ 
+ if test "x$GPT_LOCATION" = "x"; then
+-    GPT_LOCATION=$GLOBUS_LOCATION
++    GPT_LOCATION=/usr
+ fi
+ 
+-. ${GPT_LOCATION}/libexec/gpt-bootstrap.sh
++if test -f ${GPT_LOCATION}/share/globus/gpt-bootstrap.sh ; then
++    . ${GPT_LOCATION}/share/globus/gpt-bootstrap.sh
++else
++    . ${GPT_LOCATION}/libexec/gpt-bootstrap.sh
++fi
+ 
+ # update stamp.h.in
+ 

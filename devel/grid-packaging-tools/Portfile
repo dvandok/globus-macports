@@ -1,0 +1,117 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+# $Id$
+
+set perl_vendor_lib [ exec sh -c "eval \"\`perl -V:installvendorlib\`\" ; echo \$installvendorlib" ]
+
+PortSystem              1.0
+
+name                    grid-packaging-tools
+version                 3.2
+revision                1
+platforms               darwin
+categories              devel
+license                 NCSA
+maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+homepage                http://www.gridpackagingtools.com/
+
+description             Grid Packaging Tools (GPT)
+long_description        GPT is a collection of packaging tools built \
+                        around an XML based packaging data format. \
+                        This format provides a straight forward way to \
+                        define complex dependency and compatibility \
+                        relationships between packages. The tools \
+                        provide a means for developers to easily \
+                        define the packaging data and include it as \
+                        part of their source code distribution. \
+                        Binary packages can be automatically generated \
+                        from this data. The packages defined by GPT \
+                        are compatible with other packages and can be \
+                        easily converted.
+
+depends_build           port:perl5 \
+                        port:libtool
+
+depends_run             port:perl5 \
+                        port:p5-archive-tar \
+                        port:autoconf \
+                        port:automake \
+                        port:libtool
+
+master_sites            http://www-unix.globus.org/ftppub/gt4/4.2.1/gpt
+
+distfiles               gpt-3.2globus2.tar.gz
+
+checksums               gpt-3.2globus2.tar.gz \
+                            md5 988dfe71611afcd3768141eaf2fb985c \
+                            sha1 13a08cb148cd245af11f99be1f87fad9eeca38be \
+                            rmd160 99a844f8ba3ebab133ff7d978dd1bbb417972124
+
+patchfiles              ${name}-perlpath.patch \
+                        ${name}-share.patch \
+                        ${name}-usr.patch \
+                        ${name}-man.patch \
+                        ${name}-filelists.patch \
+                        ${name}-globus-package-dtd.patch \
+                        ${name}-bootstrap-shebang.patch \
+                        ${name}-flavored-headers.patch \
+                        ${name}-colocate-bugfix.patch \
+                        ${name}-age-version.patch \
+                        ${name}-target.patch \
+                        ${name}-xml.patch \
+                        ${name}-gpt-update.patch \
+                        ${name}-helpstring.patch \
+                        ${name}-compat.patch \
+                        ${name}-version-info.patch \
+                        ${name}-wrong-url.patch
+
+patch.dir               ${workpath}/gpt
+patch.pre_args          -p1
+
+worksrcdir              gpt/packaging_tools
+
+configure.post_args     --libexecdir='\${datadir}/globus' \
+                        --mandir='\${datadir}/man' \
+                        --with-perlmoduledir=${perl_vendor_lib} \
+                        --disable-compat --with-newgpt
+
+destroot.target-append  install-man
+
+pre-configure {
+    touch ${worksrcpath}/aclocal.m4
+    touch ${worksrcpath}/Makefile.in
+    touch ${worksrcpath}/configure
+
+    foreach i {config.guess config.sub} {
+        file copy -force ${prefix}/share/libtool/config/$i ${worksrcpath}/$i
+    }
+}
+
+post-destroot {
+    # Remove perl version check script that is not used for anything (and even
+    # gets installed without shebang so it is not executable from the path)
+    delete ${destroot}${prefix}/sbin/gpt-perl-version
+
+    # Remove old globus core source tarball users should install an up-to-date
+    # globus-core package instead of having gpt compile it from source
+    delete ${destroot}${prefix}/share/globus/globus_core-src.tar.gz
+
+    # Remove temporary build file
+    delete ${destroot}${prefix}/share/globus/gpt_scripts_list
+
+    # Rename config.guess script in order not to clash with globus-common
+    move ${destroot}${prefix}/share/globus/config.guess \
+        ${destroot}${prefix}/share/globus/config.guess.gpt
+    reinplace "s/config.guess/config.guess.gpt/" \
+        ${destroot}${perl_vendor_lib}/Grid/GPT/Localize.pm
+
+    # Rename libtoolize to glibtoolize
+    reinplace "s/libtoolize/glibtoolize/g" \
+        ${destroot}${prefix}/share/globus/gpt-bootstrap.sh
+
+    # Install documentation
+    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
+    xinstall -m 644 ${workpath}/gpt/CHANGES \
+        ${workpath}/gpt/LICENSE ${workpath}/gpt/README \
+        ${destroot}${prefix}/share/doc/${name}-${version}
+}

@@ -1,0 +1,12 @@
+diff -ur globus_common-10.2.orig/library/Makefile.am globus_common-10.2/library/Makefile.am
+--- globus_common-10.2.orig/library/Makefile.am	2006-01-13 22:24:29.000000000 +0100
++++ globus_common-10.2/library/Makefile.am	2008-07-14 17:33:08.000000000 +0200
+@@ -143,7 +143,7 @@
+ 
+ libglobus_common___GLOBUS_FLAVOR_NAME__la_LIBADD = @GPT_LIB_LINKS@
+ libglobus_common___GLOBUS_FLAVOR_NAME__la_SOURCES = $(Sources)
+-libglobus_common___GLOBUS_FLAVOR_NAME__la_LDFLAS = @GPT_LDFLAGS@
++libglobus_common___GLOBUS_FLAVOR_NAME__la_LDFLAGS = @GPT_LDFLAGS@
+ 
+ EXTRA_DIST = \
+ 	globus_callback_nothreads.c \

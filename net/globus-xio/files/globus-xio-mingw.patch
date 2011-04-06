@@ -1,0 +1,57 @@
+diff -ur globus_xio-2.7.orig/globus_i_xio_system_common.h globus_xio-2.7/globus_i_xio_system_common.h
+--- globus_xio-2.7.orig/globus_i_xio_system_common.h	2008-03-12 20:01:11.000000000 +0100
++++ globus_xio-2.7/globus_i_xio_system_common.h	2009-05-07 10:53:51.000000000 +0200
+@@ -61,7 +61,7 @@
+         ("[%s] fd=%lu, Exiting with error\n", _xio_name, (unsigned long)(fd)))
+ 
+ #ifdef WIN32
+-#include <Winsock2.h>
++#include <winsock2.h>
+ #define GlobusXIOSystemUpdateErrno() (errno = WSAGetLastError())
+ #elif defined(TARGET_ARCH_NETOS)
+ #define GlobusXIOSystemUpdateErrno() (errno = getErrno())
+diff -ur globus_xio-2.7.orig/globus_i_xio_win32.h globus_xio-2.7/globus_i_xio_win32.h
+--- globus_xio-2.7.orig/globus_i_xio_win32.h	2008-04-07 21:50:34.000000000 +0200
++++ globus_xio-2.7/globus_i_xio_win32.h	2009-05-07 10:53:51.000000000 +0200
+@@ -9,9 +9,9 @@
+ #define GLOBUS_I_XIO_WIN32_H_
+ 
+ #include "globus_i_xio_system_common.h"
+-#include <Windows.h>
++#include <windows.h>
+ #include <process.h>
+-#include <Winsock2.h>
++#include <winsock2.h>
+ 
+ typedef struct globus_l_xio_win32_event_entry_s *
+     globus_i_xio_win32_event_entry_t;
+diff -ur globus_xio-2.7.orig/globus_i_xio_win32_mode.c globus_xio-2.7/globus_i_xio_win32_mode.c
+--- globus_xio-2.7.orig/globus_i_xio_win32_mode.c	2008-04-07 21:50:34.000000000 +0200
++++ globus_xio-2.7/globus_i_xio_win32_mode.c	2009-05-07 12:41:18.000000000 +0200
+@@ -34,12 +34,6 @@
+     ULONG                               Mode;
+ } FILE_MODE_INFORMATION;
+ 
+-enum
+-{
+-    FILE_SYNCHRONOUS_IO_ALERT           = 0x00000010,
+-    FILE_SYNCHRONOUS_IO_NONALERT        = 0x00000020
+-};
+-
+ typedef NTSTATUS
+ (__stdcall *globus_i_xio_win32_mode_nqif_t)(
+     HANDLE                              FileHandle,
+diff -ur globus_xio-2.7.orig/globus_xio_system.h globus_xio-2.7/globus_xio_system.h
+--- globus_xio-2.7.orig/globus_xio_system.h	2008-03-12 20:01:11.000000000 +0100
++++ globus_xio-2.7/globus_xio_system.h	2009-05-07 10:53:51.000000000 +0200
+@@ -31,8 +31,8 @@
+ 
+ #ifdef WIN32
+ 
+-#include <Windows.h>
+-#include <Winsock2.h>
++#include <windows.h>
++#include <winsock2.h>
+ #define GLOBUS_XIO_SYSTEM_INVALID_FILE INVALID_HANDLE_VALUE
+ #define GLOBUS_XIO_SYSTEM_INVALID_SOCKET INVALID_SOCKET
+ 

@@ -1,0 +1,344 @@
+diff -ur globus_gass_transfer-4.3.orig/library/globus_gass_transfer_attribute.c globus_gass_transfer-4.3/library/globus_gass_transfer_attribute.c
+--- globus_gass_transfer-4.3.orig/library/globus_gass_transfer_attribute.c	2006-01-19 06:54:50.000000000 +0100
++++ globus_gass_transfer-4.3/library/globus_gass_transfer_attribute.c	2010-01-23 09:44:41.703531475 +0100
+@@ -213,7 +213,7 @@
+  *        The scheme which which the attribute will be used for.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully initialized.
++ *         The attribute was successfully initialized.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         Either @a attr or @a url_scheme was GLOBUS_NULL.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NOT_IMPLEMENTED
+@@ -264,7 +264,7 @@
+  *        The attribute set to be destroyed.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully destroyed.
++ *         The attribute was successfully destroyed.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+@@ -307,7 +307,7 @@
+  *        set.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully updated.
++ *         The attribute was successfully updated.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+@@ -398,7 +398,7 @@
+  *        with this attribute set.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully updated.
++ *         The attribute was successfully updated.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+@@ -477,7 +477,7 @@
+  *        The value of the file mode attribute.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully updated.
++ *         The attribute was successfully updated.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+@@ -556,7 +556,7 @@
+  *        The value of the connection reuse attribute.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully updated.
++ *         The attribute was successfully updated.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+@@ -694,7 +694,7 @@
+  *        The value of the socket buffer.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully updated.
++ *         The attribute was successfully updated.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+@@ -773,7 +773,7 @@
+  *        The value of the socket buffer.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully updated.
++ *         The attribute was successfully updated.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+@@ -852,7 +852,7 @@
+  *        The value of the nodelay attribute.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully updated.
++ *         The attribute was successfully updated.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+@@ -998,7 +998,7 @@
+  *        GLOBUS_GASS_TRANSFER_AUTHORIZE_SUBJECT
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully updated.
++ *         The attribute was successfully updated.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+@@ -1130,7 +1130,7 @@
+  *        The scheme which which the attribute will be used for.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully initialized.
++ *         The attribute was successfully initialized.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         Either @a attr or @a url_scheme was GLOBUS_NULL.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NOT_IMPLEMENTED
+@@ -1187,7 +1187,7 @@
+  *        The number of outstanding connections to allow.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully updated.
++ *         The attribute was successfully updated.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+@@ -1265,7 +1265,7 @@
+  *        The TCP or UDP port number to use.
+  *
+  * @retval GLOBUS_SUCCESS
+- *         The attribute was succesfully updated.
++ *         The attribute was successfully updated.
+  * @retval GLOBUS_GASS_TRANSFER_ERROR_NULL_POINTER
+  *         The @a attr was GLOBUS_NULL.
+  */
+diff -ur globus_gass_transfer-4.3.orig/library/globus_gass_transfer.h globus_gass_transfer-4.3/library/globus_gass_transfer.h
+--- globus_gass_transfer-4.3.orig/library/globus_gass_transfer.h	2006-01-19 06:54:50.000000000 +0100
++++ globus_gass_transfer-4.3/library/globus_gass_transfer.h	2010-01-23 09:24:55.530533493 +0100
+@@ -47,8 +47,8 @@
+  * simple protocol-independent API.
+  *
+  * The GASS Transfer API provides a way to implement both
+- * @link globus_gass_transfer_client client @endlink and
+- * @link globus_gass_transfer_server server @endlink
++ * @link globus_gass_transfer_client client@endlink and
++ * @link globus_gass_transfer_server server@endlink
+  * components. These share common data block and request management
+  * functionality. Client-specific functions are provided to implement file
+  * "get", "put", and "append" operations. Server-specific functions are
+@@ -62,7 +62,7 @@
+  * server-side support for the http and https protocols. 
+  * An application which requires additional
+  * protocol support may add this through the @link
+- * globus_gass_transfer_protocol protocol module interface @endlink.
++ * globus_gass_transfer_protocol protocol module interface@endlink.
+  *
+  * The GASS Transfer API is defined in the header file
+  * "globus_gass_transfer.h"
+@@ -122,9 +122,9 @@
+  * For server operations, the request is initialized by calling
+  * globus_gass_transfer_accept().
+  *
+- * The functions in the @link globus_gass_transfer_request request section
+- * @endlink of this manual describe the functions available for accessing
+- * information from a request handle.
++ * The functions in the @link globus_gass_transfer_request request
++ * section@endlink of this manual describe the functions available for
++ * accessing information from a request handle.
+  *
+  * Each request handle should be destroyed by calling
+  * globus_gass_transfer_request_destroy() once the user has completed
+@@ -340,7 +340,7 @@
+  * file transfers. The operations supported by the GASS Transfer API
+  * are file get, put, and append. These operations are provided for
+  * HTTP, and HTTPS file servers. The @link
+- * globus_gass_transfer_protocol protocol module interface @endlink
++ * globus_gass_transfer_protocol protocol module interface@endlink
+  * allows support for additional protocols to be added
+  * easily.
+  *
+diff -ur globus_gass_transfer-4.3.orig/library/globus_gass_transfer_proto.c globus_gass_transfer-4.3/library/globus_gass_transfer_proto.c
+--- globus_gass_transfer-4.3.orig/library/globus_gass_transfer_proto.c	2009-11-11 20:48:37.000000000 +0100
++++ globus_gass_transfer-4.3/library/globus_gass_transfer_proto.c	2010-01-23 09:46:29.522280290 +0100
+@@ -48,7 +48,7 @@
+  * @ingroup globus_gass_transfer_protocol
+  *
+  * A protocol module must call this function once a byte range registered
+- * for sending via the protcol module's send_buffer method has been completely
++ * for sending via the protocol module's send_buffer method has been completely
+  * processed. This function is called for protocol modules implementing
+  * either server or client functionality.
+  *
+@@ -98,7 +98,7 @@
+  * @ingroup globus_gass_transfer_protocol
+  *
+  * A protocol module must call this function once a byte range registered
+- * for receive via the protcol module's recv_buffer method has been completely
++ * for receive via the protocol module's recv_buffer method has been completely
+  * processed. This function is called for protocol modules implementing
+  * either server or client functionality.
+  *
+@@ -150,7 +150,7 @@
+  * This function notifies the GASS Transfer Library that the protocol module
+  * has decided that a new request can be accepted on this particular listener.
+  * It must only be called after the GASS Transfer Library has called the
+- * @link globus_gass_transfer_listener_proto_t::listen listen function @endlink
++ * @link globus_gass_transfer_listener_proto_t::listen listen function@endlink
+  * in a #globus_gass_transfer_listener_proto_t protocol module-specific
+  * listener structure.
+  *
+@@ -339,7 +339,7 @@
+  * Request ready.
+  * @ingroup globus_gass_transfer_protocol
+  *
+- * This function notifies the GASS Transfer Libary that new request
++ * This function notifies the GASS Transfer Library that new request
+  * generated by a client has begun processing in a protocol module,
+  * and that protocol module is now ready to send or receive data to handle
+  * this request. 
+@@ -466,7 +466,7 @@
+  * New listener request.
+  * @ingroup globus_gass_transfer_protocol
+  *
+- * This function notifies the GASS Transfer Libary that new request
++ * This function notifies the GASS Transfer Library that new request
+  * generated by a server calling the globus_gass_transfer_register_accept()
+  * function has begun processing in a protocol module,
+  * and that protocol module is now ready to send or receive data to handle
+@@ -603,7 +603,7 @@
+  * Request denied.
+  * @ingroup globus_gass_transfer_protocol
+  *
+- * This function notifies the GASS Transfer Libary that new request
++ * This function notifies the GASS Transfer Library that new request
+  * generated by a client calling one of the functions in the
+  * "@ref globus_gass_transfer_client" section of the manual has been
+  * denied by the server, and so cannot be processed by
+@@ -714,7 +714,7 @@
+  * Request referred.
+  * @ingroup globus_gass_transfer_protocol
+  *
+- * This function notifies the GASS Transfer Libary that new request
++ * This function notifies the GASS Transfer Library that new request
+  * generated by a client calling one of the functions in the
+  * "@ref globus_gass_transfer_client" section of the manual has been
+  * referred to another URL by the server, and so processing has stopped.
+diff -ur globus_gass_transfer-4.3.orig/library/globus_gass_transfer_proto.h globus_gass_transfer-4.3/library/globus_gass_transfer_proto.h
+--- globus_gass_transfer-4.3.orig/library/globus_gass_transfer_proto.h	2006-01-19 06:54:50.000000000 +0100
++++ globus_gass_transfer-4.3/library/globus_gass_transfer_proto.h	2010-01-23 09:24:55.532280360 +0100
+@@ -65,8 +65,8 @@
+  * must be called after the #GLOBUS_GASS_TRANSFER_MODULE has already been
+  * activated. Once registered, applications may use URLs of the scheme type
+  * provided by the protocol module for the standard @link
+- * globus_gass_transfer_client client @endlink or @link
+- * globus_gass_transfer_server server @endlink operations.
++ * globus_gass_transfer_client client@endlink or @link
++ * globus_gass_transfer_server server@endlink operations.
+  */
+ 
+ #ifndef GLOBUS_GASS_INCLUDE_GLOBUS_GASS_PROTO_H
+@@ -88,9 +88,17 @@
+ EXTERN_C_BEGIN
+ 
+ /* Module-specific types */
++/**
++ * Protocol module request handling structure.
++ * @ingroup globus_gass_transfer_protocol
++ * @see #globus_gass_transfer_request_proto_s */
+ typedef struct globus_gass_transfer_request_proto_s
+ globus_gass_transfer_request_proto_t;
+ 
++/**
++ * Protocol module listener handling structure.
++ * @ingroup globus_gass_transfer_protocol
++ * @see #globus_gass_transfer_listener_proto_s */
+ typedef struct globus_gass_transfer_listener_proto_s
+ globus_gass_transfer_listener_proto_t;
+ 
+@@ -223,7 +231,7 @@
+  *        A protocol-specific attribute set, created by calling the
+  *        protocol module's
+  *        @link globus_gass_transfer_proto_descriptor_t::new_requestattr
+- *        new_requestattr function pointer @endlink.
++ *        new_requestattr function pointer@endlink.
+  */
+ typedef void
+ (* globus_gass_transfer_proto_new_request_t)(
+@@ -246,7 +254,7 @@
+  *        A protocol-specific attribute set, created by calling the
+  *        protocol module's
+  *        @link globus_gass_transfer_proto_descriptor_t::new_listenerattr
+- *        new_listenerattr function pointer @endlink.
++ *        new_listenerattr function pointer@endlink.
+  * @param scheme
+  *        The URL scheme that the server has requested for the new listener.
+  *        This will be one the scheme associated with a particular
+@@ -368,16 +376,16 @@
+     globus_gass_transfer_requestattr_t *	attr);
+ 
+ /**
+- * @struct globus_gass_transfer_request_proto_t
++ * @struct globus_gass_transfer_request_proto_s
+  * Protocol module request handling structure.
+  * @ingroup globus_gass_transfer_protocol
+  *
+  * This structure is created by a GASS transfer protocol module to
+  * handle a particular request. It is created in response to a
+- * @link globus_gass_transfer_listener_proto_t::accept
+- * listener's accept method @endlink or a @link
++ * @link globus_gass_transfer_listener_proto_s::accept
++ * listener's accept method@endlink or a @link
+  * globus_gass_transfer_proto_descriptor_t::new_request
+- * protocol module's new_request method @endlink.
++ * protocol module's new_request method@endlink.
+  *
+  * Memory management of this structure is the responsibility of the protocol
+  * module. The destroy method will be called when the GASS Transfer library
+@@ -431,7 +439,7 @@
+ };
+ 
+ /**
+- * @struct globus_gass_transfer_listener_proto_t
++ * @struct globus_gass_transfer_listener_proto_s
+  * Protocol module listener handling structure.
+  * @ingroup globus_gass_transfer_protocol
+  */
+diff -ur globus_gass_transfer-4.3.orig/library/globus_gass_transfer_request.c globus_gass_transfer-4.3/library/globus_gass_transfer_request.c
+--- globus_gass_transfer-4.3.orig/library/globus_gass_transfer_request.c	2009-01-20 23:39:11.000000000 +0100
++++ globus_gass_transfer-4.3/library/globus_gass_transfer_request.c	2010-01-23 09:24:55.532280360 +0100
+@@ -41,7 +41,7 @@
+  * @param request
+  *        The request to query.
+  *
+- * @return The @link #globus_gass_transfer_request_type_t type @endlink
++ * @return The @link #globus_gass_transfer_request_type_t type@endlink
+  * of the request.
+  */
+ globus_gass_transfer_request_type_t
+diff -ur globus_gass_transfer-4.3.orig/library/globus_gass_transfer_send_recv.c globus_gass_transfer-4.3/library/globus_gass_transfer_send_recv.c
+--- globus_gass_transfer-4.3.orig/library/globus_gass_transfer_send_recv.c	2006-01-19 06:54:50.000000000 +0100
++++ globus_gass_transfer-4.3/library/globus_gass_transfer_send_recv.c	2010-01-23 09:42:14.628279984 +0100
+@@ -80,7 +80,7 @@
+  *        A user-supplied buffer containing the data associated with the
+  *        request.
+  * @param send_length
+- *        The lenght of the @a bytes array.
++ *        The length of the @a bytes array.
+  * @param last_data
+  *        A flag to indicate whether this is the final block of data
+  *        for the request. If this is true, then the @a callback
+@@ -252,7 +252,7 @@
+  *        A user-supplied buffer containing the data associated with the
+  *        request.
+  * @param max_length
+- *        The lenght of the @a bytes array.
++ *        The length of the @a bytes array.
+  * @param wait_for_length
+  *        The minimum amount of data to wait for before invoking the @a
+  *        callback function. A partial byte array of at least this amount

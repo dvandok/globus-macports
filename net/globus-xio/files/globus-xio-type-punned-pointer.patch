@@ -1,0 +1,81 @@
+diff -ur globus_xio-2.7.orig/builtins/mode_e/globus_xio_mode_e_driver.c globus_xio-2.7/builtins/mode_e/globus_xio_mode_e_driver.c
+--- globus_xio-2.7.orig/builtins/mode_e/globus_xio_mode_e_driver.c	2006-07-25 18:30:34.000000000 +0200
++++ globus_xio-2.7/builtins/mode_e/globus_xio_mode_e_driver.c	2008-12-31 14:50:21.000000000 +0100
+@@ -526,7 +526,7 @@
+     memset(handle, 0, sizeof(globus_l_xio_mode_e_handle_t));
+     if (!attr)
+     {
+-        result = globus_l_xio_mode_e_attr_init((void**)&handle->attr); 
++        result = globus_l_xio_mode_e_attr_init((void**)(void*)&handle->attr); 
+         if (result != GLOBUS_SUCCESS)
+         {
+             result = GlobusXIOErrorWrapFailed(
+@@ -537,7 +537,7 @@
+     else
+     {
+         result = globus_l_xio_mode_e_attr_copy(
+-                                (void**)&handle->attr, (void*)attr);
++                                (void**)(void*)&handle->attr, (void*)attr);
+         if (result != GLOBUS_SUCCESS)
+         {
+             result = GlobusXIOErrorWrapFailed(
+diff -ur globus_xio-2.7.orig/builtins/ordering/globus_xio_ordering_driver.c globus_xio-2.7/builtins/ordering/globus_xio_ordering_driver.c
+--- globus_xio-2.7.orig/builtins/ordering/globus_xio_ordering_driver.c	2008-09-26 08:04:52.000000000 +0200
++++ globus_xio-2.7/builtins/ordering/globus_xio_ordering_driver.c	2008-12-31 14:59:58.000000000 +0100
+@@ -367,12 +367,12 @@
+     }
+     if (!attr)
+     {
+-       result = globus_l_xio_ordering_attr_init((void**)&handle->attr); 
++        result = globus_l_xio_ordering_attr_init((void**)(void*)&handle->attr);
+     }
+     else
+     {
+         result = globus_l_xio_ordering_attr_copy(
+-                                (void**)&handle->attr, (void*)attr);
++                                (void**)(void*)&handle->attr, (void*)attr);
+     }
+     if (result != GLOBUS_SUCCESS)
+     {
+diff -ur globus_xio-2.7.orig/builtins/tcp/globus_xio_tcp_driver.c globus_xio-2.7/builtins/tcp/globus_xio_tcp_driver.c
+--- globus_xio-2.7.orig/builtins/tcp/globus_xio_tcp_driver.c	2008-09-18 08:17:07.000000000 +0200
++++ globus_xio-2.7/builtins/tcp/globus_xio_tcp_driver.c	2008-12-31 14:55:17.000000000 +0100
+@@ -2028,7 +2028,7 @@
+     }
+     
+     result = globus_l_xio_tcp_attr_copy(
+-        (void **) &connect_info->attr, (void *) attr);
++        (void **) (void *) &connect_info->attr, (void *) attr);
+     if(result != GLOBUS_SUCCESS)
+     {
+         result = GlobusXIOErrorWrapFailed(
+diff -ur globus_xio-2.7.orig/builtins/telnet/globus_xio_telnet.c globus_xio-2.7/builtins/telnet/globus_xio_telnet.c
+--- globus_xio-2.7.orig/builtins/telnet/globus_xio_telnet.c	2007-08-08 00:50:29.000000000 +0200
++++ globus_xio-2.7/builtins/telnet/globus_xio_telnet.c	2008-12-31 14:48:06.000000000 +0100
+@@ -455,7 +455,7 @@
+         return GLOBUS_SUCCESS;
+     }
+ 
+-    res = globus_l_xio_telnet_attr_init((void **) &dest_attr);
++    res = globus_l_xio_telnet_attr_init((void **) (void *) &dest_attr);
+     if(res == GLOBUS_SUCCESS)
+     {
+         src_attr = (globus_l_xio_telnet_attr_t *) src_driver_attr;
+@@ -525,7 +525,7 @@
+     globus_l_xio_telnet_attr_t *        attr;
+     GlobusXIOName(globus_l_xio_telnet_server_init);
+ 
+-    res = globus_l_xio_telnet_attr_copy((void **)&attr, driver_attr);
++    res = globus_l_xio_telnet_attr_copy((void **) (void *) &attr, driver_attr);
+     if(res != GLOBUS_SUCCESS)
+     {
+         goto error;
+@@ -560,7 +560,7 @@
+     globus_l_xio_telnet_attr_t *        attr;
+     GlobusXIOName(globus_l_xio_telnet_accept);
+    
+-    res = globus_l_xio_telnet_attr_copy((void **)&attr, driver_server);
++    res = globus_l_xio_telnet_attr_copy((void **) (void *) &attr, driver_server);
+     if(res != GLOBUS_SUCCESS)
+     {
+         goto error;

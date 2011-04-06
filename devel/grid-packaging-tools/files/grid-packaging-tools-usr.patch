@@ -1,0 +1,764 @@
+diff -ur gpt.orig/packaging_tools/configure gpt/packaging_tools/configure
+--- gpt.orig/packaging_tools/configure	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/configure	2008-12-15 08:54:57.000000000 +0100
+@@ -273,7 +273,7 @@
+ PACKAGE_BUGREPORT=''
+ 
+ ac_unique_file="Makefile.am"
+-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE am__leading_dot PERL POD2MAN perlmoduledir TAR GUNZIP GZIP LN_S GPT_LOCATION ENABLE_COMPAT_TRUE ENABLE_COMPAT_FALSE LIBOBJS LTLIBOBJS'
++ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE am__leading_dot PERL POD2MAN perlmoduledir TAR GUNZIP GZIP LN_S ENABLE_COMPAT_TRUE ENABLE_COMPAT_FALSE LIBOBJS LTLIBOBJS'
+ ac_subst_files=''
+ 
+ # Initialize some variables set by options.
+@@ -1880,17 +1880,7 @@
+ 
+ 
+ # checking for the GPT_LOCATION
+-
+-if test "x$GPT_LOCATION" = "x"; then
+-    # checking for the GLOBUS_LOCATION
+-
+-    if test "x$GLOBUS_LOCATION" = "x"; then
+-        echo "ERROR Please specify GLOBUS_LOCATION or GPT_LOCATION" >&2
+-        exit 1
+-    else
+-        GPT_LOCATION=$GLOBUS_LOCATION
+-    fi
+-fi
++ac_default_prefix=${GPT_LOCATION:-$ac_default_prefix}
+ 
+ for ac_prog in gtar tar
+ do
+@@ -2036,8 +2026,6 @@
+ fi
+ 
+ 
+-
+-
+ # Check whether --enable-compat was given.
+ if test "${enable_compat+set}" = set; then
+   enableval=$enable_compat;
+@@ -2742,7 +2730,6 @@
+ s,@GUNZIP@,$GUNZIP,;t t
+ s,@GZIP@,$GZIP,;t t
+ s,@LN_S@,$LN_S,;t t
+-s,@GPT_LOCATION@,$GPT_LOCATION,;t t
+ s,@ENABLE_COMPAT_TRUE@,$ENABLE_COMPAT_TRUE,;t t
+ s,@ENABLE_COMPAT_FALSE@,$ENABLE_COMPAT_FALSE,;t t
+ s,@LIBOBJS@,$LIBOBJS,;t t
+diff -ur gpt.orig/packaging_tools/configure.ac gpt/packaging_tools/configure.ac
+--- gpt.orig/packaging_tools/configure.ac	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/configure.ac	2008-12-15 08:54:57.000000000 +0100
+@@ -66,25 +66,13 @@
+ 
+ 
+ # checking for the GPT_LOCATION
+-
+-if test "x$GPT_LOCATION" = "x"; then
+-    # checking for the GLOBUS_LOCATION
+-
+-    if test "x$GLOBUS_LOCATION" = "x"; then
+-        echo "ERROR Please specify GLOBUS_LOCATION or GPT_LOCATION" >&2
+-        exit 1
+-    else
+-        GPT_LOCATION=$GLOBUS_LOCATION
+-    fi
+-fi
++ac_default_prefix=${GPT_LOCATION:-$ac_default_prefix}
+ 
+ AC_PATH_PROGS(TAR, gtar tar)
+ AC_PATH_PROGS(GUNZIP, gunzip)
+ AC_PATH_PROGS(GZIP, gzip)
+ AC_PROG_LN_S
+ 
+-AC_SUBST(GPT_LOCATION)
+-
+ AC_ARG_ENABLE(compat, AC_HELP_STRING([--disable-compat], [disable backward compatibility symlinks]),[],enable_compat="yes")
+ AC_MSG_NOTICE([Enable backward compatibility symlinks: $enable_compat])
+ AM_CONDITIONAL([ENABLE_COMPAT],[test "x$enable_compat" = "xyes"])
+diff -ur gpt.orig/packaging_tools/etc/bootstrap.frg gpt/packaging_tools/etc/bootstrap.frg
+--- gpt.orig/packaging_tools/etc/bootstrap.frg	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/etc/bootstrap.frg	2008-12-15 08:54:57.000000000 +0100
+@@ -1,17 +1,12 @@
+ #! /bin/sh
+ 
+-# checking for the GLOBUS_LOCATION
+-
+-if test "x$GLOBUS_LOCATION" = "x"; then
+-    echo "ERROR Please specify GLOBUS_LOCATION" >&2
+-    exit 1
+-fi
+-
+-if [ ! -f ${GLOBUS_LOCATION}/libexec/globus-bootstrap.sh ]; then
+-    echo "ERROR: Unable to locate \${GLOBUS_LOCATION}/libexec/globus-bootstrap.sh"
++if [ -f ${GLOBUS_LOCATION:-/usr}/share/globus/globus-bootstrap.sh ]; then
++    . ${GLOBUS_LOCATION:-/usr}/share/globus/globus-bootstrap.sh
++elif [ -f ${GLOBUS_LOCATION:-/usr}/libexec/globus-bootstrap.sh ]; then
++    . ${GLOBUS_LOCATION:-/usr}/libexec/globus-bootstrap.sh
++else
++    echo "ERROR: Unable to locate globus-bootstrap.sh"
+     echo "       Please ensure that you have installed the globus-core package and"
+     echo "       that GLOBUS_LOCATION is set to the proper directory"
+     exit
+ fi
+-
+-. ${GLOBUS_LOCATION}/libexec/globus-bootstrap.sh
+diff -ur gpt.orig/packaging_tools/etc/gpt_autoconf_macros.m4 gpt/packaging_tools/etc/gpt_autoconf_macros.m4
+--- gpt.orig/packaging_tools/etc/gpt_autoconf_macros.m4	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/etc/gpt_autoconf_macros.m4	2008-12-15 08:54:57.000000000 +0100
+@@ -1,8 +1,7 @@
+ dnl GPT_INIT()
+ AC_DEFUN([GPT_INIT], [
+         if test "x$GPT_LOCATION" = "x"; then
+-                echo "ERROR Please specify GPT_LOCATION" >&2
+-                exit 1
++                GPT_LOCATION=/usr
+         fi
+ 
+         AC_SUBST(GPT_LOCATION)
+@@ -73,9 +72,9 @@
+ 	. ./gpt_build_temp.sh  
+ 	rm ./gpt_build_temp.sh
+ 	GPT_CFLAGS="$GPT_CONFIG_CFLAGS"
+-	GPT_INCLUDES="-I$GLOBUS_LOCATION/include/$GLOBUS_FLAVOR_NAME $GPT_CONFIG_INCLUDES"
++	GPT_INCLUDES="$GPT_CONFIG_INCLUDES"
+ 	GPT_LIBS="$GPT_CONFIG_PKG_LIBS $GPT_CONFIG_LIBS"
+-	GPT_LDFLAGS="$GPT_CONFIG_STATIC_LINKLINE -L$GLOBUS_LOCATION/lib $GPT_LDFLAGS"
++	GPT_LDFLAGS="$GPT_CONFIG_STATIC_LINKLINE $GPT_LDFLAGS"
+ 	GPT_PGM_LINKS="$GPT_CONFIG_PGM_LINKS $GPT_CONFIG_LIBS"
+ 	GPT_LIB_LINKS="$GPT_CONFIG_LIB_LINKS $GPT_CONFIG_LIBS"
+ 
+diff -ur gpt.orig/packaging_tools/etc/gpt-bootstrap.sh gpt/packaging_tools/etc/gpt-bootstrap.sh
+--- gpt.orig/packaging_tools/etc/gpt-bootstrap.sh	2008-12-15 08:43:01.000000000 +0100
++++ gpt/packaging_tools/etc/gpt-bootstrap.sh	2008-12-15 09:02:45.000000000 +0100
+@@ -9,7 +9,7 @@
+ # Removed check for autotools.  CAB 01/08
+ 
+ # Always include globus macros
+-config="$aclocal_includes -I $GLOBUS_LOCATION/share/globus/aclocal"
++config="$aclocal_includes -I ${GLOBUS_LOCATION:-/usr}/share/globus/aclocal"
+ 
+ # test for local macros
+ if test -d "./config"; then
+@@ -17,18 +17,12 @@
+ fi
+ 
+ # test to see if GPT macros are in a seperate location
+-if test ! -f "$GLOBUS_LOCATION/share/globus/aclocal/gpt_autoconf_macros.m4"; then
+-    if test "x$GPT_LOCATION" = "x"; then
+-        echo "ERROR Globus Packaging Tools not found" >&2
+-        echo "ERROR either set GPT_LOCATION or install them in $GLOBUS_LOCATION" >&2
+-        exit 1
+-    else
+-        config="$config -I $GPT_LOCATION/share/globus/aclocal"
+-    fi
++if test ! -f "${GLOBUS_LOCATION:-/usr}/share/globus/aclocal/gpt_autoconf_macros.m4"; then
++    config="$config -I ${GPT_LOCATION:-/usr}/share/globus/aclocal"
+ fi
+ 
+ if test "x$GPT_LOCATION" = "x"; then
+-    GPT_LOCATION=$GLOBUS_LOCATION
++    GPT_LOCATION=/usr
+ fi
+ 
+ if test ! -h pkgdata/Makefile.am ; then
+diff -ur gpt.orig/packaging_tools/Makefile.am gpt/packaging_tools/Makefile.am
+--- gpt.orig/packaging_tools/Makefile.am	2008-12-15 08:38:27.000000000 +0100
++++ gpt/packaging_tools/Makefile.am	2008-12-15 08:54:57.000000000 +0100
+@@ -1,5 +1,3 @@
+-prefix=$(GPT_LOCATION)
+-
+ sbin_SCRIPTS = 	\
+ 	perl/scripts/gpt-build \
+ 	perl/scripts/gpt_build_config \
+diff -ur gpt.orig/packaging_tools/Makefile.in gpt/packaging_tools/Makefile.in
+--- gpt.orig/packaging_tools/Makefile.in	2008-12-15 08:37:36.000000000 +0100
++++ gpt/packaging_tools/Makefile.in	2008-12-15 08:54:57.000000000 +0100
+@@ -51,7 +51,6 @@
+ ECHO_T = @ECHO_T@
+ ENABLE_COMPAT_FALSE = @ENABLE_COMPAT_FALSE@
+ ENABLE_COMPAT_TRUE = @ENABLE_COMPAT_TRUE@
+-GPT_LOCATION = @GPT_LOCATION@
+ GUNZIP = @GUNZIP@
+ GZIP = @GZIP@
+ INSTALL_DATA = @INSTALL_DATA@
+@@ -101,7 +100,7 @@
+ mandir = @mandir@
+ oldincludedir = @oldincludedir@
+ perlmoduledir = @perlmoduledir@
+-prefix = $(GPT_LOCATION)
++prefix = @prefix@
+ program_transform_name = @program_transform_name@
+ sbindir = @sbindir@
+ sharedstatedir = @sharedstatedir@
+@@ -111,7 +110,6 @@
+ target_cpu = @target_cpu@
+ target_os = @target_os@
+ target_vendor = @target_vendor@
+-
+ sbin_SCRIPTS = \
+ 	perl/scripts/gpt-build \
+ 	perl/scripts/gpt_build_config \
+diff -ur gpt.orig/packaging_tools/perl/GPT/BuildLine.pm gpt/packaging_tools/perl/GPT/BuildLine.pm
+--- gpt.orig/packaging_tools/perl/GPT/BuildLine.pm	2006-01-11 17:10:11.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/BuildLine.pm	2008-12-15 08:54:57.000000000 +0100
+@@ -33,7 +33,9 @@
+ 
+         if ($libname =~ m!$flavor! || $libname =~ m!GLOBUS_FLAVOR_NAME!)
+         {
+-            $libname =~ s/\-l/$ENV{GLOBUS_LOCATION}\/lib\/lib/;
++            my $globus_path = defined $ENV{GLOBUS_LOCATION} ?
++                $ENV{GLOBUS_LOCATION} : "/usr";
++            $libname =~ s/\-l/$globus_path\/lib\/lib/;
+             $libname = $libname.".a";
+         }
+         $libslist .= $libname;
+diff -ur gpt.orig/packaging_tools/perl/GPT/Locations.pm gpt/packaging_tools/perl/GPT/Locations.pm
+--- gpt.orig/packaging_tools/perl/GPT/Locations.pm	2008-12-15 08:40:31.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/Locations.pm	2008-12-15 09:01:33.000000000 +0100
+@@ -66,6 +66,7 @@
+ sub _init_gptdir {
+   my ($me) =@_;
+   my $gptdir = $ENV{'GPT_LOCATION'};
++  $gptdir = "/usr" if ( !defined $gptdir );
+   $me->{'gpt_etcdir'} = "$gptdir/share/globus";
+   $me->{'gpt_amdir'} = "$gptdir/share/globus/amdir";
+   $me->{'gpt_aclocaldir'} = "$gptdir/share/globus/aclocal";
+@@ -134,7 +135,7 @@
+   my ($me) =@_;
+ 
+   my $gpath = $ENV{GPT_INSTALL_LOCATION} ? $ENV{GPT_INSTALL_LOCATION} 
+-    : $ENV{GLOBUS_LOCATION};
++    : $ENV{GLOBUS_LOCATION} ? $ENV{GLOBUS_LOCATION} : "/usr";
+ 
+ 
+   $me->{'installdir'} = defined $me->{'installdir'} ? 
+diff -ur gpt.orig/packaging_tools/perl/GPT/PackageFilelist/flat1.pm gpt/packaging_tools/perl/GPT/PackageFilelist/flat1.pm
+--- gpt.orig/packaging_tools/perl/GPT/PackageFilelist/flat1.pm	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/PackageFilelist/flat1.pm	2008-12-15 08:54:57.000000000 +0100
+@@ -69,7 +69,9 @@
+     # handle arguments
+     #
+ 
+-    my %args = (installdir => $ENV{'GLOBUS_LOCATION'}, @_);
++    my $globus_path = defined $ENV{'GLOBUS_LOCATION'} ?
++        $ENV{'GLOBUS_LOCATION'} : "/usr";
++    my %args = (installdir => $globus_path, @_);
+ 
+     my $installdir = $args{'installdir'};
+     my $packageList = $args{'packageList'};
+diff -ur gpt.orig/packaging_tools/perl/GPT/PackageFilelist/xml1.pm gpt/packaging_tools/perl/GPT/PackageFilelist/xml1.pm
+--- gpt.orig/packaging_tools/perl/GPT/PackageFilelist/xml1.pm	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/PackageFilelist/xml1.pm	2008-12-15 08:54:57.000000000 +0100
+@@ -69,7 +69,9 @@
+     # handle arguments
+     #
+ 
+-    my %args = (installdir => $ENV{'GLOBUS_LOCATION'}, @_);
++    my $globus_path = defined $ENV{'GLOBUS_LOCATION'} ?
++        $ENV{'GLOBUS_LOCATION'} : "/usr";
++    my %args = (installdir => $globus_path, @_);
+ 
+     my $installdir = $args{'installdir'};
+     my $packageList = $args{'packageList'};
+diff -ur gpt.orig/packaging_tools/perl/GPT/PkgMngmt/SetupBuildFlavors.pm gpt/packaging_tools/perl/GPT/PkgMngmt/SetupBuildFlavors.pm
+--- gpt.orig/packaging_tools/perl/GPT/PkgMngmt/SetupBuildFlavors.pm	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/PkgMngmt/SetupBuildFlavors.pm	2008-12-15 08:54:57.000000000 +0100
+@@ -24,8 +24,7 @@
+       
+       if (!defined($gpath))
+         {
+-          $gpath = $ENV{GLOBUS_LOCATION};
+-          
++          $gpath = "/usr";
+         }
+       
+       if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/GPT/Setup.pm gpt/packaging_tools/perl/GPT/Setup.pm
+--- gpt.orig/packaging_tools/perl/GPT/Setup.pm	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/Setup.pm	2008-12-15 08:54:57.000000000 +0100
+@@ -11,6 +11,7 @@
+ use Config;
+ # @INC fiddling
+ my $gpt_path = $ENV{GPT_LOCATION};
++$gpt_path = "/usr" if ( !defined $gpt_path );
+ @INC = ("$gpt_path/lib/perl", "$gpt_path/lib/perl/$Config{'archname'}", @INC);
+ 
+ require Grid::GPT::Installation;
+diff -ur gpt.orig/packaging_tools/perl/GPT/V1/BuildFlavors.pm gpt/packaging_tools/perl/GPT/V1/BuildFlavors.pm
+--- gpt.orig/packaging_tools/perl/GPT/V1/BuildFlavors.pm	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/V1/BuildFlavors.pm	2008-12-15 08:54:57.000000000 +0100
+@@ -30,7 +30,7 @@
+     
+     if (!defined($gpath))
+       {
+-        $gpath = $ENV{GLOBUS_LOCATION};
++        $gpath = "/usr";
+       }
+     my $confdir = "$gpath/share/globus";
+ 
+diff -ur gpt.orig/packaging_tools/perl/GPT/V1/Package.pm gpt/packaging_tools/perl/GPT/V1/Package.pm
+--- gpt.orig/packaging_tools/perl/GPT/V1/Package.pm	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/GPT/V1/Package.pm	2008-12-15 09:00:43.000000000 +0100
+@@ -84,6 +84,7 @@
+ {
+   my ($self, $name, $f, $t)=@_;
+   my $globus=$ENV{GLOBUS_LOCATION};
++  $globus="/usr" if (!defined $globus);
+   my $path="$globus/share/globus/packages/$name/pkg_data_".$f."_$t.gpt";
+  
+   $self->read_metadata_file($path);
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-build gpt/packaging_tools/perl/scripts/gpt-build
+--- gpt.orig/packaging_tools/perl/scripts/gpt-build	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-build	2008-12-15 08:54:57.000000000 +0100
+@@ -11,10 +11,6 @@
+ # programs.
+ #
+ 
+-my $gp = $ENV{GPT_LOCATION};
+-my @p = $ENV{PATH};
+-my $pi = $ENV{PATH};
+-
+ if ( ! ( defined eval "require 5.005" ) )
+ {
+     die "GPT requires at least Perl version 5.005";
+@@ -24,7 +20,7 @@
+ 
+ if (!defined($gpath))
+ {
+-   $gpath = $ENV{GLOBUS_LOCATION};
++   $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_build_config gpt/packaging_tools/perl/scripts/gpt_build_config
+--- gpt.orig/packaging_tools/perl/scripts/gpt_build_config	2006-01-11 17:56:50.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt_build_config	2008-12-15 08:54:57.000000000 +0100
+@@ -19,8 +19,7 @@
+ 
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-bundle gpt/packaging_tools/perl/scripts/gpt-bundle
+--- gpt.orig/packaging_tools/perl/scripts/gpt-bundle	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-bundle	2008-12-15 08:54:57.000000000 +0100
+@@ -17,7 +17,7 @@
+  
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
++  $gpath = "/usr";
+ }
+    
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-config gpt/packaging_tools/perl/scripts/gpt-config
+--- gpt.orig/packaging_tools/perl/scripts/gpt-config	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-config	2008-12-15 08:54:57.000000000 +0100
+@@ -48,7 +48,7 @@
+ 
+ if (!defined($gpath))
+ {
+-   $gpath = $ENV{GLOBUS_LOCATION};
++   $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-convert-bundle-old2new gpt/packaging_tools/perl/scripts/gpt-convert-bundle-old2new
+--- gpt.orig/packaging_tools/perl/scripts/gpt-convert-bundle-old2new	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-convert-bundle-old2new	2008-12-15 08:54:57.000000000 +0100
+@@ -20,7 +20,7 @@
+  
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
++  $gpath = "/usr";
+ }
+    
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_convert_xml gpt/packaging_tools/perl/scripts/gpt_convert_xml
+--- gpt.orig/packaging_tools/perl/scripts/gpt_convert_xml	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt_convert_xml	2008-12-15 08:54:57.000000000 +0100
+@@ -58,7 +58,7 @@
+ 
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
++  $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_create_automake_rules gpt/packaging_tools/perl/scripts/gpt_create_automake_rules
+--- gpt.orig/packaging_tools/perl/scripts/gpt_create_automake_rules	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt_create_automake_rules	2008-12-15 08:54:57.000000000 +0100
+@@ -20,8 +20,7 @@
+ my $gpath = $ENV{GPT_LOCATION};
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ if (!defined($gpath))
+ {
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-deps gpt/packaging_tools/perl/scripts/gpt-deps
+--- gpt.orig/packaging_tools/perl/scripts/gpt-deps	2008-12-15 08:46:56.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-deps	2008-12-15 08:54:57.000000000 +0100
+@@ -18,6 +18,16 @@
+ my $gpt_path = $ENV{GPT_LOCATION};
+ my $globus_path = $ENV{GLOBUS_LOCATION};
+ 
++if ( !defined($gpt_path) )
++{
++    $gpt_path = "/usr";
++}
++
++if ( !defined($globus_path) )
++{
++    $globus_path = "/usr";
++}
++
+ if ( !defined($gpt_path) && !defined($globus_path) )
+ {
+     die("GPT_LOCATION or GLOBUS_LOCATION needs to be set before running this script");
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_extract_data gpt/packaging_tools/perl/scripts/gpt_extract_data
+--- gpt.orig/packaging_tools/perl/scripts/gpt_extract_data	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt_extract_data	2008-12-15 08:54:57.000000000 +0100
+@@ -18,8 +18,7 @@
+ my $gpath = $ENV{GPT_LOCATION};
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ if (!defined($gpath))
+ {
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-filelist-convert gpt/packaging_tools/perl/scripts/gpt-filelist-convert
+--- gpt.orig/packaging_tools/perl/scripts/gpt-filelist-convert	2008-12-15 08:46:17.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-filelist-convert	2008-12-15 08:54:57.000000000 +0100
+@@ -19,6 +19,16 @@
+ my $globus_path = $ENV{GLOBUS_LOCATION};
+ my $gpath;
+ 
++if ( !defined($gpt_path) )
++{
++    $gpt_path = "/usr";
++}
++
++if ( !defined($globus_path) )
++{
++    $globus_path = "/usr";
++}
++
+ if ( !defined($gpt_path) && !defined($globus_path) )
+ {
+     die("GPT_LOCATION or GLOBUS_LOCATION needs to be set before running this script");
+@@ -103,7 +113,7 @@
+ {
+     my $fl = new Grid::GPT::PackageFilelist(
+                         context => "installdir",
+-                        contextData => { dir => $ENV{'GLOBUS_LOCATION'}, },
++                        contextData => { dir => $globus_path, },
+                         pkgnode => $pkg,
+                         convert => 1,
+                         );
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-filelist-copy gpt/packaging_tools/perl/scripts/gpt-filelist-copy
+--- gpt.orig/packaging_tools/perl/scripts/gpt-filelist-copy	2008-12-15 08:47:24.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-filelist-copy	2008-12-15 08:54:57.000000000 +0100
+@@ -19,6 +19,16 @@
+ my $globus_path = $ENV{GLOBUS_LOCATION};
+ my $gpath;
+ 
++if ( !defined($gpt_path) )
++{
++    $gpt_path = "/usr";
++}
++
++if ( !defined($globus_path) )
++{
++    $globus_path = "/usr";
++}
++
+ if ( !defined($gpt_path) && !defined($globus_path) )
+ {
+     die("GPT_LOCATION or GLOBUS_LOCATION needs to be set before running this script");
+@@ -109,7 +119,7 @@
+ {
+     my $fl = new Grid::GPT::PackageFilelist(
+                         context => "installdir",
+-                        contextData => { dir => $ENV{'GLOBUS_LOCATION'}, },
++                        contextData => { dir => $globus_path, },
+                         pkgnode => $pkg,
+                         convert => 0,
+                         );
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-file-remove gpt/packaging_tools/perl/scripts/gpt-file-remove
+--- gpt.orig/packaging_tools/perl/scripts/gpt-file-remove	2008-12-15 08:46:44.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-file-remove	2008-12-15 08:54:57.000000000 +0100
+@@ -19,6 +19,16 @@
+ my $globus_path = $ENV{GLOBUS_LOCATION};
+ my $gpath;
+ 
++if ( !defined($gpt_path) )
++{
++    $gpt_path = "/usr";
++}
++
++if ( !defined($globus_path) )
++{
++    $globus_path = "/usr";
++}
++
+ if ( !defined($gpt_path) && !defined($globus_path) )
+ {
+     die("GPT_LOCATION or GLOBUS_LOCATION needs to be set before running this script");
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-flavor-configuration gpt/packaging_tools/perl/scripts/gpt-flavor-configuration
+--- gpt.orig/packaging_tools/perl/scripts/gpt-flavor-configuration	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-flavor-configuration	2008-12-15 08:54:57.000000000 +0100
+@@ -19,8 +19,7 @@
+ 
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_generate_bin_pkg_data gpt/packaging_tools/perl/scripts/gpt_generate_bin_pkg_data
+--- gpt.orig/packaging_tools/perl/scripts/gpt_generate_bin_pkg_data	2006-01-11 17:56:50.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt_generate_bin_pkg_data	2008-12-15 08:54:57.000000000 +0100
+@@ -18,8 +18,7 @@
+ my $gpath = $ENV{GPT_LOCATION};
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ if (!defined($gpath))
+ {
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-install gpt/packaging_tools/perl/scripts/gpt-install
+--- gpt.orig/packaging_tools/perl/scripts/gpt-install	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-install	2008-12-15 08:54:57.000000000 +0100
+@@ -21,8 +21,7 @@
+ 
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-link gpt/packaging_tools/perl/scripts/gpt-link
+--- gpt.orig/packaging_tools/perl/scripts/gpt-link	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-link	2008-12-15 08:54:57.000000000 +0100
+@@ -20,8 +20,7 @@
+ 
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-md5 gpt/packaging_tools/perl/scripts/gpt-md5
+--- gpt.orig/packaging_tools/perl/scripts/gpt-md5	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-md5	2008-12-15 08:54:57.000000000 +0100
+@@ -18,7 +18,7 @@
+ 
+ if (!defined($gpath))
+ {
+-   $gpath = $ENV{GLOBUS_LOCATION};
++   $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-pkg gpt/packaging_tools/perl/scripts/gpt-pkg
+--- gpt.orig/packaging_tools/perl/scripts/gpt-pkg	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-pkg	2008-12-15 08:54:57.000000000 +0100
+@@ -20,8 +20,7 @@
+ 
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-postinstall gpt/packaging_tools/perl/scripts/gpt-postinstall
+--- gpt.orig/packaging_tools/perl/scripts/gpt-postinstall	2008-12-15 08:47:11.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-postinstall	2008-12-15 08:54:57.000000000 +0100
+@@ -26,6 +26,16 @@
+ my $globus_path = $ENV{GLOBUS_LOCATION};
+ my $verbose;
+ 
++if ( !defined($gpt_path) )
++{
++    $gpt_path = "/usr";
++}
++
++if ( !defined($globus_path) )
++{
++    $globus_path = "/usr";
++}
++
+ if ( !defined($gpt_path) && !defined($globus_path) )
+ {
+     die("GPT_LOCATION and GLOBUS_LOCATION needs to be set before running this script");
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-query gpt/packaging_tools/perl/scripts/gpt-query
+--- gpt.orig/packaging_tools/perl/scripts/gpt-query	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-query	2008-12-15 08:54:57.000000000 +0100
+@@ -25,6 +25,16 @@
+ my $gpt_path = $ENV{GPT_LOCATION};
+ my $globus_path = $ENV{GLOBUS_LOCATION};
+ 
++if ( !defined($gpt_path) )
++{
++    $gpt_path = "/usr";
++}
++
++if ( !defined($globus_path) )
++{
++    $globus_path = "/usr";
++}
++
+ if ( !defined($gpt_path) && !defined($globus_path) )
+ {
+     die("GPT_LOCATION needs to be set before running this script");
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_save_flavor gpt/packaging_tools/perl/scripts/gpt_save_flavor
+--- gpt.orig/packaging_tools/perl/scripts/gpt_save_flavor	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt_save_flavor	2008-12-15 08:54:57.000000000 +0100
+@@ -18,8 +18,7 @@
+ my $gpath = $ENV{GPT_LOCATION};
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ if (!defined($gpath))
+ {
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-setup gpt/packaging_tools/perl/scripts/gpt-setup
+--- gpt.orig/packaging_tools/perl/scripts/gpt-setup	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-setup	2008-12-15 08:54:57.000000000 +0100
+@@ -14,8 +14,7 @@
+ my $gpath = $ENV{GPT_LOCATION};
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ if (!defined($gpath))
+ {
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_sort_filelist gpt/packaging_tools/perl/scripts/gpt_sort_filelist
+--- gpt.orig/packaging_tools/perl/scripts/gpt_sort_filelist	2008-12-15 08:33:05.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt_sort_filelist	2008-12-15 08:54:57.000000000 +0100
+@@ -21,6 +21,16 @@
+ my $globus_path = $ENV{GLOBUS_LOCATION};
+ my $verbose = 0;
+ 
++if ( !defined($gpt_path) )
++{
++    $gpt_path = "/usr";
++}
++
++if ( !defined($globus_path) )
++{
++    $globus_path = "/usr";
++}
++
+ if ( !defined($gpt_path) && !defined($globus_path) )
+ {
+     die("GPT_LOCATION needs to be set before running this script");
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-undefines gpt/packaging_tools/perl/scripts/gpt-undefines
+--- gpt.orig/packaging_tools/perl/scripts/gpt-undefines	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-undefines	2008-12-15 08:54:57.000000000 +0100
+@@ -20,8 +20,7 @@
+ my $gpath = $ENV{GPT_LOCATION};
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ if (!defined($gpath))
+ {
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-uninstall gpt/packaging_tools/perl/scripts/gpt-uninstall
+--- gpt.orig/packaging_tools/perl/scripts/gpt-uninstall	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-uninstall	2008-12-15 08:54:57.000000000 +0100
+@@ -24,7 +24,7 @@
+ #
+ 
+ my $gpath     = defined $ENV{GPT_LOCATION} ? $ENV{GPT_LOCATION} 
+-                                           : $ENV{GLOBUS_LOCATION};
++                                           : "/usr";
+ if ( !defined($gpath))
+ {
+     die("GPT_LOCATION needs to be set before running this script");
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-update gpt/packaging_tools/perl/scripts/gpt-update
+--- gpt.orig/packaging_tools/perl/scripts/gpt-update	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-update	2008-12-15 08:54:57.000000000 +0100
+@@ -14,8 +14,7 @@
+ 
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-verify gpt/packaging_tools/perl/scripts/gpt-verify
+--- gpt.orig/packaging_tools/perl/scripts/gpt-verify	2008-12-15 08:46:30.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-verify	2008-12-15 08:54:57.000000000 +0100
+@@ -27,6 +27,16 @@
+ my $globus_path = $ENV{GLOBUS_LOCATION};
+ my $verbose;
+ 
++if ( !defined($gpt_path) )
++{
++    $gpt_path = "/usr";
++}
++
++if ( !defined($globus_path) )
++{
++    $globus_path = "/usr";
++}
++
+ if ( !defined($gpt_path) && !defined($globus_path) )
+ {
+     die("GPT_LOCATION or GLOBUS_LOCATION needs to be set before running this script");
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_version.in gpt/packaging_tools/perl/scripts/gpt_version.in
+--- gpt.orig/packaging_tools/perl/scripts/gpt_version.in	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt_version.in	2008-12-15 08:54:57.000000000 +0100
+@@ -23,7 +23,7 @@
+ 
+ if (!defined($gpath))
+ {
+-   $gpath = $ENV{GLOBUS_LOCATION};
++   $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt-virtual-pkg gpt/packaging_tools/perl/scripts/gpt-virtual-pkg
+--- gpt.orig/packaging_tools/perl/scripts/gpt-virtual-pkg	2006-01-11 17:10:12.000000000 +0100
++++ gpt/packaging_tools/perl/scripts/gpt-virtual-pkg	2008-12-15 08:54:57.000000000 +0100
+@@ -20,8 +20,7 @@
+ 
+ if (!defined($gpath))
+ {
+-  $gpath = $ENV{GLOBUS_LOCATION};
+-
++  $gpath = "/usr";
+ }
+ 
+ if (!defined($gpath))

@@ -1,0 +1,272 @@
+diff -ur globus_common-11.2.orig/library/globus_common_paths.c globus_common-11.2/library/globus_common_paths.c
+--- globus_common-11.2.orig/library/globus_common_paths.c	2006-01-19 06:54:14.000000000 +0100
++++ globus_common-11.2/library/globus_common_paths.c	2010-01-21 17:40:22.405535210 +0100
+@@ -111,8 +111,7 @@
+     p = globus_libc_getenv(name);
+     if (!p || strlen(p)==0)
+     {
+-	globus_libc_sprintf(errmsg,_GCSL("Environment variable %s is not set"), name);
+-	return GLOBUS_COMMON_PATH_ERROR_INSTANCE(errmsg);
++	return GLOBUS_SUCCESS;
+     }
+ 
+     *bufp = globus_libc_strdup(p);
+@@ -199,17 +198,17 @@
+     if (!deploy && (result=globus_location(&deploy)))
+ 	return result;
+ 
+-    filename = globus_malloc(strlen(deploy) +
++    filename = globus_malloc( ( deploy ? strlen(deploy) : 0 ) +
+ 			     strlen(file_location) + 1 + 1 );
+     if (!filename)
+ 	return GLOBUS_COMMON_PATH_ERROR_INSTANCE(_GCSL("malloc error"));
+     
+     globus_libc_sprintf(filename,
+ 			"%s/%s",
+-			deploy,
++			deploy ? deploy : "",
+ 			file_location);
+ 
+-    if (!deploy_path)
++    if (!deploy_path && deploy)
+ 	globus_free(deploy);
+ 
+     fp = fopen(filename,"r");
+diff -ur globus_common-11.2.orig/library/globus_extension.c globus_common-11.2/library/globus_extension.c
+--- globus_common-11.2.orig/library/globus_extension.c	2008-03-12 20:01:05.000000000 +0100
++++ globus_common-11.2/library/globus_extension.c	2010-01-21 17:40:22.406533240 +0100
+@@ -195,14 +195,17 @@
+         
+         if(globus_location(&tmp) == GLOBUS_SUCCESS)
+         {
++            if(tmp)
++            {
+ #if defined(TARGET_ARCH_WIN32)
+-            globus_l_globus_location =
+-                globus_common_create_string("%s\\lib", tmp);
++                globus_l_globus_location =
++                    globus_common_create_string("%s\\lib", tmp);
+ #else
+-            globus_l_globus_location =
+-                globus_common_create_string("%s/lib", tmp);
++                globus_l_globus_location =
++                    globus_common_create_string("%s/lib", tmp);
+ #endif
+-            globus_free(tmp);
++                globus_free(tmp);
++            }
+         }
+         
+         initialized = GLOBUS_TRUE;
+diff -ur globus_common-11.2.orig/Makefile.am globus_common-11.2/Makefile.am
+--- globus_common-11.2.orig/Makefile.am	2004-10-11 14:53:32.000000000 +0200
++++ globus_common-11.2/Makefile.am	2010-01-21 17:40:22.406533240 +0100
+@@ -9,7 +9,7 @@
+ 	config \
+ 	doxygen
+ 
+-sbin_SCRIPTS= \
++libexec_SCRIPTS= \
+ 	config.guess
+ 
+ EXTRA_DIST = \
+diff -ur globus_common-11.2.orig/programs/globus-sh-exec.in globus_common-11.2/programs/globus-sh-exec.in
+--- globus_common-11.2.orig/programs/globus-sh-exec.in	2006-01-19 06:54:19.000000000 +0100
++++ globus_common-11.2/programs/globus-sh-exec.in	2010-01-21 17:40:22.406533240 +0100
+@@ -17,7 +17,11 @@
+ # 
+ 
+ 
+-. ${GLOBUS_LOCATION}/libexec/globus-script-initializer
++if test -f ${GLOBUS_LOCATION:-/usr}/share/globus/globus-script-initializer ; then
++. ${GLOBUS_LOCATION:-/usr}/share/globus/globus-script-initializer
++else
++. ${GLOBUS_LOCATION:-/usr}/libexec/globus-script-initializer
++fi
+ globus_source ${libexecdir}/globus-sh-tools.sh
+ 
+ # This was done by the script initializer before V2.0
+diff -ur globus_common-11.2.orig/programs/globus-version.in globus_common-11.2/programs/globus-version.in
+--- globus_common-11.2.orig/programs/globus-version.in	2008-10-22 18:42:37.000000000 +0200
++++ globus_common-11.2/programs/globus-version.in	2010-01-21 17:40:22.407532807 +0100
+@@ -37,7 +37,11 @@
+ 
+ usage()
+ {
+-    . ${GLOBUS_LOCATION}/libexec/globus-script-initializer
++    if test -f ${GLOBUS_LOCATION:-/usr}/share/globus/globus-script-initializer ; then
++    . ${GLOBUS_LOCATION:-/usr}/share/globus/globus-script-initializer
++    else
++    . ${GLOBUS_LOCATION:-/usr}/libexec/globus-script-initializer
++    fi
+     globus_source ${libexecdir}/globus-sh-tools.sh
+ 
+     ${GLOBUS_SH_CAT-cat} 1>&2 <<EOF
+diff -ur globus_common-11.2.orig/programs/Makefile.am globus_common-11.2/programs/Makefile.am
+--- globus_common-11.2.orig/programs/Makefile.am	2008-11-03 21:31:12.000000000 +0100
++++ globus_common-11.2/programs/Makefile.am	2010-01-21 17:42:10.644280522 +0100
+@@ -3,7 +3,7 @@
+ if ENABLE_PROGRAMS
+ bin_SCRIPTS = globus-sh-exec globus-version
+ 
+-libexec_PROGRAMS = globus-libc-hostname globus-is-local-user globus-redia
++sbin_PROGRAMS = globus-libc-hostname globus-is-local-user globus-redia
+ 
+ EXTRA_DIST = globus-sh-exec.in globus-version.in
+ 
+diff -ur globus_common-11.2.orig/scripts/globus-hostname globus_common-11.2/scripts/globus-hostname
+--- globus_common-11.2.orig/scripts/globus-hostname	2006-01-19 06:54:22.000000000 +0100
++++ globus_common-11.2/scripts/globus-hostname	2010-01-21 17:40:22.408279898 +0100
+@@ -23,13 +23,12 @@
+ # domainname
+ 
+ 
+-if test "x$GLOBUS_LOCATION" = "x"; then
+-    echo "ERROR Please specify GLOBUS_LOCATION" >&2
+-    exit 1
++if test -f ${GLOBUS_LOCATION:-/usr}/share/globus/globus-script-initializer ; then
++. ${GLOBUS_LOCATION:-/usr}/share/globus/globus-script-initializer
++else
++. ${GLOBUS_LOCATION:-/usr}/libexec/globus-script-initializer
+ fi
+ 
+-. ${GLOBUS_LOCATION}/libexec/globus-script-initializer
+-
+ PROGRAM_NAME=`echo $0 | ${GLOBUS_SH_SED-sed} -e 's|.*/||g'`
+ PROGRAM_VERSION=`echo '$Revision: 1.3 $' | ${GLOBUS_SH_CUT-cut} -d' ' -f2`
+ 
+@@ -67,7 +66,7 @@
+ EOF
+ }
+ 
+-. ${GLOBUS_LOCATION}/libexec/globus-args-parser-header
++. ${libexecdir}/globus-args-parser-header
+ 
+ if [ -n "$1" ]; then
+     globus_args_unrecognized_option "$1"
+@@ -79,8 +78,8 @@
+ if [ -z "${GLOBUS_HOSTNAME}" ] ; then
+ 
+   # Set the _fullname based upon Globus's hostname command
+-  if [ -x "${libexecdir}/globus-libc-hostname" ]; then
+-    _fullname="`${libexecdir}/globus-libc-hostname`"
++  if [ -x "${sbindir}/globus-libc-hostname" ]; then
++    _fullname="`${sbindir}/globus-libc-hostname`"
+   fi
+ 
+   # if failed to set, use the system's hostname command
+diff -ur globus_common-11.2.orig/scripts/globus-makefile-header globus_common-11.2/scripts/globus-makefile-header
+--- globus_common-11.2.orig/scripts/globus-makefile-header	2008-02-20 17:03:35.000000000 +0100
++++ globus_common-11.2/scripts/globus-makefile-header	2010-01-21 17:40:22.408279898 +0100
+@@ -25,29 +25,15 @@
+ 
+ my $gpt_path = $ENV{GPT_LOCATION};
+ my $globus_path = $ENV{GLOBUS_LOCATION};
+-my $gpath;
+ 
+-if ( !defined($gpt_path) && !defined($globus_path) )
++if ( !defined($gpt_path) )
+ {
+-    die("ERROR: GPT_LOCATION or GLOBUS_LOCATION needs to be set before running this script");
++    $gpt_path = "/usr";
+ }
+ 
+-if ( defined($gpt_path) )
++if ( !defined($globus_path) )
+ {
+-    $gpath = $gpt_path;
+-    if ( ! -d $gpath )
+-    {
+-        die("ERROR: $gpath doesn't exist!\n");
+-    }
+-}
+-
+-if ( !defined($gpath) && defined($globus_path) )
+-{
+-    $gpath = $globus_path;
+-    if ( ! -d $gpath )
+-    {
+-        die("ERROR: $gpath doesn't exist!\n");
+-    }
++    $globus_path = "/usr";
+ }
+ 
+ 
+@@ -60,7 +46,7 @@
+ #
+ 
+ my($environment);
+-@INC = ("$gpath/lib/perl", "$gpath/lib/perl/$Config{'archname'}", @INC);
++@INC = ("$gpt_path/lib/perl", "$gpt_path/lib/perl/$Config{'archname'}", @INC);
+ 
+ if ( defined eval "require Grid::GPT::V1::Package" )
+ {
+@@ -240,7 +226,9 @@
+     # point our installation object at our globus location
+     #
+ 
+-    $installation = new Grid::GPT::Installation(pkgdir => "$globus_path/etc/globus_packages");
++    $installation = -d "$globus_path/share/globus/packages" ?
++        new Grid::GPT::Installation(pkgdir => "$globus_path/share/globus/packages") :
++        new Grid::GPT::Installation(pkgdir => "$globus_path/etc/globus_packages");
+     $installation->set_depenv('Build');
+ 
+     #
+@@ -313,10 +301,17 @@
+     # push all of our entries onto our header array
+     #
+ 
++    @INC = ("$globus_path/lib/perl", @INC);
++
++    require Globus::Core::Paths;
++    my $includedir = $Globus::Core::Paths::includedir;
++    my $flavorincludedir = $Globus::Core::Paths::flavorincludedir;
++    my $libdir = $Globus::Core::Paths::libdir;
++
+     push(@$header, "GLOBUS_CFLAGS=\"$cflagslist\"");
+-    push(@$header, "GLOBUS_INCLUDES=\"-I${globus_path}/include/$flavor $includeslist\"");
++    push(@$header, "GLOBUS_INCLUDES=\"-I${includedir} -I${flavorincludedir} $includeslist\"");
+     push(@$header, "GLOBUS_LIBS=\"$libslist\"");
+-    push(@$header, "GLOBUS_LDFLAGS=\"-L${globus_path}/lib\"");
++    push(@$header, "GLOBUS_LDFLAGS=\"-L${libdir}\"");
+     push(@$header, "GLOBUS_PKG_LIBS=\"$pkglibslist $extlibslist\"");
+     push(@$header, "GLOBUS_LIBTOOL=\"$globus_path/sbin/libtool-$flavor\"");
+ }
+@@ -332,7 +327,9 @@
+     my($header) = @_;
+     my($copy);
+ 
+-    open(IN, "$globus_path/libexec/globus-build-env-$flavor.sh") || die "ERROR: Cannot open $globus_path/libexec/globus-build-env-$flavor.sh!\n$common_error\n";
++    open(IN, "$globus_path/share/globus/globus-build-env-$flavor.sh") ||
++      open(IN, "$globus_path/libexec/globus-build-env-$flavor.sh") ||
++      die "ERROR: Cannot open globus-build-env-$flavor.sh!\n$common_error\n";
+ 
+     while (<IN>)
+     { 
+@@ -370,7 +367,9 @@
+     my($header) = @_;
+     my($copy);
+ 
+-    open(IN, "$globus_path/libexec/globus-sh-tools-vars.sh") || die "ERROR: Cannot open $globus_path/libexec/globus-sh-tools-vars.sh!\n$common_error\n";
++    open(IN, "$globus_path/share/globus/globus-sh-tools-vars.sh") ||
++      open(IN, "$globus_path/libexec/globus-sh-tools-vars.sh") ||
++      die "ERROR: Cannot open globus-sh-tools-vars.sh!\n$common_error\n";
+ 
+     while (<IN>) 
+     {
+diff -ur globus_common-11.2.orig/scripts/globus-sh-tools.sh globus_common-11.2/scripts/globus-sh-tools.sh
+--- globus_common-11.2.orig/scripts/globus-sh-tools.sh	2006-01-19 06:54:22.000000000 +0100
++++ globus_common-11.2/scripts/globus-sh-tools.sh	2010-01-21 17:40:42.884287442 +0100
+@@ -18,7 +18,11 @@
+ 
+ if test -z "$GLOBUS_SH_VARIABLES_SET" ; then
+     
+-    . ${GLOBUS_LOCATION}/libexec/globus-sh-tools-vars.sh
++    if test -f ${GLOBUS_LOCATION:-/usr}/share/globus/globus-sh-tools-vars.sh ; then
++    . ${GLOBUS_LOCATION:-/usr}/share/globus/globus-sh-tools-vars.sh
++    else
++    . ${GLOBUS_LOCATION:-/usr}/libexec/globus-sh-tools-vars.sh
++    fi
+     
+     # export all commands:
+ 

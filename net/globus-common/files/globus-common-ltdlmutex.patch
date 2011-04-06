@@ -1,0 +1,42 @@
+diff -ur globus_common-11.2.orig/configure.in globus_common-11.2/configure.in
+--- globus_common-11.2.orig/configure.in	2008-10-22 18:42:37.000000000 +0200
++++ globus_common-11.2/configure.in	2010-01-21 17:54:34.099279823 +0100
+@@ -24,6 +24,11 @@
+ 
+ GPT_SET_LIBS(["$EXTERNAL_LIBS"])
+ 
++save_LIBS=$LIBS
++LIBS="$LIBS $GPT_LIBS"
++AC_CHECK_FUNCS([lt_dlmutex_register])
++LIBS=$save_LIBS
++
+ AC_SUBST(GLOBUS_THREADS)
+ 
+ if test "X$GLOBUS_VERSION" = "X"; then
+diff -ur globus_common-11.2.orig/library/globus_extension.c globus_common-11.2/library/globus_extension.c
+--- globus_common-11.2.orig/library/globus_extension.c	2008-03-12 20:01:05.000000000 +0100
++++ globus_common-11.2/library/globus_extension.c	2010-01-21 17:54:34.100280018 +0100
+@@ -14,6 +14,7 @@
+  * limitations under the License.
+  */
+ 
++#include "config.h"
+ #include "globus_extension.h"
+ #include "globus_debug.h"
+ #include GLOBUS_THREAD_INCLUDE
+@@ -169,6 +170,7 @@
+         {
+             goto error_dlinit;
+         }
++#       ifdef HAVE_LT_DLMUTEX_REGISTER
+         if(lt_dlmutex_register(
+             globus_l_libtool_mutex_lock,
+             globus_l_libtool_mutex_unlock,
+@@ -177,6 +179,7 @@
+         {
+             goto error_dlmutex;
+         }
++#       endif /* HAVE_LT_DLMUTEX_REGISTER */
+ #       endif /* !BUILD_STATIC_ONLY */
+         
+         globus_hashtable_init(

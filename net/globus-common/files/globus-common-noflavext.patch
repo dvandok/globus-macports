@@ -1,0 +1,28 @@
+diff -ur globus-common-7.30.orig/library/globus_extension.c globus-common-7.30/library/globus_extension.c
+--- globus-common-7.30.orig/library/globus_extension.c	2005-04-19 00:59:29.000000000 +0200
++++ globus-common-7.30/library/globus_extension.c	2008-07-05 09:22:39.000000000 +0200
+@@ -357,11 +357,24 @@
+     dlhandle = lt_dlopenext(library);
+     if(!dlhandle)
+     {
++        snprintf(library, 1024, "lib%s", name);
++        library[1023] = 0;
++        dlhandle = lt_dlopenext(library);
++    }
++    if(!dlhandle)
++    {
+         /* older libtools dont search the extensions correctly */
+         snprintf(library, 1024, "lib%s_%s" MY_LIB_EXT, name, build_flavor);
+         library[1023] = 0;
+         dlhandle = lt_dlopenext(library);
+     }
++    if(!dlhandle)
++    {
++        /* older libtools dont search the extensions correctly */
++        snprintf(library, 1024, "lib%s" MY_LIB_EXT, name);
++        library[1023] = 0;
++        dlhandle = lt_dlopenext(library);
++    }
+ 
+     if(!dlhandle)
+     {

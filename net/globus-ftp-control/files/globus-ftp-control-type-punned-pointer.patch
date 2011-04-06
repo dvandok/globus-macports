@@ -1,0 +1,33 @@
+diff -ur globus_ftp_control-2.10.orig/globus_ftp_control_client.c globus_ftp_control-2.10/globus_ftp_control_client.c
+--- globus_ftp_control-2.10.orig/globus_ftp_control_client.c	2008-10-02 05:46:49.000000000 +0200
++++ globus_ftp_control-2.10/globus_ftp_control_client.c	2008-12-31 14:44:24.000000000 +0100
+@@ -1799,7 +1799,7 @@
+ 
+         rc=globus_i_ftp_control_encode_command(&(handle->cc_handle),
+                                                buf,
+-                                               (char **) &encode_buf);
++                                               (char **) (void *) &encode_buf);
+         
+         globus_libc_free(buf);
+ 
+@@ -4678,7 +4678,7 @@
+         result=globus_i_ftp_control_encode_command(
+             &handle->cc_handle,
+             write_buf,
+-            (char **) &element->write_buf);     
++            (char **) (void *) &element->write_buf);     
+     }
+     else
+     {
+diff -ur globus_ftp_control-2.10.orig/globus_ftp_control_server.c globus_ftp_control-2.10/globus_ftp_control_server.c
+--- globus_ftp_control-2.10.orig/globus_ftp_control_server.c	2008-10-02 05:46:49.000000000 +0200
++++ globus_ftp_control-2.10/globus_ftp_control_server.c	2008-12-31 14:43:58.000000000 +0100
+@@ -2681,7 +2681,7 @@
+ 
+     if(handle->cc_handle.auth_info.authenticated == GLOBUS_TRUE)
+     {
+-        rc=globus_i_ftp_control_encode_reply(buf,(char **) &encoded_buf,
++        rc=globus_i_ftp_control_encode_reply(buf,(char **) (void *) &encoded_buf,
+                                              &(handle->cc_handle.auth_info));
+ 
+         globus_libc_free(buf);

@@ -1,0 +1,11 @@
+diff -ur globus-core-4.34.orig/aclocal/globus_package.m4 globus-core-4.34/aclocal/globus_package.m4
+--- globus-core-4.34.orig/aclocal/globus_package.m4	2004-08-24 17:37:03.000000000 +0200
++++ globus-core-4.34/aclocal/globus_package.m4	2008-06-21 16:07:56.000000000 +0200
+@@ -127,6 +117,7 @@
+ dnl GPT_MAJOR_VERSION and GPT_MINOR_VERSION provided by GPT_INIT
+ AC_SUBST(GPT_MAJOR_VERSION)
+ AC_SUBST(GPT_MINOR_VERSION)
++AC_SUBST(GPT_AGE_VERSION)
+ AC_SUBST(DIRT_TIMESTAMP)
+ AC_SUBST(DIRT_BRANCH_ID)
+ 

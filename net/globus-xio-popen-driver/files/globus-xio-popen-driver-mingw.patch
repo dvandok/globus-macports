@@ -1,0 +1,67 @@
+diff -ur globus_xio_popen_driver-0.7.orig/globus_xio_popen_driver.c globus_xio_popen_driver-0.7/globus_xio_popen_driver.c
+--- globus_xio_popen_driver-0.7.orig/globus_xio_popen_driver.c	2010-01-07 00:46:52.000000000 +0100
++++ globus_xio_popen_driver-0.7/globus_xio_popen_driver.c	2010-03-07 16:08:38.672301504 +0100
+@@ -19,11 +19,17 @@
+ #include "version.h"
+ #include <stdio.h>
+ #include <sys/types.h>
++#ifndef WIN32
+ #include <sys/wait.h>
++#endif
+ 
+ #define USE_SOCKET_PAIR 1
+ #define GLOBUS_L_XIO_POPEN_WAITPID_DELAY 500
+ 
++#ifdef WIN32
++#define WNOHANG 0
++#endif
++
+ GlobusDebugDefine(GLOBUS_XIO_POPEN);
+ 
+ #define GlobusXIOPOpenDebugPrintf(level, message)                            \
+@@ -491,7 +497,9 @@
+     globus_result_t                     result;
+     GlobusXIOName(globus_l_xio_popen_init_child_pipe);
+ 
++#ifndef WIN32
+     fcntl(fd, F_SETFD, FD_CLOEXEC);
++#endif
+ 
+     result = globus_xio_system_file_init(out_system, fd);
+     if(result != GLOBUS_SUCCESS)
+@@ -531,6 +539,9 @@
+     
+     GlobusXIOPOpenDebugEnter();
+     
++#ifdef WIN32
++    result = GlobusXIOErrorSystemResource("not available for windows");
++#else
+     attr = (xio_l_popen_attr_t *) 
+         driver_attr ? driver_attr : &xio_l_popen_attr_default;
+ 
+@@ -678,6 +689,7 @@
+ error_in_pipe:
+     globus_l_xio_popen_handle_destroy(handle);
+ error_handle:
++#endif
+     GlobusXIOPOpenDebugExitWithError();
+     return result;
+ }
+@@ -710,6 +722,9 @@
+     globus_reltime_t                    delay;
+     GlobusXIOName(globus_l_popen_waitpid);
+ 
++#ifdef WIN32
++    result = GlobusXIOErrorSystemResource("not available for windows");
++#else
+     rc = waitpid(handle->pid, &status, opts);
+     if(rc > 0)
+     {
+@@ -815,6 +830,7 @@
+             handle);         
+     }
+ 
++#endif
+     GlobusXIOPOpenDebugExit();
+ }
+ 

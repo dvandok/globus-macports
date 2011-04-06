@@ -1,0 +1,74 @@
+diff -ur globus_core-5.15.orig/config/acplatforms.m4 globus_core-5.15/config/acplatforms.m4
+--- globus_core-5.15.orig/config/acplatforms.m4	2005-11-02 23:25:26.000000000 +0100
++++ globus_core-5.15/config/acplatforms.m4	2009-05-09 23:21:28.000000000 +0200
+@@ -105,6 +105,10 @@
+     AC_DEFINE(TARGET_ARCH_NETOS)
+     AC_DEFINE(TARGET_ARCH_ARM)
+   ;;
++  *mingw32* )
++    AC_DEFINE(TARGET_ARCH_WIN32)
++    AC_DEFINE(TARGET_ARCH_X86)
++  ;;
+   * )
+ 	echo "platform not configured with TARGET_ARCH_*"
+   ;;
+diff -ur globus_core-5.15.orig/config/acthreads.m4 globus_core-5.15/config/acthreads.m4
+--- globus_core-5.15.orig/config/acthreads.m4	2009-05-09 23:20:07.000000000 +0200
++++ globus_core-5.15/config/acthreads.m4	2009-05-09 23:21:23.000000000 +0200
+@@ -56,6 +56,9 @@
+         sproc)
+             LAC_THREADS_SPROC
+             ;;
++        windows)
++            LAC_THREADS_WINDOWS
++            ;;
+         external)
+             LAC_THREADS_EXTERNAL
+             ;;
+@@ -400,6 +403,19 @@
+ 
+ ])
+ 
++dnl LAC_THREADS_WINDOWS
++AC_DEFUN([LAC_THREADS_WINDOWS],
++[
++if test "$lac_cv_threads_type" = "windows"; then
++    found_inc="yes"
++    found_lib="yes"
++
++    lac_cv_threads_type="windows"
++    LAC_THREADS_ADD_DEFINE(HAVE_WINDOWS_THREADS)
++    lac_cv_threads_LIBS=""
++    lac_cv_threads_CFLAGS="-DWINVER=0x0502"
++fi
++])
+ 
+ dnl LAC_THREADS_ADD_DEFINE(SYMBOL)
+ dnl If you add a define for a new SYMBOL, you need to add that symbol
+@@ -418,6 +434,7 @@
+         LAC_THREADS_DEFINE_ONE(HAVE_SOLARISTHREADS)
+         LAC_THREADS_DEFINE_ONE(HAVE_PTHREAD)
+         LAC_THREADS_DEFINE_ONE(HAVE_SPROC)
++        LAC_THREADS_DEFINE_ONE(HAVE_WINDOWS_THREADS)
+         LAC_THREADS_DEFINE_ONE(HAVE_EXTERNALTHREADS)
+         LAC_THREADS_DEFINE_ONE(HAVE_PTHREAD_DRAFT_4)
+         LAC_THREADS_DEFINE_ONE(HAVE_PTHREAD_DRAFT_6)
+diff -ur globus_core-5.15.orig/globus_config.h.in globus_core-5.15/globus_config.h.in
+--- globus_core-5.15.orig/globus_config.h.in	2009-05-09 23:20:07.000000000 +0200
++++ globus_core-5.15/globus_config.h.in	2009-05-09 23:21:28.000000000 +0200
+@@ -31,6 +31,7 @@
+ #undef _POSIX_PTHREAD_SEMANTICS 
+ #undef HAVE_SOLARISTHREADS
+ #undef HAVE_SPROC
++#undef HAVE_WINDOWS_THREADS
+ #undef HAVE_THREAD_SAFE_SELECT
+ #undef HAVE_THREAD_SAFE_STDIO
+ #undef _CMA_REENTRANT_CLIB_
+@@ -73,6 +74,7 @@
+ #undef TARGET_ARCH_X86
+ #undef TARGET_ARCH_IA64
+ #undef TARGET_ARCH_ARM
++#undef TARGET_ARCH_WIN32
+ 
+ #ifdef NET_OS
+ #undef TARGET_ARCH_NETOS
