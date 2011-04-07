@@ -69,7 +69,7 @@ if [[ "x${4}x" != "xx" ]]; then
 fi
 rm -rf ${pkgdir}/Packages/${pkgname}-${pkgversion}.pkg
 mv -f ${pkgname}/${pkgname}-${pkgversion}.pkg ${pkgdir}/Packages/.
-sed -i .old "/<\/array>/i \\
+gsed -i "/<\/array>/i \\
 \     <dict>\\
 \       <key>IFPkgFlagPackageLocation</key>\\
 \       <string>${pkgname}-${pkgversion}.pkg</string>\\
@@ -91,13 +91,13 @@ port cat ${pkgname} | sed -e :a -e '$!N;s/[[:space:]]*\\\n[[:space:]]*/ /;ta' \
                     | sed -e "/^archcheck.files/d" \
                     | sed -e "s/^\(master_sites[[:space:]]*gnu\)/\1:${pkgname}/" > ${pkgname}-arcstandalone/Portfile
 
-sed -i .old "/checksums/i \\
+gsed -i "/checksums/i \\
 destroot.violate_mtree      yes\\
 " ${pkgname}-arcstandalone/Portfile
 
 if [[ ${pkgname} = "glibmm" ]]
 then
-  sed -i .old -e "
+  gsed -i -e "
                   /^checksums/a \\
                   \\
                   configure.env PKG_CONFIG_LIBDIR=${location}/lib/pkgconfig
@@ -105,7 +105,7 @@ then
 fi
 
 # Set distname so source can be fetched.
-sed -i .old "
+gsed -i "
              /^[[:space:]]*version[[:space:]]/a \\
              distname ${pkgname}-\${version}\\
              " ${pkgname}-arcstandalone/Portfile
@@ -131,7 +131,7 @@ rm -rf ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Conte
 description=`port info --long_description -D ${pkgname}-arcstandalone | sed "s/^long_description: //"`
 description=${description//\//\\\/}
 
-sed -i .old "s/<string><\/string>/<string>${description}<\/string>/" \
+gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
   ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/Description.plist
 
 # Install package since others packages might depend on it.
@@ -171,7 +171,7 @@ port cat -D ${basedir}/${portdir}/${pkgname} \
   | sed -e "s@\${prefix}/share/libtool@/opt/local/share/libtool@g" \
   | sed -e "/^archcheck.files/d" > ${pkgname}-arcstandalone/Portfile
 
-sed -i .old "/checksums/i \\
+gsed -i "/checksums/i \\
 destroot.violate_mtree      yes\\
 " ${pkgname}-arcstandalone/Portfile
 
@@ -208,7 +208,7 @@ rm -rf ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Conte
 description=`port info --long_description -D ${pkgname}-arcstandalone | sed "s/^long_description: //"`
 description=${description//\//\\\/}
 
-sed -i .old "s/<string><\/string>/<string>${description}<\/string>/" \
+gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
   ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/Description.plist
 
 # Install package since others packages might depend on it.
@@ -230,7 +230,7 @@ return 0
 
 function requiredpackagescheck() {
 # The following packages are required to be installed to build the stand-alone package.
-requiredpkgs=(gperf pkgconfig autoconf automake wget doxygen p5-archive-tar perl5)
+requiredpkgs=(gsed gperf pkgconfig autoconf automake wget doxygen p5-archive-tar perl5)
 pkgsneeded=
 installedports=`port installed`
 for package in ${requiredpkgs[@]}
@@ -340,7 +340,7 @@ do
   insertpackage ${package}-arcstandalone `port info --version -D ${package}-arcstandalone | awk '{print $2}'` required arcstandalone-dependencies.mpkg
 done
 
-sed -i .old "/<\/array>/i \\
+gsed -i "/<\/array>/i \\
 \     <dict>\\
 \       <key>IFPkgFlagPackageLocation</key>\\
 \       <string>arcstandalone-dependencies.mpkg</string>\\
@@ -405,7 +405,7 @@ do
   insertpackage globus-${package}-arcstandalone `port info --version -D globus-${package}-arcstandalone | awk '{print $2}'` required globus-dependencies.mpkg
 done
 
-sed -i .old "/<\/array>/i \\
+gsed -i "/<\/array>/i \\
 \     <dict>\\
 \       <key>IFPkgFlagPackageLocation</key>\\
 \       <string>globus-dependencies.mpkg</string>\\
@@ -559,7 +559,7 @@ cp ${basedir}/logo-ng-shaded.png \
    ${name}-${version}.mpkg/Contents/Resources/background
 
 # Put logo in bottom-left corner, and do not scale it.
-sed -i .old \
+gsed -i \
   -e "/<key>IFPkgFlagComponentDirectory<\/key>/i \\
 \  <key>IFPkgFlagBackgroundAlignment</key>\\
 \  <string>bottomleft</string>\\
