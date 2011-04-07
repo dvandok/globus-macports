@@ -4,7 +4,7 @@ PortSystem          1.0
 
 name                igtf-certificates
 version             1.37
-categories          grid
+categories          security
 maintainers         skou@nbi.dk
 description         The trusted IGTF CA-certificates
 homepage            http://www.igtf.net
