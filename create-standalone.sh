@@ -886,13 +886,13 @@ if test $# -gt 4; then
 fi
 
 # First argument is type which should be one of (releases, testing, experimental, nightlies)
-if test ${1} != "releases" && test ${1} != "testing" && test ${1} != "experimental"; then
+if test "x${1}" != "xreleases" && test "x${1}" != "xtesting" && test "x${1}" != "xexperimental"; then
   type="nightlies"
 else
   type=${1}
 fi
 
-if test ${type} != "nightlies" && test $# == 1
+if test "x${type}" != "xnightlies" && test $# == 1
 then
   echo "2nd argument (version) must be specified for type \"${type}\"."
   exit 1
