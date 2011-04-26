@@ -18,7 +18,7 @@ architecture="x86_64"
 
 domakecheck="no"
 
-makeglobus="no"
+makeglobus="yes"
 arcglobusmoduledir=globus-plugins
 
 # The metapackage should contain the following packages (order matters!):
@@ -902,7 +902,7 @@ if test "x${2}" != "x"; then
   version=${2}
 fi
 
-test $# -ge 3 && test "x${3}" == "xyes" && makeglobus="yes"
+test $# -ge 3 && test "x${3}" == "xno" && makeglobus="no"
 test $# == 4 && test "x${4}" == "xyes" && domakecheck="yes"
 
 else
