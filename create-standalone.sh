@@ -720,7 +720,7 @@ function completepackage() {
 # Add PATHs to environment by using postinstall script. Copy ReadMe to location. Set to executable.
 cat << EEOOFF > ${name}-${version}.mpkg/Contents/Resources/postinstall
 #!/bin/bash
-cat << EOF > /etc/paths.d/nordugrid-arc-standalone
+cat << EOF > /etc/paths.d/${name}
 ${location}/bin
 EOF
 
@@ -759,7 +759,7 @@ Default client.conf, jobs.xml directory location (these directories are hidden b
 Uninstalling this package
 -------------------------
 
-To uninstall this package simply remove the '${location}' directory and the file '/etc/paths.d/nordugrid-arc-nox-standalone'.
+To uninstall this package simply remove the '${location}' directory and the file '/etc/paths.d/${name}'.
 Additionally user configuration files might exist in the \$HOME/.arc directory, which can safely be removed.
 EOF
 
