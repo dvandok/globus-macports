@@ -285,7 +285,11 @@ gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
 
 toggleownmacportconf on
 # Install package since other packages might depend on it.
-port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/wor
+if test $? != 0; then
+  echo "Unable to install package ${pkgname}"
+  return 1
+fi
 
 # Sanity check. Check if libraries are linked properly.
 depslibs=`port contents -D ${pkgname} | grep ${location} | grep dylib`
@@ -392,6 +396,10 @@ gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
 toggleownmacportconf on
 # Install package since others packages might depend on it.
 port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+if test $? != 0; then
+  echo "Unable to install package ${pkgname}"
+  return 1
+fi
 
 # Sanity check. Check if libraries are linked properly.
 depslibs=`port contents -D ${pkgname} | grep ${location} | grep dylib`
