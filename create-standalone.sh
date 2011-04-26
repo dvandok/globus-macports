@@ -1,238 +1,92 @@
 #!/bin/bash
 #
 # This script creates a Mac OS X NorduGrid ARC standalone package.
-# Requires: wget
-# Usage: create-standalone.sh <version>
-# Relies on the files in the repository, and must be executed here.
+# Usage: create-standalone.sh [type] [version] [build globus]
 #
 # TODO:
-# * Support for nightlies
 # * Upload package to download.nordugrid.org
-# * Modify ReadMe file
 # * Add a 'Finish Up' entry in the installer
-# * Make the script independent on run-time location.
 
-if test $# != 1 && test $# != 2 && test $# != 3
-then
-  echo "1 to 3 arguments needed."
-  exit 1
-fi
-
-# Second argument is type which should be one of (releases (default), testing, experimental).
-if test $# == 2
-then
-  if test ${2} != "releases" && test ${2} != "testing" && test ${2} != "experimental"
-  then
-    echo "2nd argument must be one of \"releases\", \"testing\" or \"experimental\"."
-    exit 1
-  fi
-  type=${2}
-else
-  type="releases"
-fi
-
-makeglobus="no"
-test $# == 3 && test "x${3}" == "xyes" && makeglobus="yes"
+test "x${BUILD_ARC_DEBUG}" == "xyes" && set -x
 
 
-basedir=`pwd`
-workdir=arcstandalone-workdir
-rm -rf ${workdir}
-mkdir ${workdir}
-cd ${workdir}
-
+## DEFAULT VALUES.
 # Install package to the specified location. Note that the specified location should be a path used exclusively for the standalone.
 location=/opt/local/nordugrid
-
 name=nordugrid-arc-standalone
-version=$1
-source=nordugrid-arc-${version}.tar.gz
+architecture="x86_64"
 
+domakecheck="no"
+
+makeglobus="no"
 arcglobusmoduledir=globus-plugins
 
 # The metapackage should contain the following packages (order matters!):
-deppackages=(zlib openssl libiconv libxml2 gettext libsigcxx2 perl5.8 perl5 python_select glib2 glibmm libtool)
+deppackages=(zlib libiconv libxml2 gettext libsigcxx2 glib2 glibmm libtool)
 
 # The following globus packages are needed for a working ARC0 middleware module. Order matters.
 globuspkgs=(libtool common callout openssl gsi-openssl-error gsi-proxy-ssl openssl-module \
             gsi-cert-utils gsi-sysconfig gsi-callback gsi-credential gsi-proxy-core \
             gssapi-gsi gss-assist gssapi-error xio xio-gsi-driver io xio-popen-driver \
             ftp-control ftp-client rls-client)
+###
 
-function insertpackage() {
-pkgname=${1}
-pkgversion=${2}
-pkgdir=${name}-${version}.mpkg/Contents/
 
-if [[ "x${4}x" != "xx" ]]; then
-  pkgdir=${pkgdir}/Packages/${4}/Contents/
-fi
-rm -rf ${pkgdir}/Packages/${pkgname}-${pkgversion}.pkg
-mv -f ${pkgname}/${pkgname}-${pkgversion}.pkg ${pkgdir}/Packages/.
-gsed -i "/<\/array>/i \\
-\     <dict>\\
-\       <key>IFPkgFlagPackageLocation</key>\\
-\       <string>${pkgname}-${pkgversion}.pkg</string>\\
-\       <key>IFPkgFlagPackageSelection</key>\\
-\       <string>${3}</string>\\
-\     </dict>
-" ${pkgdir}/Info.plist
-}
+function initialise() {
+basedir=`pwd`
+workdir=`mktemp -d /tmp/arcstandalone-workdir-XXXXXX`
+cd ${workdir}
 
-function makedeppackage() {
-pkgname=${1}
-rm -rf ${pkgname}-arcstandalone
-mkdir ${pkgname}-arcstandalone
-# Modify Portfile  to our purpose.
-port cat ${pkgname} | sed -e :a -e '$!N;s/[[:space:]]*\\\n[[:space:]]*/ /;ta' \
-                    | sed -e "s/\${name}/${pkgname}/g" \
-                    | sed -e "s/\(name[[:space:]]*${pkgname}\)/\1-arcstandalone/" \
-                    | sed -e "/^depends_lib/d" \
-                    | sed -e "/^archcheck.files/d" \
-                    | sed -e "s/^\(master_sites[[:space:]]*gnu\)/\1:${pkgname}/" > ${pkgname}-arcstandalone/Portfile
-
-gsed -i "/checksums/i \\
-destroot.violate_mtree      yes\\
-" ${pkgname}-arcstandalone/Portfile
-
-if [[ ${pkgname} = "glibmm" ]]
-then
-  gsed -i -e "
-                  /^checksums/a \\
-                  \\
-                  configure.env PKG_CONFIG_LIBDIR=${location}/lib/pkgconfig
-                  " ${pkgname}-arcstandalone/Portfile
-fi
-
-# Set distname so source can be fetched.
-gsed -i "
-             /^[[:space:]]*version[[:space:]]/a \\
-             distname ${pkgname}-\${version}\\
-             " ${pkgname}-arcstandalone/Portfile
-# Make link to patch files.
-[[ -d `port dir ${pkgname}`/files ]] && ln -s `port dir ${pkgname}`/files ${pkgname}-arcstandalone/files
-# Wait 1 second before creating package to avoid MacPorts complaining about files in future.
-sleep 1
-# Make a package.
-port pkg -D ${pkgname}-arcstandalone +universal prefix=${location}
-if [[ $? -ne 0 ]]
-then
-  echo "Unable to make package ${pkgname}"
-  exit 1
-fi
-
-# Move package, so it is not deleted.
-pkgversion=`port info --version -D ${pkgname}-arcstandalone | awk '{ print $2 }'`
-mv -f ${pkgname}-arcstandalone/work/${pkgname}-arcstandalone-${pkgversion}.pkg ${pkgname}-arcstandalone/.
-mv -f ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj/Description.plist \
-      ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/.
-rm -rf ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj
-
-description=`port info --long_description -D ${pkgname}-arcstandalone | sed "s/^long_description: //"`
-description=${description//\//\\\/}
-
-gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
-  ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/Description.plist
-
-# Install package since others packages might depend on it.
-port install -D ${pkgname}-arcstandalone +universal prefix=${location}
-
-# Sanity check. Check if libraries are linked properly.
-depslibs=`port contents -D ${pkgname}-arcstandalone | grep ${location} | grep dylib`
-if [[ -n ${depslibs} ]] && [[ `otool -L ${depslibs} | grep -v ${location} |\
-                              grep -v /usr/lib |\
-                              grep -c -v /System/Library` -ne 0 ]]
-then
-  echo "The ${pkgname} package libraries are linked inconsistently."
-  otool -L ${depslibs} | grep -v ${location} | grep -v /usr/lib | grep -v /System/Library
-  exit 1
-fi
-
+mkdir -p macports/{registry,logs,software}
+ln -s /opt/local/var/macports/sources macports/sources
+cp -p /opt/local/var/macports/registry/registry.db macports/registry/.
+touch macports/variants.conf
 return 0
 }
 
-function makeglobuspackage() {
-pkgname=${1}
-portdir=${2-net}
-
-if [[ "${pkgname}" != "grid-packaging-tools" ]]; then
-  pkgname=globus-${pkgname}
-fi
-
-rm -rf ${pkgname}-arcstandalone
-mkdir ${pkgname}-arcstandalone
-# Modify Portfile  to our purpose.
-port cat -D ${basedir}/${portdir}/${pkgname} \
-  | sed -e :a -e '$!N;s/[[:space:]]*\\\n[[:space:]]*/ /;ta' \
-  | sed -e "s/\${name}/${pkgname}/g" \
-  | sed -e "s/\$name/${pkgname}/g" \
-  | sed -e "s/\(name[[:space:]]*${pkgname}\)/\1-arcstandalone/" \
-  | sed -e "/^depends/d" \
-  | sed -e "s@\${prefix}/share/libtool@/opt/local/share/libtool@g" \
-  | sed -e "/^archcheck.files/d" > ${pkgname}-arcstandalone/Portfile
-
-gsed -i "/checksums/i \\
-destroot.violate_mtree      yes\\
-" ${pkgname}-arcstandalone/Portfile
-
-# Make link to patch files.
-[[ -d `port dir -D ${basedir}/${portdir}/${pkgname}`/files ]] && ln -s `port dir -D ${basedir}/${portdir}/${pkgname}`/files ${pkgname}-arcstandalone/files
-
-if [[ "${pkgname}" == "grid-packaging-tools" ]] || [[ "${pkgname}" == "globus-core" ]];
-then
-  port install -D ${pkgname}-arcstandalone +universal prefix=${location}
-  if [[ $? -ne 0 ]]
-  then
-    echo "Unable to make package ${pkgname}"
-    exit 1
+function toggleownmacportconf() {
+if test "${1}" = "on"; then
+  if test -L ${HOME}/.macports/macports.conf && test "`readlink ${HOME}/.macports/macports.conf`" = "${workdir}/macports.conf"; then
+    return
   fi
+  
+  if test -f ${HOME}/.macports/macports.conf; then
+    mv ${HOME}/.macports/macports.conf ${workdir}/macports.conf.orig
+  fi
+  
+  cat << EOF > ${workdir}/macports.conf
+# Set the directory in which to install ports. Must match where MacPorts itself is installed.
+prefix			/opt/local
 
-  return
+# Where to store MacPorts working data
+portdbpath		${workdir}/macports
+
+applications_dir	/Applications/MacPorts
+frameworks_dir		/opt/local/Library/Frameworks
+sources_conf		/opt/local/etc/macports/sources.conf
+variants_conf		${workdir}/macports/variants.conf
+universal_archs			x86_64 i386
+EOF
+
+  ln -s ${workdir}/macports.conf ${HOME}/.macports/macports.conf
+elif test "${1}" = "off"; then
+  if test -L ${HOME}/.macports/macports.conf && test "`readlink ${HOME}/.macports/macports.conf`" = "${workdir}/macports.conf"; then
+    rm ${HOME}/.macports/macports.conf
+    if test -f ${workdir}/macports.conf.orig; then
+      mv ${workdir}/macports.conf.orig ${HOME}/.macports/macports.conf
+    fi
+  fi
 fi
 
-# Make a package.
-port pkg -D ${pkgname}-arcstandalone +universal prefix=${location}
-if [[ $? -ne 0 ]]
-then
-  echo "Unable to make package ${pkgname}"
-  exit 1
-fi
-
-# Move package, so it is not deleted.
-pkgversion=`port info --version -D ${pkgname}-arcstandalone | awk '{ print $2 }'`
-mv -f ${pkgname}-arcstandalone/work/${pkgname}-arcstandalone-${pkgversion}.pkg ${pkgname}-arcstandalone/.
-mv -f ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj/Description.plist \
-      ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/.
-rm -rf ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj
-
-description=`port info --long_description -D ${pkgname}-arcstandalone | sed "s/^long_description: //"`
-description=${description//\//\\\/}
-
-gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
-  ${pkgname}-arcstandalone/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/Description.plist
-
-# Install package since others packages might depend on it.
-port install -D ${pkgname}-arcstandalone +universal prefix=${location}
-
-# Sanity check. Check if libraries are linked properly.
-depslibs=`port contents -D ${pkgname}-arcstandalone | grep ${location} | grep dylib`
-if [[ -n ${depslibs} ]] && [[ `otool -L ${depslibs} | grep -v ${location} |\
-                              grep -v /usr/lib |\
-                              grep -c -v /System/Library` -ne 0 ]]
-then
-  echo "The ${pkgname} package libraries are linked inconsistently."
-  otool -L ${depslibs} | grep -v ${location} | grep -v /usr/lib | grep -v /System/Library
-  exit 1
-fi
-
-return 0
 }
 
 function requiredpackagescheck() {
+toggleownmacportconf on
 # The following packages are required to be installed to build the stand-alone package.
 requiredpkgs=(gsed gperf pkgconfig autoconf automake wget doxygen p5-archive-tar perl5)
 pkgsneeded=
 installedports=`port installed`
+toggleownmacportconf off
 for package in ${requiredpkgs[@]}
 do
   [[ `echo $installedports | grep -c $package` -eq 0 ]] && pkgsneeded="$pkgsneeded $package"
@@ -243,50 +97,393 @@ then
   echo "The following packages are required to build the stand-alone:"
   echo $pkgsneeded
   echo "Please install them."
-  exit 1
+  return 1
 fi
+
+return 0
 }
 
 function fetchsource() {
 # Source need to be downloaded to be able to calculate checksums. Remove old source first.
-rm -rf ${basedir}/${name}/files
-mkdir ${basedir}/${name}/files
-wget -q -O ${basedir}/${name}/files/${source} http://download.nordugrid.org/software/nordugrid-arc/${type}/${version}/src/${source}
+rm -rf ${workdir}/${name}/files
+mkdir -p ${workdir}/${name}/files
+
+if test ${type} == "nightlies"
+then
+  if test "x${version}" == "x"; then
+    version=`date +%F`
+  fi
+  source=`wget -O - -q http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/${version}/src | grep -o "nordugrid-arc-[0-9]\+.tar.gz" | head -1`
+
+  if test "x${source}" == "x"; then
+    echo "Unable to locate source."
+    return 1
+  fi
+
+  wget -q http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/${version}/src/${source} -O ${workdir}/${name}/files/${source}
+else
+  source=nordugrid-arc-${version}.tar.gz
+  wget -q http://download.nordugrid.org/software/nordugrid-arc/${type}/${version}/src/${source} -O ${workdir}/${name}/files/${source}
+fi
 
 if [[ $? != 0 ]]
 then
   echo "Unable to fetch source."
-  exit 1
+  return 1
 fi
+
+return 0
 }
 
-function calculatechecksums() {
+function createportfile() {
+if test ! -f ${workdir}/${name}/files/${source}; then
+  echo "Unable to create Portfile. Source ${workdir}/${name}/files/${source} does not exist."
+  return 1
+fi
+
 # Calculate and insert checksums and insert version.
-md5=`md5 ${basedir}/${name}/files/${source} | awk '{ print $NF }'`
-sha1=`openssl sha1 ${basedir}/${name}/files/${source} | awk '{ print $NF }'`
-rmd160=`openssl rmd160 ${basedir}/${name}/files/${source} | awk '{ print $NF }'`
-sed -e "s/__VERSION__/${version}/" \
-    -e "s/__MD5__/${md5}/" \
-    -e "s/__SHA1__/${sha1}/" \
-    -e "s/__RMD160__/${rmd160}/" ${basedir}/${name}/Portfile.in > ${basedir}/${name}/Portfile
+md5=`md5 ${workdir}/${name}/files/${source} | awk '{ print $NF }'`
+sha1=`openssl sha1 ${workdir}/${name}/files/${source} | awk '{ print $NF }'`
+rmd160=`openssl rmd160 ${workdir}/${name}/files/${source} | awk '{ print $NF }'`
+
+cat << EOF > ${workdir}/${name}/Portfile
+set sourcename nordugrid-arc
+
+PortSystem              1.0
+
+name                \${sourcename}-standalone
+version             ${version}
+categories          grid
+maintainers         NorduGrid
+description         \${version} release of the Advanced Resource Connector (ARC)
+long_description    \\
+        The Advanced Resource Connector (ARC) middleware, introduced by \\
+        NorduGrid (www.nordugrid.org), is an open source software solution \\
+        enabling production quality computational and data Grids since May \\
+        2002.
+
+homepage            http://www.nordugrid.org
+platforms           darwin
+distfiles           ${source}
+checksums           md5     ${md5} \\
+                    sha1    ${sha1} \\
+                    rmd160  ${rmd160}
+
+worksrcdir          ${source//.tar.gz}
+pre-configure       {
+    reinplace "s/@MSGMERGE@ --update/@MSGMERGE@ --update --backup=off/" \${worksrcpath}/po/Makefile.in.in
+}
+configure.env PKG_CONFIG_LIBDIR=\${prefix}/lib/pkgconfig:/usr/lib/pkgconfig
+configure.args-append --disable-xmlsec1 --disable-all --enable-hed --enable-arclib-client --enable-credentials-client --enable-data-client --enable-srm-client --enable-doc --enable-cppunit
+
+test.run            yes
+test.target         check
+
+post-destroot {
+  system "rm -rf \${destroot}/\${prefix}/share/arc/examples/config"
+  system "rm -rf \${destroot}/\${prefix}/share/arc/examples/echo"
+  system "rm -rf \${destroot}/\${prefix}/share/arc/profiles"
+  system "rm -rf \${destroot}/\${prefix}/share/arc/schema"
+  system "rm -rf \${destroot}/\${prefix}/share/doc"
+  system "rm -rf \${destroot}/\${prefix}/share/man/man8"
+  system "rm -rf \${destroot}/\${prefix}/sbin"
+  system "rm -rf \${destroot}/\${prefix}/libexec"
+  system "rm -rf \${destroot}/Library"
+}
+
+destroot.violate_mtree      yes
+EOF
+
+return 0
+}
+
+function insertpackage() {
+pkgname=${1}
+pkgversion=${2}
+
+pkgdir=${name}-${version}.mpkg/Contents/
+[[ "x${4}x" != "xx" ]] && pkgdir=${pkgdir}/Packages/${4}/Contents/
+
+rm -rf ${pkgdir}/Packages/${pkgname}-arcstandalone-${pkgversion}.pkg
+mv -f ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg ${pkgdir}/Packages/.
+
+if [[ $? != 0 ]]; then
+  echo "Unable to locate package ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg"
+  return 1
+fi
+
+gsed -i "/<\/array>/i \\
+\     <dict>\\
+\       <key>IFPkgFlagPackageLocation</key>\\
+\       <string>${pkgname}-arcstandalone-${pkgversion}.pkg</string>\\
+\       <key>IFPkgFlagPackageSelection</key>\\
+\       <string>${3}</string>\\
+\     </dict>
+" ${pkgdir}/Info.plist
+
+return 0
+}
+
+function makedeppackage() {
+pkgname=${1}
+rm -rf ${pkgname}
+mkdir ${pkgname}
+# Modify Portfile  to our purpose.
+port cat ${pkgname} | sed -e :a -e '$!N;s/[[:space:]]*\\\n[[:space:]]*/ /;ta' \
+                    | sed -e "s/\${name}/${pkgname}/g" \
+                    | sed -e "s/\(name[[:space:]]*${pkgname}\)/\1-arcstandalone/" \
+                    | sed -e "/^depends_lib/d" \
+                    | sed -e "/^archcheck.files/d" \
+                    | sed -e "s/^\(master_sites[[:space:]]*gnu\)/\1:${pkgname}/" > ${pkgname}/Portfile
+
+gsed -i "/checksums/i \\
+destroot.violate_mtree      yes\\
+" ${pkgname}/Portfile
+
+if [[ "x${pkgname}" = "xglibmm" ]]
+then
+  gsed -i -e "
+                  /^checksums/a \\
+                  \\
+                  configure.env PKG_CONFIG_LIBDIR=${location}/lib/pkgconfig
+                  " ${pkgname}/Portfile
+fi
+
+# Set distname so source can be fetched.
+gsed -i "
+             /^[[:space:]]*version[[:space:]]/a \\
+             distname ${pkgname}-\${version}\\
+             " ${pkgname}/Portfile
+# Make link to patch files.
+[[ -d `port dir ${pkgname}`/files ]] && ln -s `port dir ${pkgname}`/files ${pkgname}/files
+# Wait 1 second before creating package to avoid MacPorts complaining about files in future.
+sleep 1
+# Make a package.
+toggleownmacportconf on
+port pkg -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+if [[ $? -ne 0 ]]
+then
+  echo "Unable to make package ${pkgname}"
+  toggleownmacportconf off
+  return 1
+fi
+toggleownmacportconf off
+
+# Move package, so it is not deleted.
+pkgversion=`port info --version -D ${pkgname} | awk '{ print $2 }'`
+mv -f ${pkgname}/work/${pkgname}-arcstandalone-${pkgversion}.pkg ${pkgname}/.
+mv -f ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj/Description.plist \
+      ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/.
+rm -rf ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj
+
+description=`port info --long_description -D ${pkgname} | sed "s/^long_description: //"`
+description=${description//\//\\\/}
+
+gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
+  ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/Description.plist
+
+toggleownmacportconf on
+# Install package since other packages might depend on it.
+port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+
+# Sanity check. Check if libraries are linked properly.
+depslibs=`port contents -D ${pkgname} | grep ${location} | grep dylib`
+toggleownmacportconf off
+if [[ -n ${depslibs} ]] && [[ `otool -L ${depslibs} | grep -v ${location} |\
+                              grep -v /usr/lib |\
+                              grep -c -v /System/Library` -ne 0 ]]
+then
+  echo "The ${pkgname} package libraries are linked inconsistently."
+  otool -L ${depslibs} | grep -v ${location} | grep -v /usr/lib | grep -v /System/Library
+  return 1
+fi
+
+return 0
 }
 
 function makedependencypackages() {
 for package in ${deppackages[@]}
 do
-  makedeppackage $package
+  makedeppackage $package || return 1
 done
+
+return 0
+}
+
+function makeglobuspackage() {
+pkgname=${1}
+
+export PERL5LIB="${location}/lib/perl5/vendor_perl"
+
+if [[ "${pkgname}" != "grid-packaging-tools" ]]; then
+  pkgname=globus-${pkgname}
+fi
+
+rm -rf ${pkgname}
+mkdir ${pkgname}
+# Modify Portfile  to our purpose.
+port cat ${pkgname} \
+  | sed -e :a -e '$!N;s/[[:space:]]*\\\n[[:space:]]*/ /;ta' \
+  | sed -e "s/\${name}/${pkgname}/g" \
+  | sed -e "s/\$name/${pkgname}/g" \
+  | sed -e "s/\(name[[:space:]]*${pkgname}\)/\1-arcstandalone/" \
+  | sed -e "/^depends/d" \
+  | sed -e "s@\${prefix}/share/libtool@/opt/local/share/libtool@g" \
+  | sed -e "s@\${perl_vendor_lib}@${PERL5LIB}@" \
+  | sed -e "/^archcheck.files/d" > ${pkgname}/Portfile
+
+gsed -i "/checksums/i \\
+destroot.violate_mtree      yes\\
+" ${pkgname}/Portfile
+
+if test "x${pkgname}" == "xglobus-openssl"; then
+  gsed -i "/configure {/a \\
+    set env(PKG_CONFIG_LIBDIR) ${location}:/usr/lib/pkgconfig\\
+" ${pkgname}/Portfile
+fi
+
+# Make link to patch files.
+[[ -d `port dir ${pkgname}`/files ]] && ln -s `port dir ${pkgname}`/files ${pkgname}/files
+
+# Wait 1 second before creating package to avoid MacPorts complaining about files in future.
+sleep 1
+
+if [[ "${pkgname}" == "grid-packaging-tools" ]] || [[ "${pkgname}" == "globus-core" ]];
+then
+  toggleownmacportconf on
+  port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+  if [[ $? -ne 0 ]]
+  then
+    toggleownmacportconf off
+
+    echo "Unable to make package ${pkgname}"
+    return 1
+  fi
+
+  toggleownmacportconf off
+  return 0
+fi
+
+toggleownmacportconf on
+# Make a package.
+port pkg -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+if [[ $? -ne 0 ]]
+then
+  toggleownmacportconf off
+  echo "Unable to make package ${pkgname}"
+  return 1
+fi
+toggleownmacportconf off
+
+# Move package, so it is not deleted.
+pkgversion=`port info --version -D ${pkgname} | awk '{ print $2 }'`
+mv -f ${pkgname}/work/${pkgname}-arcstandalone-${pkgversion}.pkg ${pkgname}/.
+mv -f ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj/Description.plist \
+      ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/.
+rm -rf ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj
+
+description=`port info --long_description -D ${pkgname} | sed "s/^long_description: //"`
+description=${description//\//\\\/}
+
+gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
+  ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/Description.plist
+
+toggleownmacportconf on
+# Install package since others packages might depend on it.
+port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+
+# Sanity check. Check if libraries are linked properly.
+depslibs=`port contents -D ${pkgname} | grep ${location} | grep dylib`
+toggleownmacportconf off
+if [[ -n ${depslibs} ]] && [[ `otool -L ${depslibs} | grep -v ${location} |\
+                              grep -v /usr/lib |\
+                              grep -c -v /System/Library` -ne 0 ]]
+then
+  echo "The ${pkgname} package libraries are linked inconsistently."
+  otool -L ${depslibs} | grep -v ${location} | grep -v /usr/lib | grep -v /System/Library
+  return 1
+fi
+
+return 0
 }
 
 function makeglobuspackages() {
 # Make globus packages. grid-packaging-tools and globus-core is needed to build the other packages.
-makeglobuspackage grid-packaging-tools devel
-makeglobuspackage core devel
+makeglobuspackage grid-packaging-tools || return 1
+makeglobuspackage core || return 1
 
 for package in ${globuspkgs[@]}
 do
-  makeglobuspackage $package
+  makeglobuspackage $package || return 1
 done
+
+return 0
+}
+
+function makearcmetapackage() {
+# Create the Nordugrid ARC stand-alone package.
+toggleownmacportconf on
+
+# Build and test the stand-alone
+port -d build -D ${workdir}/${name} prefix=${location} build_arch=${architecture} workpath=${workdir}/${name}/work distpath=${workdir}/${name}/files
+if [[ $? != 0 ]]
+then
+  toggleownmacportconf off
+  echo "Building ${name} failed"
+  return 1
+fi
+
+if test "x${domakecheck}" == "xyes"; then
+  port -d test -D ${workdir}/${name} prefix=${location} build_arch=${architecture} workpath=${workdir}/${name}/work distpath=${workdir}/${name}/files
+  if [[ $? != 0 ]]
+  then
+    toggleownmacportconf off
+    echo "Make check failed for ${name}"
+    return 1
+  fi
+fi
+# Then destroot it in order to extract the globus dependend modules.
+port destroot -D ${workdir}/${name} prefix=${location} build_arch=${architecture} workpath=${workdir}/${name}/work distpath=${workdir}/${name}/files
+if [[ $? != 0 ]]
+then
+  toggleownmacportconf off
+  echo "Make install failed for ${name}"
+  return 1
+fi
+
+# Sanity check. Check if libraries are linked properly.
+depslibs=`find ${name}/work/destroot/opt/local/nordugrid -name "*.dylib"`
+if [[ -n ${depslibs} ]] && [[ `otool -L ${depslibs} | grep -v ${location} |\
+                              grep -v /usr/lib |\
+                              grep -c -v /System/Library` -ne 0 ]]
+then
+  toggleownmacportconf off
+  echo "The ${name} package libraries are linked inconsistently."
+  otool -L ${depslibs} | grep -v ${location} | grep -v /usr/lib | grep -v /System/Library
+  return 1
+fi
+
+if test "x${makeglobus}" == "xyes"
+then
+  # Make directory for modules and move them there.
+  mkdir -p ${workdir}/${arcglobusmoduledir}/destroot/${location}/lib/arc
+  mv ${workdir}/${name}/work/destroot/${location}/lib/arc/lib{dmc{gridftp,rls},accARC0,mccgsi}.* ${workdir}/${arcglobusmoduledir}/destroot/${location}/lib/arc/.
+fi
+
+# Make meta package which should contain dependencies as well.
+port mpkg -D ${workdir}/${name} prefix=${location} build_arch=${architecture} workpath=${workdir}/${name}/work
+if [[ $? != 0 ]]
+then
+  toggleownmacportconf off
+  echo "Creating meta-package ${name} failed"
+  return 1
+fi
+toggleownmacportconf off
+
+# Copy meta package for convenience.
+cp -a ${workdir}/${name}/work/${name}-${version}.mpkg ${workdir}/.
+
+return 0
 }
 
 function groupdependencypackages() {
@@ -337,7 +534,7 @@ EOF
 
 for package in ${deppackages[@]}
 do
-  insertpackage ${package}-arcstandalone `port info --version -D ${package}-arcstandalone | awk '{print $2}'` required arcstandalone-dependencies.mpkg
+  insertpackage ${package} `port info --version -D ${package} | awk '{print $2}'` required arcstandalone-dependencies.mpkg || return 1
 done
 
 gsed -i "/<\/array>/i \\
@@ -348,6 +545,8 @@ gsed -i "/<\/array>/i \\
 \       <string>required</string>\\
 \     </dict>
 " ${name}-${version}.mpkg/Contents/Info.plist
+
+return 0
 }
 
 function groupglobuspackages() {
@@ -402,7 +601,7 @@ EOF
 
 for package in ${globuspkgs[@]}
 do
-  insertpackage globus-${package}-arcstandalone `port info --version -D globus-${package}-arcstandalone | awk '{print $2}'` required globus-dependencies.mpkg
+  insertpackage globus-${package} `port info --version -D globus-${package} | awk '{print $2}'` required globus-dependencies.mpkg || return 1
 done
 
 gsed -i "/<\/array>/i \\
@@ -413,18 +612,20 @@ gsed -i "/<\/array>/i \\
 \       <string>selected</string>\\
 \     </dict>
 " ${name}-${version}.mpkg/Contents/Info.plist
+
+return 0
 }
 
 function packagearcglobusmodule() {
 # Package ARC globus modules.
-mkdir -p ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents/Resources
-mkbom ${arcglobusmoduledir}/destroot ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents/Archive.bom
+mkdir -p ${arcglobusmoduledir}/${arcglobusmoduledir}-arcstandalone-${version}.pkg/Contents/Resources
+mkbom ${arcglobusmoduledir}/destroot ${arcglobusmoduledir}/${arcglobusmoduledir}-arcstandalone-${version}.pkg/Contents/Archive.bom
 pax -w ${arcglobusmoduledir}/destroot/opt -x cpio \
-    -f ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents/Archive.pax \
+    -f ${arcglobusmoduledir}/${arcglobusmoduledir}-arcstandalone-${version}.pkg/Contents/Archive.pax \
     -s /${arcglobusmoduledir}\\\/destroot/./
-gzip ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents/Archive.pax
+gzip ${arcglobusmoduledir}/${arcglobusmoduledir}-arcstandalone-${version}.pkg/Contents/Archive.pax
 
-cat << EOF > ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents/Resources/Description.plist
+cat << EOF > ${arcglobusmoduledir}/${arcglobusmoduledir}-arcstandalone-${version}.pkg/Contents/Resources/Description.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -437,7 +638,7 @@ cat << EOF > ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents
 </plist>
 EOF
 
-cat << EOF > ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents/Info.plist
+cat << EOF > ${arcglobusmoduledir}/${arcglobusmoduledir}-arcstandalone-${version}.pkg/Contents/Info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -447,7 +648,7 @@ cat << EOF > ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents
   <key>CFBundleIdentifier</key>
   <string>nordugrid-arc-plugins-globus</string>
   <key>CFBundleName</key>
-  <string>zlib-arcstandalone</string>
+  <string>nordugrid-arc-plugins-globus ${version}</string>
   <key>CFBundleShortVersionString</key>
   <string>${version}</string>
   <key>IFMajorVersion</key>
@@ -484,55 +685,34 @@ cat << EOF > ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents
 </plist>
 EOF
 
-echo -n "pmkrpkg1" >  ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents/PkgInfo
-echo    "major: 1" >  ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents/Resources/package_version
-echo -n "minor: 1" >> ${arcglobusmoduledir}/${arcglobusmoduledir}-${version}.pkg/Contents/Resources/package_version
+echo -n "pmkrpkg1" >  ${arcglobusmoduledir}/${arcglobusmoduledir}-arcstandalone-${version}.pkg/Contents/PkgInfo
+echo    "major: 1" >  ${arcglobusmoduledir}/${arcglobusmoduledir}-arcstandalone-${version}.pkg/Contents/Resources/package_version
+echo -n "minor: 1" >> ${arcglobusmoduledir}/${arcglobusmoduledir}-arcstandalone-${version}.pkg/Contents/Resources/package_version
 
-insertpackage ${arcglobusmoduledir} ${version} required globus-dependencies.mpkg
+insertpackage ${arcglobusmoduledir} ${version} required globus-dependencies.mpkg || return 1
+
+return 0
 }
 
 function packagecertificates() {
+toggleownmacportconf on
 # Include igtf-certificates in the standalone package.
-port pkg -D ${basedir}/igtf-certificates prefix=${location}
-mkdir -p igtf-certificates
-mv -f ${basedir}/igtf-certificates/work/igtf-certificates-`port info --version -D ${basedir}/igtf-certificates | awk '{ print $2 }'`.pkg \
-      igtf-certificates/.
-insertpackage igtf-certificates `port info --version -D ${basedir}/igtf-certificates | awk '{ print $2 }'` selected
-port clean --all -D ${basedir}/igtf-certificates
-}
+port pkg igtf-certificates prefix=${location} build_arch=${architecture} workpath=${workdir}/igtf-certificates/work
+toggleownmacportconf off
 
-function cleanup() {
-# Clean package.
-port clean --all -D ${basedir}/${name}
-port clean --all -D ${basedir}/igtf-certificates
+igtfversion=`port info --version igtf-certificates | awk '{ print $2 }'`
 
-# Remove arcstandalone packages and delete temporary directories.
-for package in ${deppackages[@]}
-do
-  port uninstall ${package}-arcstandalone
-  rm -rf ${package}-arcstandalone
-done
-for package in ${globuspkgs[@]}
-do
-  port uninstall globus-${package}-arcstandalone
-  rm -rf globus-${package}-arcstandalone
-done
-port uninstall grid-packaging-tools-arcstandalone
-rm -rf grid-packaging-tools-arcstandalone
-port uninstall globus-core-arcstandalone
-rm -rf globus-core-arcstandalone
+mv -f ${workdir}/igtf-certificates/work/igtf-certificates-${igtfversion}.pkg \
+      ${workdir}/igtf-certificates/igtf-certificates-arcstandalone-${igtfversion}.pkg
 
-# Remove temporary files.
-rm -f `find ${name}-${version}.mpkg/ -name "*.old"`
-}
-
-function compresspackage() {
-# Compress package
-zip -qr ${name}-${version}.mpkg.zip ${name}-${version}.mpkg
-if [[ $? -eq 0 ]]
-then
-  rm -rf ${name}-${version}.mpkg
+if [[ $? != 0 ]]; then
+  echo "igtf-certificates package not found"
+  return 1
 fi
+
+insertpackage igtf-certificates ${igtfversion} selected || return 1
+
+return 0
 }
 
 function completepackage() {
@@ -546,76 +726,187 @@ EOF
 export PATH=\$PATH:${location}/bin
 
 cp \${PACKAGE_PATH}/Contents/Resources/ReadMe ${location}/.
+
+if test -f /etc/profile && test ! `grep -q GLOBUS_LOCATION /etc/profile` ; then
+  echo "export GLOBUS_LOCATION=${location}" >> /etc/profile
+fi
 EEOOFF
+
 chmod +x ${name}-${version}.mpkg/Contents/Resources/postinstall
 
-cp ${basedir}/${name}/work/nordugrid-arc-${version}/LICENSE \
+cp ${workdir}/${name}/work/${source//.tar.gz}/LICENSE \
    ${name}-${version}.mpkg/Contents/Resources/License
-sed "s@__LOCATION__@${location}@g" ${basedir}/ReadMe > ${name}-${version}.mpkg/Contents/Resources/ReadMe
+
+cat << EOF > ${name}-${version}.mpkg/Contents/Resources/ReadMe
+You need to do the following steps after installation of ARC
+------------------------------------------------------------
+
+Install Grid certificate and private key:
+
+  Copy your usercert.pem file to: \$HOME/.globus/usercert.pem
+  Copy your userkey.pem  file to: \$HOME/.globus/userkey.pem
+
+
+Other information
+-----------------
+
+Default client.conf, jobs.xml directory location (these directories are hidden by default):
+
+  \$HOME/.arc
+
+
+Uninstalling this package
+-------------------------
+
+To uninstall this package simply remove the '${location}' directory and the file '/etc/paths.d/nordugrid-arc-nox-standalone'.
+Additionally user configuration files might exist in the \$HOME/.arc directory, which can safely be removed.
+EOF
 
 # Remove MacPorts background and use own background.
-rm -f ${name}-${version}.mpkg/Contents/Resources/background.tiff
-cp ${basedir}/logo-ng-shaded.png \
-   ${name}-${version}.mpkg/Contents/Resources/background
+wget -q http://www.nordugrid.org/images/ng-logo.png -O ${name}-${version}.mpkg/Contents/Resources/background
 
-# Put logo in bottom-left corner, and do not scale it.
-gsed -i \
-  -e "/<key>IFPkgFlagComponentDirectory<\/key>/i \\
+if [[ $? != 0 ]]; then
+  echo "WARNING: Unable to fetch NG-logo"
+else 
+  rm -f ${name}-${version}.mpkg/Contents/Resources/background.tiff
+
+  # Put logo in bottom-left corner, and do not scale it.
+  gsed -i \
+    -e "/<key>IFPkgFlagComponentDirectory<\/key>/i \\
 \  <key>IFPkgFlagBackgroundAlignment</key>\\
 \  <string>bottomleft</string>\\
 \  <key>IFPkgFlagBackgroundScaling</key>\\
 \  <string>none</string>\\
 " \
-  -e "/<string>${name}-${version}.pkg<\/string>/,/<string>selected<\/string>/s/selected/required/" \
-  ${name}-${version}.mpkg/Contents/Info.plist
+    -e "/<string>${name}-${version}.pkg<\/string>/,/<string>selected<\/string>/s/selected/required/" \
+    ${name}-${version}.mpkg/Contents/Info.plist
+fi
+
+
+return 0
+}
+
+function compresspackage() {
+# Compress package
+zip -qr ${name}-${version}.mpkg.zip ${name}-${version}.mpkg
+if [[ $? != 0 ]]; then
+  echo "Unable to compress package."
+  return 1
+fi
+
+rm -rf ${name}-${version}.mpkg
+mv ${name}-${version}.mpkg.zip ${basedir}/.
+if [[ $? != 0 ]]; then
+  echo "Unable to move package \"${name}-${version}.mpkg.zip\" to \"${basedir}/.\""
+  return 1
+fi
+
+return 0
+}
+
+function cleanup() {
+toggleownmacportconf on
+
+# Clean package.
+port -q clean --all -D ${workdir}/${name}
+port -q clean --all igtf-certificates
+
+# Remove arcstandalone packages and delete temporary directories.
+for package in ${deppackages[@]}
+do
+  port -q uninstall -D ${workdir}/${package}
+  rm -rf ${package}
+done
+for package in ${globuspkgs[@]}
+do
+  port -q uninstall globus-${package}-arcstandalone
+  rm -rf globus-${package}
+done
+port -q uninstall grid-packaging-tools-arcstandalone
+rm -rf grid-packaging-tools
+port -q uninstall globus-core-arcstandalone
+rm -rf globus-core
+
+toggleownmacportconf off
+
+rm -rf ${location}/*
+
+cd ${basedir}
+rm -rf ${workdir}
+
+return 0
+}
+
+function build_standalone() {
+
+echo "Building ARC standalone for Mac OS X with the following options:"
+echo "Name: $name"
+echo "Version: $version"
+echo "Channel: $type"
+echo "Install location: $location"
+echo "Architecture: $architecture"
+echo "Build globus module: $makeglobus"
+
+initialise || return 1
+
+echo "Working directory: $workdir"
+
+requiredpackagescheck || return 1
+fetchsource || return 1
+createportfile || return 1
+
+makedependencypackages || return 1
+if test "x${makeglobus}" == "xyes"
+then
+makeglobuspackages || return 1
+fi
+
+makearcmetapackage || return 1
+
+groupdependencypackages || return 1
+if test "x${makeglobus}" == "xyes"
+then
+groupglobuspackages || return 1
+packagearcglobusmodule || return 1
+fi
+packagecertificates || return 1
+completepackage || return 1
+compresspackage || return 1
+cleanup || return 1
+
+echo "Creating ${name}-standalone finished successfully"
 }
 
 
-requiredpackagescheck
-fetchsource
-calculatechecksums
-makedependencypackages
-if test "x${makeglobus}" == "xyes"
-then
-makeglobuspackages
-fi
-
-# Create the Nordugrid ARC stand-alone package.
-# First destroot the stand-alone in order to extract the globus dependend modules.
-port destroot -D ${basedir}/${name} +universal prefix=${location}
-if [[ $? != 0 ]]
-then
-  echo "Building ${name} failed"
+if test "x${BUILD_ARC_INTERACTIVE}" != "xyes"; then
+if test $# -gt 4; then
+  echo "0 to 4 arguments needed."
+  echo "${0} [type] [version] [build globus] [perform make check]"
   exit 1
 fi
 
-if test "x${makeglobus}" == "xyes"
-then
-# Make directory for modules and move them there.
-mkdir -p ${arcglobusmoduledir}/destroot/${location}/lib/arc
-mv `port work -D ${basedir}/${name}`/destroot/${location}/lib/arc/lib{dmc{gridftp,rls},accARC0,mccgsi}.* ${arcglobusmoduledir}/destroot/${location}/lib/arc/.
+# First argument is type which should be one of (releases, testing, experimental, nightlies)
+if test ${1} != "releases" && test ${1} != "testing" && test ${1} != "experimental"; then
+  type="nightlies"
+else
+  type=${1}
 fi
-# Make meta package which should contain dependencies as well.
-port mpkg -D ${basedir}/${name} +universal prefix=${location}
-if [[ $? != 0 ]]
+
+if test ${type} != "nightlies" && test $# == 1
 then
-  echo "Creating meta-package ${name} failed"
+  echo "2nd argument (version) must be specified for type \"${type}\"."
   exit 1
 fi
-# Copy meta package for convenience.
-cp -a `port work -D ${basedir}/${name}`/${name}-${version}.mpkg .
 
-groupdependencypackages
-if test "x${makeglobus}" == "xyes"
-then
-groupglobuspackages
-packagearcglobusmodule
+if test "x${2}" != "x"; then
+  version=${2}
 fi
-packagecertificates
-completepackage
-cleanup
-compresspackage
 
-cd ${basedir}
-mv ${workdir}/${name}-${version}.mpkg.zip .
-rm -rf ${workdir}
+test $# -ge 3 && test "x${3}" == "xyes" && makeglobus="yes"
+test $# == 4 && test "x${4}" == "xyes" && domakecheck="yes"
+
+else
+type="nightlies"
+fi
+
+test "x${BUILD_ARC_INTERACTIVE}" != "xyes" && build_standalone
