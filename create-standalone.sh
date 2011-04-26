@@ -37,6 +37,7 @@ basedir=`pwd`
 workdir=`mktemp -d /tmp/arcstandalone-workdir-XXXXXX`
 cd ${workdir}
 
+mkdir ${HOME}/.macports
 mkdir -p macports/{registry,logs,software}
 ln -s /opt/local/var/macports/sources macports/sources
 cp -p /opt/local/var/macports/registry/registry.db macports/registry/.
