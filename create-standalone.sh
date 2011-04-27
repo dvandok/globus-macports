@@ -735,10 +735,6 @@ EOF
 export PATH=\$PATH:${location}/bin
 
 cp \${PACKAGE_PATH}/Contents/Resources/ReadMe ${location}/.
-
-if test -f /etc/profile && test ! `grep -q GLOBUS_LOCATION /etc/profile` ; then
-  echo "export GLOBUS_LOCATION=${location}" >> /etc/profile
-fi
 EEOOFF
 
 chmod +x ${name}-${version}.mpkg/Contents/Resources/postinstall
@@ -747,14 +743,18 @@ cp ${workdir}/${name}/work/${source//.tar.gz}/LICENSE \
    ${name}-${version}.mpkg/Contents/Resources/License
 
 cat << EOF > ${name}-${version}.mpkg/Contents/Resources/ReadMe
-You need to do the following steps after installation of ARC
-------------------------------------------------------------
+NOTE: You need to do the following steps after installation of ARC
+-------------------------------------------------------------------
 
 Install Grid certificate and private key:
 
-  Copy your usercert.pem file to: \$HOME/.globus/usercert.pem
-  Copy your userkey.pem  file to: \$HOME/.globus/userkey.pem
+  Copy your user certificate (e.g. usercert.pem) to: \$HOME/.globus/usercert.pem
+  Copy your user key (e.g. userkey.pem) to: \$HOME/.globus/userkey.pem
 
+Also you should set the environment variable GLOBUS_LOCATION to ${location}
+in the shell where ARC will be executed in order for the certain ARC modules
+to function. E.g. for bash:
+export GLOBUS_LOCATION=${location}
 
 Other information
 -----------------
