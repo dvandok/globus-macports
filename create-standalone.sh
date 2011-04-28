@@ -17,10 +17,6 @@ architecture="x86_64"
 
 domakecheck="no"
 
-# Group ID to install files as.
-installgroup=
-test "x${ARC_BUILD_GROUP}" != "x" && installgroup="install.group="${ARC_BUILD_GROUP}
-
 makeglobus="yes"
 arcglobusmoduledir=globus-plugins
 
@@ -292,7 +288,7 @@ gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
 
 toggleownmacportconf on
 # Install package since other packages might depend on it.
-port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work ${installgroup}
+port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
 if test $? != 0; then
   echo "Unable to install package ${pkgname}"
   return 1
@@ -363,7 +359,7 @@ sleep 1
 if [[ "${pkgname}" == "grid-packaging-tools" ]] || [[ "${pkgname}" == "globus-core" ]];
 then
   toggleownmacportconf on
-  port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work ${installgroup}
+  port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
   if [[ $? -ne 0 ]]
   then
     toggleownmacportconf off
@@ -402,7 +398,7 @@ gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
 
 toggleownmacportconf on
 # Install package since others packages might depend on it.
-port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work ${installgroup}
+port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
 if test $? != 0; then
   echo "Unable to install package ${pkgname}"
   return 1
