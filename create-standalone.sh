@@ -1,8 +1,15 @@
 #!/bin/bash
 #
 # This script creates a Mac OS X NorduGrid ARC standalone package.
-# Usage: create-standalone.sh [type] [version] [build globus]
-#
+# The following environment variables are used to control the outcome:
+# ARC_BUILD_CHANNEL (nightlies, releases, testing, experimental)
+# ARC_BUILD_VERSION (e.g. 1970-01-01, 1.0.0...)
+# ARC_BUILD_ARCHITECTURE (x86_64, i386)
+# ARC_BUILD_MAKECHECK (no, yes)
+# ARC_BUILD_GLOBUS (yes, no)
+# ARC_BUILD_INTERACTIVE (no, yes)
+# ARC_BUILD_DEBUG (no, yes)
+# 
 # TODO:
 # * Upload package to download.nordugrid.org
 # * Add a 'Finish Up' entry in the installer
@@ -13,11 +20,6 @@ test "x${ARC_BUILD_DEBUG}" == "xyes" && set -x
 # Install package to the specified location. Note that the specified location should be a path used exclusively for the standalone.
 location=/opt/local/nordugrid
 name=nordugrid-arc-standalone
-architecture="x86_64"
-
-domakecheck="no"
-
-makeglobus="yes"
 arcglobusmoduledir=globus-plugins
 
 # The metapackage should contain the following packages (order matters!):
@@ -35,6 +37,8 @@ function initialise() {
 basedir=`pwd`
 workdir=`mktemp -d /tmp/arcstandalone-workdir-XXXXXX`
 cd ${workdir}
+
+rm -rf ${location}/*
 
 mkdir ${HOME}/.macports
 mkdir -p macports/{registry,logs,software}
@@ -801,17 +805,20 @@ return 0
 }
 
 function compresspackage() {
+# Rename package
+mv ${workdir}/${name}-${version}.mpkg ${workdir}/${name}-${version}-snow_leopard-${architecture}.mpkg
+
 # Compress package
-zip -qr ${name}-${version}.mpkg.zip ${name}-${version}.mpkg
+zip -qr ${workdir}/${name}-${version}-snow_leopard-${architecture}.mpkg.zip ${workdir}/${name}-${version}-snow_leopard-${architecture}.mpkg
 if [[ $? != 0 ]]; then
   echo "Unable to compress package."
   return 1
 fi
 
-rm -rf ${name}-${version}.mpkg
-mv ${name}-${version}.mpkg.zip ${basedir}/.
+rm -rf ${workdir}/${name}-${version}-snow_leopard-${architecture}.mpkg
+mv ${workdir}/${name}-${version}-snow_leopard-${architecture}.mpkg.zip ${basedir}/.
 if [[ $? != 0 ]]; then
-  echo "Unable to move package \"${name}-${version}.mpkg.zip\" to \"${basedir}/.\""
+  echo "Unable to move package \"${workdir}/${name}-${version}-snow_leopard-${architecture}.mpkg.zip\" to \"${basedir}/.\""
   return 1
 fi
 
@@ -895,35 +902,26 @@ test "x${ARC_BUILD_DEBUG}" == "xyes" && echo "ARC Mac package build finished" &&
 }
 
 
-if test "x${ARC_BUILD_INTERACTIVE}" != "xyes"; then
-if test $# -gt 4; then
-  echo "0 to 4 arguments needed."
-  echo "${0} [type] [version] [build globus] [perform make check]"
-  exit 1
-fi
-
-# First argument is type which should be one of (releases, testing, experimental, nightlies)
-if test "x${1}" != "xreleases" && test "x${1}" != "xtesting" && test "x${1}" != "xexperimental"; then
+if test "x${ARC_BUILD_CHANNEL}" != "xreleases" && test "x${ARC_BUILD_CHANNEL}" != "xtesting" && test "x${ARC_BUILD_CHANNEL}" != "xexperimental"; then
   type="nightlies"
 else
-  type=${1}
+  type=${ARC_BUILD_CHANNEL}
+  if test "x${ARC_BUILD_VERSION}" == "x"; then
+    echo "ARC_BUILD_VERSION environment variable must be set for the \"${type}\" channel."
+    exit 1
+  fi
 fi
 
-if test "x${type}" != "xnightlies" && test $# == 1
-then
-  echo "2nd argument (version) must be specified for type \"${type}\"."
-  exit 1
-fi
+version=
+test "x${ARC_BUILD_VERSION}" != "x" && version=${ARC_BUILD_VERSION}
 
-if test "x${2}" != "x"; then
-  version=${2}
-fi
+architecture="x86_64"
+test "x${ARC_BUILD_ARCHITECTURE}" != "x" && architecture=${ARC_BUILD_ARCHITECTURE}
 
-test $# -ge 3 && test "x${3}" == "xno" && makeglobus="no"
-test $# == 4 && test "x${4}" == "xyes" && domakecheck="yes"
+domakecheck="no"
+test "x${ARC_BUILD_MAKECHECK}" == "xyes" && domakecheck="yes"
 
-else
-type="nightlies"
-fi
+makeglobus="yes"
+test "x${ARC_BUILD_GLOBUS}" == "xno" && makeglobus="no"
 
 test "x${ARC_BUILD_INTERACTIVE}" != "xyes" && build_standalone
