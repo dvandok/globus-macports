@@ -50,8 +50,12 @@ return 0
 
 function toggleownmacportconf() {
 if test "${1}" = "on"; then
-  if test -L ${HOME}/.macports/macports.conf && test "`readlink ${HOME}/.macports/macports.conf`" = "${workdir}/macports.conf"; then
-    return
+  if test -L ${HOME}/.macports/macports.conf; then
+    if test "`readlink ${HOME}/.macports/macports.conf`" = "${workdir}/macports.conf"; then
+      return
+    else
+      rm ${HOME}/.macports/macports.conf
+    fi
   fi
   
   if test -f ${HOME}/.macports/macports.conf; then
