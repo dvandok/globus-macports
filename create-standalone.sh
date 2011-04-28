@@ -859,8 +859,7 @@ return 0
 }
 
 function build_standalone() {
-test "x${ARC_BUILD_DEBUG}" == "xyes" && echo "Starting ARC Mac package build" && date
-
+date
 echo "Building ARC standalone for Mac OS X with the following options:"
 echo "Name: $name"
 echo "Version: $version"
@@ -897,8 +896,7 @@ compresspackage || return 1
 cleanup || return 1
 
 echo "Creating ${name}-standalone finished successfully"
-
-test "x${ARC_BUILD_DEBUG}" == "xyes" && echo "ARC Mac package build finished" && date
+date
 }
 
 
