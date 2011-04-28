@@ -7,8 +7,7 @@
 # * Upload package to download.nordugrid.org
 # * Add a 'Finish Up' entry in the installer
 
-test "x${BUILD_ARC_DEBUG}" == "xyes" && set -x
-
+test "x${ARC_BUILD_DEBUG}" == "xyes" && set -x
 
 ## DEFAULT VALUES.
 # Install package to the specified location. Note that the specified location should be a path used exclusively for the standalone.
@@ -17,6 +16,10 @@ name=nordugrid-arc-standalone
 architecture="x86_64"
 
 domakecheck="no"
+
+# Group ID to install files as.
+installgroup=
+test "x${ARC_BUILD_GROUP}" != "x" && installgroup="install.group="${ARC_BUILD_GROUP}
 
 makeglobus="yes"
 arcglobusmoduledir=globus-plugins
@@ -285,7 +288,7 @@ gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
 
 toggleownmacportconf on
 # Install package since other packages might depend on it.
-port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/wor
+port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work ${installgroup}
 if test $? != 0; then
   echo "Unable to install package ${pkgname}"
   return 1
@@ -356,7 +359,7 @@ sleep 1
 if [[ "${pkgname}" == "grid-packaging-tools" ]] || [[ "${pkgname}" == "globus-core" ]];
 then
   toggleownmacportconf on
-  port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+  port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work ${installgroup}
   if [[ $? -ne 0 ]]
   then
     toggleownmacportconf off
@@ -395,7 +398,7 @@ gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
 
 toggleownmacportconf on
 # Install package since others packages might depend on it.
-port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work ${installgroup}
 if test $? != 0; then
   echo "Unable to install package ${pkgname}"
   return 1
@@ -751,15 +754,16 @@ Install Grid certificate and private key:
   Copy your user certificate (e.g. usercert.pem) to: \$HOME/.globus/usercert.pem
   Copy your user key (e.g. userkey.pem) to: \$HOME/.globus/userkey.pem
 
-Also you should set the environment variable GLOBUS_LOCATION to ${location}
-in the shell where ARC will be executed in order for the certain ARC modules
-to function. E.g. for bash:
+Also you must set the environment variable GLOBUS_LOCATION to ${location} in
+the shell where ARC will be executed in order for the certain ARC modules to
+function. E.g. for bash:
 export GLOBUS_LOCATION=${location}
 
 Other information
 -----------------
 
-Default client.conf, jobs.xml directory location (these directories are hidden by default):
+Default client.conf, jobs.xml directory location (these directories are
+hidden by default):
 
   \$HOME/.arc
 
@@ -767,8 +771,9 @@ Default client.conf, jobs.xml directory location (these directories are hidden b
 Uninstalling this package
 -------------------------
 
-To uninstall this package simply remove the '${location}' directory and the file '/etc/paths.d/${name}'.
-Additionally user configuration files might exist in the \$HOME/.arc directory, which can safely be removed.
+To uninstall this package simply remove the '${location}' directory and the
+file '/etc/paths.d/${name}'. Additionally user configuration files might
+exist in the \$HOME/.arc directory, which can safely be removed.
 EOF
 
 # Remove MacPorts background and use own background.
@@ -847,6 +852,7 @@ return 0
 }
 
 function build_standalone() {
+test "x${ARC_BUILD_DEBUG}" == "xyes" && echo "Starting ARC Mac package build" && date
 
 echo "Building ARC standalone for Mac OS X with the following options:"
 echo "Name: $name"
@@ -884,10 +890,12 @@ compresspackage || return 1
 cleanup || return 1
 
 echo "Creating ${name}-standalone finished successfully"
+
+test "x${ARC_BUILD_DEBUG}" == "xyes" && echo "ARC Mac package build finished" && date
 }
 
 
-if test "x${BUILD_ARC_INTERACTIVE}" != "xyes"; then
+if test "x${ARC_BUILD_INTERACTIVE}" != "xyes"; then
 if test $# -gt 4; then
   echo "0 to 4 arguments needed."
   echo "${0} [type] [version] [build globus] [perform make check]"
@@ -918,4 +926,4 @@ else
 type="nightlies"
 fi
 
-test "x${BUILD_ARC_INTERACTIVE}" != "xyes" && build_standalone
+test "x${ARC_BUILD_INTERACTIVE}" != "xyes" && build_standalone
