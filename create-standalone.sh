@@ -73,6 +73,7 @@ applications_dir	/Applications/MacPorts
 frameworks_dir		/opt/local/Library/Frameworks
 sources_conf		/opt/local/etc/macports/sources.conf
 variants_conf		${workdir}/macports/variants.conf
+binpath                 ${location}/bin:/opt/local/bin:/opt/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin
 universal_archs			x86_64 i386
 EOF
 
@@ -91,7 +92,7 @@ fi
 function requiredpackagescheck() {
 toggleownmacportconf on
 # The following packages are required to be installed to build the stand-alone package.
-requiredpkgs=(gsed gperf pkgconfig autoconf automake wget doxygen p5-archive-tar perl5)
+requiredpkgs=(gsed gperf autoconf automake wget doxygen p5-archive-tar perl5)
 pkgsneeded=
 installedports=`port installed`
 toggleownmacportconf off
@@ -180,6 +181,7 @@ checksums           md5     ${md5} \\
 worksrcdir          ${source//.tar.gz}
 pre-configure       {
     reinplace "s/@MSGMERGE@ --update/@MSGMERGE@ --update --backup=off/" \${worksrcpath}/po/Makefile.in.in
+    reinplace "s/\\\/opt\\\/local/${location//\//\\\/}/g" \${worksrcpath}/Makefile.in
 }
 configure.env PKG_CONFIG_LIBDIR=\${prefix}/lib/pkgconfig:/usr/lib/pkgconfig
 configure.args-append --disable-xmlsec1 --disable-all --enable-hed --enable-arclib-client --enable-credentials-client --enable-data-client --enable-srm-client --enable-doc --enable-cppunit
@@ -202,6 +204,43 @@ post-destroot {
 destroot.violate_mtree      yes
 EOF
 
+return 0
+}
+
+function installpkgconfig() {
+rm -rf ${workdir}/pkgconfig
+mkdir ${workdir}/pkgconfig
+
+port cat pkgconfig  | sed -e :a -e '$!N;s/[[:space:]]*\\\n[[:space:]]*/ /;ta' \
+                    | sed -e "s/\${name}/pkgconfig/g" \
+                    | sed -e "s/\(name[[:space:]]*pkgconfig\)/\1-arcstandalone/" \
+                    | sed -e "/^depends_lib/d" \
+                    | sed -e "/^archcheck.files/d" \
+                    | sed -e "s/^\(master_sites[[:space:]]*gnu\)/\1:pkgconfig/" > ${workdir}/pkgconfig/Portfile
+
+gsed -i "/checksums/i \\
+destroot.violate_mtree      yes\\
+" ${workdir}/pkgconfig/Portfile
+
+gsed -i "
+             /^[[:space:]]*version[[:space:]]/a \\
+             distname pkgconfig-\${version}\\
+             " ${workdir}/pkgconfig/Portfile
+# Make link to patch files.
+[[ -d `port dir pkgconfig`/files ]] && ln -s `port dir pkgconfig`/files ${workdir}/pkgconfig/files
+
+sleep 1
+
+toggleownmacportconf on
+port install -D pkgconfig prefix=${location} build_arch=${architecture} workpath=${workdir}/pkgconfig/work
+if [[ $? -ne 0 ]]
+then
+  echo "Unable to install pkgconfig"
+  toggleownmacportconf off
+  return 1
+fi
+
+toggleownmacportconf off
 return 0
 }
 
@@ -875,6 +914,8 @@ echo "Working directory: $workdir"
 requiredpackagescheck || return 1
 fetchsource || return 1
 createportfile || return 1
+
+installpkgconfig || return 1
 
 makedependencypackages || return 1
 if test "x${makeglobus}" == "xyes"
