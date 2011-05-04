@@ -41,7 +41,7 @@ cd ${workdir}
 rm -rf ${location}/*
 
 mkdir ${HOME}/.macports
-mkdir -p macports/{registry,logs,software}
+mkdir -p macports/{registry,logs,software,build}
 ln -s /opt/local/var/macports/sources macports/sources
 cp -p /opt/local/var/macports/registry/registry.db macports/registry/.
 touch macports/variants.conf
