@@ -232,7 +232,7 @@ gsed -i "
 sleep 1
 
 toggleownmacportconf on
-port install -D pkgconfig prefix=${location} build_arch=${architecture} workpath=${workdir}/pkgconfig/work
+port install -D pkgconfig prefix=${location} build_arch=${architecture}
 if [[ $? -ne 0 ]]
 then
   echo "Unable to install pkgconfig"
@@ -307,18 +307,19 @@ gsed -i "
 sleep 1
 # Make a package.
 toggleownmacportconf on
-port pkg -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+port pkg -D ${pkgname} prefix=${location} build_arch=${architecture}
 if [[ $? -ne 0 ]]
 then
   echo "Unable to make package ${pkgname}"
   toggleownmacportconf off
   return 1
 fi
+workpath=`port work -D ${pkgname}`
 toggleownmacportconf off
 
 # Move package, so it is not deleted.
 pkgversion=`port info --version -D ${pkgname} | awk '{ print $2 }'`
-mv -f ${pkgname}/work/${pkgname}-arcstandalone-${pkgversion}.pkg ${pkgname}/.
+mv -f ${workpath}/${pkgname}-arcstandalone-${pkgversion}.pkg ${pkgname}/.
 mv -f ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj/Description.plist \
       ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/.
 rm -rf ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj
@@ -331,7 +332,7 @@ gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
 
 toggleownmacportconf on
 # Install package since other packages might depend on it.
-port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+port install -D ${pkgname} prefix=${location} build_arch=${architecture}
 if test $? != 0; then
   echo "Unable to install package ${pkgname}"
   return 1
@@ -402,7 +403,7 @@ sleep 1
 if [[ "${pkgname}" == "grid-packaging-tools" ]] || [[ "${pkgname}" == "globus-core" ]];
 then
   toggleownmacportconf on
-  port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+  port install -D ${pkgname} prefix=${location} build_arch=${architecture}
   if [[ $? -ne 0 ]]
   then
     toggleownmacportconf off
@@ -417,18 +418,19 @@ fi
 
 toggleownmacportconf on
 # Make a package.
-port pkg -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+port pkg -D ${pkgname} prefix=${location} build_arch=${architecture}
 if [[ $? -ne 0 ]]
 then
   toggleownmacportconf off
   echo "Unable to make package ${pkgname}"
   return 1
 fi
+workpath=`port work -D ${pkgname}`
 toggleownmacportconf off
 
 # Move package, so it is not deleted.
 pkgversion=`port info --version -D ${pkgname} | awk '{ print $2 }'`
-mv -f ${pkgname}/work/${pkgname}-arcstandalone-${pkgversion}.pkg ${pkgname}/.
+mv -f ${workpath}/${pkgname}-arcstandalone-${pkgversion}.pkg ${pkgname}/.
 mv -f ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj/Description.plist \
       ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/.
 rm -rf ${pkgname}/${pkgname}-arcstandalone-${pkgversion}.pkg/Contents/Resources/English.lproj
@@ -441,7 +443,7 @@ gsed -i "s/<string><\/string>/<string>${description}<\/string>/" \
 
 toggleownmacportconf on
 # Install package since others packages might depend on it.
-port install -D ${pkgname} prefix=${location} build_arch=${architecture} workpath=${workdir}/${pkgname}/work
+port install -D ${pkgname} prefix=${location} build_arch=${architecture}
 if test $? != 0; then
   echo "Unable to install package ${pkgname}"
   return 1
@@ -480,7 +482,7 @@ function makearcmetapackage() {
 toggleownmacportconf on
 
 # Build and test the stand-alone
-port -d build -D ${workdir}/${name} prefix=${location} build_arch=${architecture} workpath=${workdir}/${name}/work distpath=${workdir}/${name}/files
+port -d build -D ${workdir}/${name} prefix=${location} build_arch=${architecture}
 if [[ $? != 0 ]]
 then
   toggleownmacportconf off
@@ -489,7 +491,7 @@ then
 fi
 
 if test "x${domakecheck}" == "xyes"; then
-  port -d test -D ${workdir}/${name} prefix=${location} build_arch=${architecture} workpath=${workdir}/${name}/work distpath=${workdir}/${name}/files
+  port -d test -D ${workdir}/${name} prefix=${location} build_arch=${architecture} distpath=${workdir}/${name}/files
   if [[ $? != 0 ]]
   then
     toggleownmacportconf off
@@ -498,16 +500,17 @@ if test "x${domakecheck}" == "xyes"; then
   fi
 fi
 # Then destroot it in order to extract the globus dependend modules.
-port destroot -D ${workdir}/${name} prefix=${location} build_arch=${architecture} workpath=${workdir}/${name}/work distpath=${workdir}/${name}/files
+port destroot -D ${workdir}/${name} prefix=${location} build_arch=${architecture} distpath=${workdir}/${name}/files
 if [[ $? != 0 ]]
 then
   toggleownmacportconf off
   echo "Make install failed for ${name}"
   return 1
 fi
+workpath=`port work -D ${workdir}/${name}`
 
 # Sanity check. Check if libraries are linked properly.
-depslibs=`find ${name}/work/destroot/opt/local/nordugrid -name "*.dylib"`
+depslibs=`find ${workpath}/destroot/opt/local/nordugrid -name "*.dylib"`
 if [[ -n ${depslibs} ]] && [[ `otool -L ${depslibs} | grep -v ${location} |\
                               grep -v /usr/lib |\
                               grep -c -v /System/Library` -ne 0 ]]
@@ -522,11 +525,11 @@ if test "x${makeglobus}" == "xyes"
 then
   # Make directory for modules and move them there.
   mkdir -p ${workdir}/${arcglobusmoduledir}/destroot/${location}/lib/arc
-  mv ${workdir}/${name}/work/destroot/${location}/lib/arc/lib{dmc{gridftp,rls},accARC0,mccgsi}.* ${workdir}/${arcglobusmoduledir}/destroot/${location}/lib/arc/.
+  mv ${workpath}/destroot/${location}/lib/arc/lib{dmc{gridftp,rls},accARC0,mccgsi}.* ${workdir}/${arcglobusmoduledir}/destroot/${location}/lib/arc/.
 fi
 
 # Make meta package which should contain dependencies as well.
-port mpkg -D ${workdir}/${name} prefix=${location} build_arch=${architecture} workpath=${workdir}/${name}/work
+port mpkg -D ${workdir}/${name} prefix=${location} build_arch=${architecture}
 if [[ $? != 0 ]]
 then
   toggleownmacportconf off
@@ -536,7 +539,7 @@ fi
 toggleownmacportconf off
 
 # Copy meta package for convenience.
-cp -a ${workdir}/${name}/work/${name}-${version}.mpkg ${workdir}/.
+cp -a ${workpath}/${name}-${version}.mpkg ${workdir}/.
 
 return 0
 }
@@ -752,12 +755,14 @@ return 0
 function packagecertificates() {
 toggleownmacportconf on
 # Include igtf-certificates in the standalone package.
-port pkg igtf-certificates prefix=${location} build_arch=${architecture} workpath=${workdir}/igtf-certificates/work
+port pkg igtf-certificates prefix=${location} build_arch=${architecture}
+workpath=`port work igtf-certificates`
 toggleownmacportconf off
 
 igtfversion=`port info --version igtf-certificates | awk '{ print $2 }'`
 
-mv -f ${workdir}/igtf-certificates/work/igtf-certificates-${igtfversion}.pkg \
+mkdir -p ${workdir}/igtf-certificates
+mv -f ${workpath}/igtf-certificates-${igtfversion}.pkg \
       ${workdir}/igtf-certificates/igtf-certificates-arcstandalone-${igtfversion}.pkg
 
 if [[ $? != 0 ]]; then
@@ -785,8 +790,10 @@ EEOOFF
 
 chmod +x ${name}-${version}.mpkg/Contents/Resources/postinstall
 
-cp ${workdir}/${name}/work/${source//.tar.gz}/LICENSE \
+toggleownmacportconf on
+cp `port work -D ${name}`/${source//.tar.gz}/LICENSE \
    ${name}-${version}.mpkg/Contents/Resources/License
+toggleownmacportconf off
 
 cat << EOF > ${name}-${version}.mpkg/Contents/Resources/ReadMe
 NOTE: You need to do the following steps after installation of ARC
