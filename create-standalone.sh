@@ -214,7 +214,6 @@ mkdir ${workdir}/pkgconfig
 port cat pkgconfig  | sed -e :a -e '$!N;s/[[:space:]]*\\\n[[:space:]]*/ /;ta' \
                     | sed -e "s/\${name}/pkgconfig/g" \
                     | sed -e "s/\(name[[:space:]]*pkgconfig\)/\1-arcstandalone/" \
-                    | sed -e "/^depends_lib/d" \
                     | sed -e "/^archcheck.files/d" \
                     | sed -e "s/^\(master_sites[[:space:]]*gnu\)/\1:pkgconfig/" > ${workdir}/pkgconfig/Portfile
 
@@ -280,6 +279,7 @@ port cat ${pkgname} | sed -e :a -e '$!N;s/[[:space:]]*\\\n[[:space:]]*/ /;ta' \
                     | sed -e "s/\${name}/${pkgname}/g" \
                     | sed -e "s/\(name[[:space:]]*${pkgname}\)/\1-arcstandalone/" \
                     | sed -e "/^depends_lib/d" \
+                    | sed -e "/^depends_build/d" \
                     | sed -e "/^archcheck.files/d" \
                     | sed -e "s/^\(master_sites[[:space:]]*gnu\)/\1:${pkgname}/" > ${pkgname}/Portfile
 
