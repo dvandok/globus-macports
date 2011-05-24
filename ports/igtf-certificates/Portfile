@@ -9,7 +9,7 @@ maintainers         nbi.ku.dk:skou
 description         The trusted IGTF CA-certificates
 homepage            http://www.igtf.net
 platforms           darwin
-master_sites        http://download.nordugrid.org/software/igtf/releases/${version}
+master_sites        http://download.nordugrid.org/packages/igtf/releases/${version}
 distfiles           igtf-policy-installation-bundle-${version}.tar.gz
 checksums           md5    450069195c9ced70abae2bb4af9d5f6e \
                     sha1   bf484a2dc2bba64e9fb66bf20b9f8911f7d84458 \
