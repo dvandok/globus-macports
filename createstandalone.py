@@ -14,7 +14,7 @@
 # * Upload package to download.nordugrid.org
 # * Add a 'Finish Up' entry in the installer
 
-import os, sys
+import os, sys, stat
 from os.path import join as pj
 import tempfile
 import shutil
@@ -551,10 +551,10 @@ set ARCPath to POSIX path of MacARCPath
 
 tell application "Terminal"
   activate
-  set currenttab to do script "export PATH=" & ARCPath & "Contents/MacOS/bin:${PATH}"
-  do script "export ARC_LOCATION=" & ARCPath & "Contents/MacOS" in currenttab
-  do script "export ARC_PLUIGIN_PATH=" & ARCPath & "Contents/MacOS/lib/arc" in currenttab
-  do script "export X509_CERT_DIR=" & ARCPath & "Contents/MacOS/etc/grid-security/certificates" in currenttab
+  set currenttab to do script "export PATH=\\\"" & ARCPath & "Contents/MacOS/bin:${PATH}\\\""
+  do script "export ARC_LOCATION=\\\"" & ARCPath & "Contents/MacOS\\\"" in currenttab
+  do script "export ARC_PLUIGIN_PATH=\\\"" & ARCPath & "Contents/MacOS/lib/arc\\\"" in currenttab
+  do script "export X509_CERT_DIR=\\\"" & ARCPath & "Contents/MacOS/etc/grid-security/certificates\\\"" in currenttab
 
 # Get ID of Terminal window just opened. Method assumes the window is the frontmost (maybe not reliable).
   set w_id to 0
@@ -580,6 +580,7 @@ tell application "Terminal"
   end repeat
 end tell""" % {"appname" : appname} )
         app_start_script.close()
+        os.chmod(self.mypj(appname+".app/Contents/MacOS/arc-client-setup"), stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
         app_info_plist = open(self.mypj(appname+".app/Contents/Info.plist"), 'w')
         app_info_plist.writelines("""<?xml version="1.0" encoding="UTF-8"?>
