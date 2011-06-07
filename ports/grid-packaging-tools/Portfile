@@ -63,7 +63,8 @@ patchfiles              ${name}-perlpath.patch \
                         ${name}-helpstring.patch \
                         ${name}-compat.patch \
                         ${name}-version-info.patch \
-                        ${name}-wrong-url.patch
+                        ${name}-wrong-url.patch \
+                        ${name}-escape-topdir.patch
 
 patch.dir               ${workpath}/gpt
 patch.pre_args          -p1

@@ -1,0 +1,48 @@
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_create_automake_rules gptq/packaging_tools/perl/scripts/gpt_create_automake_rules
+--- gpt.orig/packaging_tools/perl/scripts/gpt_create_automake_rules
++++ gpt/packaging_tools/perl/scripts/gpt_create_automake_rules
+@@ -110,7 +110,7 @@
+     my $file = $_;
+     my $dir = $File::Find::dir;
+ #    print "find_makefile_am: $dir\n";
+-    $dir =~ s!$topdir/+!!;
++    $dir =~ s!\Q$topdir\E/+!!;
+     process_automake_file($file) if ! defined $excluded_dirs{$dir};
+ }
+ 
+diff -ur gpt.orig/packaging_tools/perl/scripts/gpt_sort_filelist gpt/packaging_tools/perl/scripts/gpt_sort_filelist
+--- gpt.orig/packaging_tools/perl/scripts/gpt_sort_filelist
++++ gpt/packaging_tools/perl/scripts/gpt_sort_filelist
+@@ -125,15 +125,15 @@
+ # but the pkgdir value will.  Strip it out so we can inspect
+ # the filelists later.
+ my $pkgdatasubdir = "$locations->{'pkgdir'}";
+-$pkgdatasubdir =~ s!$prefix/!!;
++$pkgdatasubdir =~ s!$\Qprefix\E/!!;
+ my $oldpkgdatasubdir = "$locations->{'oldpkgdir'}";
+-$oldpkgdatasubdir =~ s!$prefix/!!;
++$oldpkgdatasubdir =~ s!\Q$prefix\E/!!;
+ my $altpkgdatasubdir = "$locations->{'altpkgdir'}";
+-$altpkgdatasubdir =~ s!$prefix/!!;
++$altpkgdatasubdir =~ s!\Q$prefix\E/!!;
+ 
+ my @list;
+ for my $line (<MASTER>) {
+-  $line =~ s!^.*$prefix!!;
++  $line =~ s!^.*\Q$prefix\E!!;
+   push @list, $line;
+ #  print $line;
+ }
+@@ -169,8 +169,8 @@
+ 
+     # If this filelist only has package metadata, don't write it!
+     my @notpkgdata;
+-    @notpkgdata = grep { ! m!$pkgdatasubdir!}
+-      grep { ! m!$oldpkgdatasubdir!}
+-      grep { ! m!$altpkgdatasubdir!} @$outlines;
++    @notpkgdata = grep { ! m!\Q$pkgdatasubdir\E!}
++      grep { ! m!\Q$oldpkgdatasubdir\E!}
++      grep { ! m!\Q$altpkgdatasubdir\E!} @$outlines;
+     next if (! @notpkgdata );
+ 
+     my $out = "$prefix/$ {type_flavor}_$ {typ}.filelist";
