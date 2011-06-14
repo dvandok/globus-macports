@@ -454,12 +454,16 @@ universal_archs     x86_64 i386
                 self.copylibraries([self.mypj(self.name, self.arcglobusdir, "arc/*.so"), self.mypj(self.name, self.arcglobusdir, "*.dylib")], self.mypj("packages/globus/lib"), globus_excludes)):
             print "Unable to separate libraries"
             return False
+
+        for filename in glob.glob(self.mypj("install/lib/libglobus_*.so")):
+            shutil.copy2(filename, filename.replace("install/lib", "packages/globus/lib"))
             
         return True
 
     def userelativelinking(self):
         if not (changeinstallnames(self.mypj("packages/globus/lib/arc/*.so"), {self.mypj(self.name, "install/lib") : "@loader_path/..", self.mypj("install/lib") : "@loader_path/.."}) and \
                 changeinstallnames(self.mypj("packages/globus/lib/*.dylib"),  {self.mypj(self.name, "install/lib") : "@loader_path",    self.mypj("install/lib") : "@loader_path"}) and \
+                changeinstallnames(self.mypj("packages/globus/lib/*.so"),     {self.mypj(self.name, "install/lib") : "@loader_path",    self.mypj("install/lib") : "@loader_path"}) and \
                 changeinstallnames(self.mypj("packages/deps/lib/*.dylib"), {self.mypj("install/lib") : "@loader_path"}) and \
                 changeinstallnames(self.mypj(self.name, "install/lib/*.dylib"),  {self.mypj(self.name, "install/lib") : "@loader_path"        , self.mypj("install/lib") : "@loader_path"}) and \
                 changeinstallnames(self.mypj(self.name, "install/lib/arc/*.so"), {self.mypj(self.name, "install/lib") : "@loader_path/.."     , self.mypj("install/lib") : "@loader_path/.."}) and \
@@ -556,6 +560,7 @@ tell application "Terminal"
   set currenttab to do script "export PATH=\\\"" & ARCPath & "Contents/MacOS/bin:/System/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}\\\""
   do script "export ARC_LOCATION=\\\"" & ARCPath & "Contents/MacOS\\\"" in currenttab
   do script "export ARC_PLUGIN_PATH=\\\"" & ARCPath & "Contents/MacOS/lib/arc\\\"" in currenttab
+  do script "export GLOBUS_LOCATION=\\\"" & ARCPath & "Contents/MacOS\\\"" in currenttab
   do script "export PYTHONPATH=\\\"" & ARCPath & "Contents/MacOS/lib/python2.6/site-packages\\\"" in currenttab
   do script "export X509_CERT_DIR=\\\"" & ARCPath & "Contents/MacOS/etc/grid-security/certificates\\\"" in currenttab
 
