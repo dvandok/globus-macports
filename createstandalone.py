@@ -346,9 +346,10 @@ universal_archs     x86_64 i386
         os.chdir(source_dir)
 
         configure_args = []
-        configure_args += ["--disable-xmlsec1", "--disable-all", "--enable-hed", "--enable-arclib-client", "--enable-credentials-client", "--enable-data-client", "--enable-srm-client", "--enable-doc", "--enable-cppunit"]
+        configure_args += ["--disable-all", "--enable-hed", "--enable-arclib-client", "--enable-credentials-client", "--enable-data-client", "--enable-srm-client", "--enable-doc", "--enable-cppunit", "--enable-python"]
         configure_args.append("--prefix="+self.mypj(self.name, "install"))
         configure_args.append("PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig")
+        configure_args.append("PATH=/System/Library/Frameworks/Python.framework/Versions/Current/bin:"+os.environ["PATH"])
 
         if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
             print "configure failed"
@@ -462,7 +463,8 @@ universal_archs     x86_64 i386
                 changeinstallnames(self.mypj("packages/deps/lib/*.dylib"), {self.mypj("install/lib") : "@loader_path"}) and \
                 changeinstallnames(self.mypj(self.name, "install/lib/*.dylib"),  {self.mypj(self.name, "install/lib") : "@loader_path"        , self.mypj("install/lib") : "@loader_path"}) and \
                 changeinstallnames(self.mypj(self.name, "install/lib/arc/*.so"), {self.mypj(self.name, "install/lib") : "@loader_path/.."     , self.mypj("install/lib") : "@loader_path/.."}) and \
-                changeinstallnames(self.mypj(self.name, "install/bin/*"),        {self.mypj(self.name, "install/lib") : "@loader_path/../lib" , self.mypj("install/lib") : "@loader_path/../lib"})):
+                changeinstallnames(self.mypj(self.name, "install/bin/*"),        {self.mypj(self.name, "install/lib") : "@loader_path/../lib" , self.mypj("install/lib") : "@loader_path/../lib"}) and \
+                changeinstallnames(self.mypj(self.name, "install/lib/python2.6/site-packages/_arc.so"), {self.mypj(self.name, "install/lib") : "@loader_path/../.." , self.mypj("install/lib") : "@loader_path/../.."})):
             print "Unable to change library links to use relative linking"
             return False
         return True
@@ -551,9 +553,10 @@ set ARCPath to POSIX path of MacARCPath
 
 tell application "Terminal"
   activate
-  set currenttab to do script "export PATH=\\\"" & ARCPath & "Contents/MacOS/bin:${PATH}\\\""
+  set currenttab to do script "export PATH=\\\"" & ARCPath & "Contents/MacOS/bin:/System/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}\\\""
   do script "export ARC_LOCATION=\\\"" & ARCPath & "Contents/MacOS\\\"" in currenttab
-  do script "export ARC_PLUIGIN_PATH=\\\"" & ARCPath & "Contents/MacOS/lib/arc\\\"" in currenttab
+  do script "export ARC_PLUGIN_PATH=\\\"" & ARCPath & "Contents/MacOS/lib/arc\\\"" in currenttab
+  do script "export PYTHONPATH=\\\"" & ARCPath & "Contents/MacOS/lib/python2.6/site-packages\\\"" in currenttab
   do script "export X509_CERT_DIR=\\\"" & ARCPath & "Contents/MacOS/etc/grid-security/certificates\\\"" in currenttab
 
 # Get ID of Terminal window just opened. Method assumes the window is the frontmost (maybe not reliable).
