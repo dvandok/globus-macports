@@ -1,11 +1,17 @@
 #!/usr/bin/python
 #
 # This script creates a Mac OS X NorduGrid ARC client package.
-# The following environment variables are used to control the outcome:
+# The following environment variables can be used to control the outcome:
 # ARC_BUILD_CHANNEL (nightlies, releases, testing, experimental)
 # ARC_BUILD_VERSION (e.g. 1970-01-01, 1.0.0...)
 # ARC_BUILD_MAKECHECK (no, yes)
 # ARC_BUILD_INTERACTIVE (no, yes)
+#
+# TODO:
+# - Support building different architectures, currently only x86_64 is
+#   supported.
+#   ARC_BUILD_ARCHITECTURE (x86_64, i386)
+
 
 import os, sys, stat
 from os.path import join as pj
@@ -65,6 +71,9 @@ class ARCPackageTool:
     # Install package to the specified location.
     install_location = "/opt/local/nordugrid"
     name = "nordugrid-arc"
+
+    # Currently only used for naming
+    architecture = "x86_64"
 
     # Where to store ARC globus modules/libraries in order to separate globus dependency. Relative to nordugrid working directory.
     arcglobusdir = "globus/lib"
@@ -299,7 +308,7 @@ universal_archs     x86_64 i386
         time.sleep(1)
 
         # Build package
-        if not self.port(["destroot", "-D", self.mypj(portname), "prefix="+self.mypj(prefix), "build_arch="+self.architecture], True, False)["success"]:
+        if not self.port(["destroot", "-D", self.mypj(portname), "prefix="+self.mypj(prefix)], True, False)["success"]:
             print "Unable to build and destroot %s package." % portname
             return False
 
@@ -315,7 +324,7 @@ universal_archs     x86_64 i386
             return False
 
         # Install package
-        if not self.port(["install", "-D", self.mypj(portname), "prefix="+self.mypj(prefix), "build_arch="+self.architecture], True, False)["success"]:
+        if not self.port(["install", "-D", self.mypj(portname), "prefix="+self.mypj(prefix)], True, False)["success"]:
             print "Unable to install %s package." % portname
             return False
 
@@ -699,7 +708,6 @@ If these are not present here, ARC will most likely not work as expected.
         print "Version: %s" % self.version
         print "Channel: %s" % self.channel
         print "Install location: %s" % self.install_location
-        print "Architecture: %s" % self.architecture
         print "Working directory: %s" % self.workdir
 
         if not self.fetchsource():
@@ -742,14 +750,13 @@ If these are not present here, ARC will most likely not work as expected.
         if os.environ.has_key('ARC_BUILD_RELEASEVERSION') and os.environ['ARC_BUILD_RELEASEVERSION']:
             self.relversion = os.environ['ARC_BUILD_RELEASEVERSION']
 
-        supported_architectures = ['x86_64', 'i386']
-        self.architecture = supported_architectures[0]
-        if os.environ.has_key('ARC_BUILD_ARCHITECTURE') and os.environ['ARC_BUILD_ARCHITECTURE']:
-            if os.environ['ARC_BUILD_ARCHITECTURE'] not in supported_architectures:
-                print "Architecture \"%s\" not supported", os.environ['ARC_BUILD_ARCHITECTURE']
-                sys.exit(1)
-
-            self.architecture = os.environ['ARC_BUILD_ARCHITECTURE']
+# Building packages for custom architectures is currently not supported.
+#        supported_architectures = ['x86_64', 'i386']
+#        self.architecture = supported_architectures[0]
+#        if os.environ.has_key('ARC_BUILD_ARCHITECTURE') and os.environ['ARC_BUILD_ARCHITECTURE']:
+#            if os.environ['ARC_BUILD_ARCHITECTURE'] not in supported_architectures:
+#                print "Architecture \"%s\" not supported", os.environ['ARC_BUILD_ARCHITECTURE']
+#                sys.exit(1)
 
         self.domakecheck = (os.environ.has_key('ARC_BUILD_MAKECHECK') and os.environ['ARC_BUILD_MAKECHECK'] == "yes")
 
