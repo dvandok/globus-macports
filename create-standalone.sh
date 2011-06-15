@@ -23,7 +23,8 @@ name=nordugrid-arc-standalone
 arcglobusmoduledir=globus-plugins
 
 # The metapackage should contain the following packages (order matters!):
-deppackages=(zlib libiconv libxml2 gettext libsigcxx2 glib2 glibmm libtool)
+#deppackages=(zlib libiconv libxml2 gettext libsigcxx2 glib2 glibmm libtool)
+deppackages=(libiconv gettext libtool libsigcxx2 glib2 glibmm)
 
 # The following globus packages are needed for a working ARC0 middleware module. Order matters.
 globuspkgs=(libtool common callout openssl gsi-openssl-error gsi-proxy-ssl openssl-module \
@@ -287,8 +288,7 @@ gsed -i "/checksums/i \\
 destroot.violate_mtree      yes\\
 " ${pkgname}/Portfile
 
-if [[ "x${pkgname}" = "xglibmm" ]]
-then
+if test "x${pkgname}" = "xglibmm"; then
   gsed -i -e "
                   /^checksums/a \\
                   \\
@@ -756,6 +756,11 @@ function packagecertificates() {
 toggleownmacportconf on
 # Include igtf-certificates in the standalone package.
 port pkg igtf-certificates prefix=${location} build_arch=${architecture}
+if test $? != 0; then
+  echo "Unable to create IGTF certificates package."
+  toggleownmacportconf off
+  return 1
+fi
 workpath=`port work igtf-certificates`
 toggleownmacportconf off
 
@@ -855,7 +860,7 @@ function compresspackage() {
 mv ${workdir}/${name}-${version}.mpkg ${workdir}/${name}-${version}-snow_leopard-${architecture}.mpkg
 
 # Compress package
-zip -qr ${workdir}/${name}-${version}-snow_leopard-${architecture}.mpkg.zip ${workdir}/${name}-${version}-snow_leopard-${architecture}.mpkg
+zip -qr ${workdir}/${name}-${version}-snow_leopard-${architecture}.mpkg.zip ${name}-${version}-snow_leopard-${architecture}.mpkg
 if [[ $? != 0 ]]; then
   echo "Unable to compress package."
   return 1
