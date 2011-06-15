@@ -184,7 +184,7 @@ universal_archs     x86_64 i386
                 if not self.relversion:
                     self.relversion = self.version
                 
-            # Get nigthly source name.
+            # Get nightly source name.
             try:
                 output = "".join(urllib.urlopen("http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+str(self.version)+"/src/").readlines())
                 self.source = re.search("nordugrid-arc-\d{12}.tar.gz", output).group(0)
@@ -666,49 +666,23 @@ If these are not present here, ARC will most likely not work as expected.
 
         shutil.copy2(self.mypj(self.name, self.source[:-7], "LICENSE"), pj(mountpoint, "LICENSE"))
 
+        os.symlink("/Applications", pj(mountpoint, "Applications"))
+
         try:
             os.mkdir(pj(mountpoint, ".background"))
             urllib.urlretrieve('http://www.nordugrid.org/images/ng-logo.png', pj(mountpoint, ".background", "ng-logo.png"))
         except IOError:
             print "WARNING: Unable to fetch NG-logo to use as background"
 
-        prettify_dmg = '''
-tell application "Finder"
-  tell disk "%(volname)s"
-    open
-    set current view of container window to icon view
-    set toolbar visible of container window to false
-    set statusbar visible of container window to false
-    set the bounds of container window to {400, 100, 1032, 512}
-    set theViewOptions to the icon view options of container window
-    set background picture of theViewOptions to file ".background:ng-logo.png"
-    set arrangement of theViewOptions to not arranged
-    set icon size of theViewOptions to 72
-    make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
-    set position of item "%(appname)s" of container window to {190, 65}
-    set position of item "README" of container window to {525, 65}
-    set position of item "Applications" of container window to {400, 300}
-    set position of item "License" of container window to {75, 300}
-    close
-    open
-    --update without registering applications
-    delay 5
-    eject
-  end tell
-end tell
-''' % {"appname" : appname, "volname" : volname}
+        try:
+            urllib.urlretrieve('http://svn.nordugrid.org/trac/packaging/export/563/macports/trunk/ARC.app.DS_Store', pj(mountpoint, ".DS_Store"))
+        except IOError:
+            print "WARNING: Unable to prettify DMG"
 
-        osascript_proc   = subprocess.Popen(["osascript"], stdin = subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-        osascript_output = osascript_proc.communicate(input = prettify_dmg)
-        if osascript_proc.returncode != 0:
-            print "Unable to prettify DMG through AppleScript"
-            print osascript_output[0]
-            print osascript_output[1]
-            return False
+        # Syncronize to be sure data was written.
+        subprocess.Popen(["sync"]).wait()
 
-        subprocess.Popen(["sync"]).wait()
-        subprocess.Popen(["sync"]).wait()
-        #hdiutil_proc = hdiutil(["detach", dev])
+        hdiutil(["detach", dev])
 
         if os.path.isfile(dmg_name+".dmg"):
             os.remove(dmg_name+".dmg")
