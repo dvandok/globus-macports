@@ -197,7 +197,7 @@ universal_archs     x86_64 i386
             downloadlink = "http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+self.version+"/src/"+self.source
         else:
             self.source = "nordugrid-arc-"+self.version+".tar.gz"
-            downloadlink = "http://download.nordugrid.org/software/nordugrid-arc/"+self.channel+"/"+self.version+"/src/"+self.source
+            downloadlink = "http://download.nordugrid.org/packages/nordugrid-arc/"+self.channel+"/"+self.version+"/src/"+self.source
 
         try:
             if os.path.isfile(self.mypj(self.name, self.source)):
