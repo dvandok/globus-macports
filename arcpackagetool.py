@@ -548,8 +548,40 @@ exist in the $HOME/.arc directory, which can safely be removed.
         os.makedirs(self.mypj(appname+".app/Contents/MacOS"))
         os.mkdir(self.mypj(appname+".app/Contents/Resources"))
 
+        app_setup_script = open(self.mypj(appname+".app/Contents/MacOS/arc-client-setup.sh"), 'w')
+        app_setup_script.writelines("""
+# If you want to make the setup carried out here permanent you should put
+# the \"export\" statements in a setup file used by your favourite shell.
+# E.g.: ${HOME}/.bash_rc, ${HOME}/.profile, etc.
+# NOTE: The `dirname \"${BASH_SOURCE[0]}\"` call must be replaced with the
+#       absolute path to the location of ARC.
+#       E.g.: "/Applications/ARC/Contents/MacOS"
+# Also if you do not want to have ARC located in the Applications folder you
+# can move all the directories contained in the
+# "/Applications/ARC/Contents/MacOS" directory to your desired location, and
+# then also remember to set the ARC_LOCATION environment variable
+# accordingly.
+
+
+echo "Setting up ARC client environment ..."
+# Set the ARC_LOCATION environment variable. Needed since ARC is installed in a non default location.
+export ARC_LOCATION="`dirname \"${BASH_SOURCE[0]}\"`"
+# Include path to ARC client executables in PATH environment variable. Also add path to the Python executable which was linked against.
+export PATH="${ARC_LOCATION}/bin:/System/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}"
+# Set the ARC_PLUGIN_PATH enviroment path to the location of ARC modules.
+export ARC_PLUGIN_PATH="${ARC_LOCATION}/lib/arc"
+# For the ARC Globus modules to work the GLOBUS_LOCATION environment variable need to be set. 
+export GLOBUS_LOCATION="${ARC_LOCATION}"
+# For the ARC Python bindings to work the PYTHONPATH need to be set.
+export PYTHONPATH="${ARC_LOCATION}/lib/python2.6/site-packages"
+# Set the path to the directory containing CA Certificates
+export X509_CERT_DIR="${ARC_LOCATION}/etc/grid-security/certificates"
+echo "If you want to make these settings permanent in your Terminal/shell look for instructions in the \"${BASH_SOURCE[0]}\" file."
+echo "ARC client environment ready ..."
+""")
+        app_setup_script.close()
         
-        app_start_script = open(self.mypj(appname+".app/Contents/MacOS/arc-client-setup"), 'w')
+        app_start_script = open(self.mypj(appname+".app/Contents/MacOS/ARC"), 'w')
         app_start_script.writelines("""#!/usr/bin/osascript
 # Delay otherwise application doesnt show up in the launch bar
 delay 1
@@ -559,12 +591,7 @@ set ARCPath to POSIX path of MacARCPath
 
 tell application "Terminal"
   activate
-  set currenttab to do script "export PATH=\\\"" & ARCPath & "Contents/MacOS/bin:/System/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}\\\""
-  do script "export ARC_LOCATION=\\\"" & ARCPath & "Contents/MacOS\\\"" in currenttab
-  do script "export ARC_PLUGIN_PATH=\\\"" & ARCPath & "Contents/MacOS/lib/arc\\\"" in currenttab
-  do script "export GLOBUS_LOCATION=\\\"" & ARCPath & "Contents/MacOS\\\"" in currenttab
-  do script "export PYTHONPATH=\\\"" & ARCPath & "Contents/MacOS/lib/python2.6/site-packages\\\"" in currenttab
-  do script "export X509_CERT_DIR=\\\"" & ARCPath & "Contents/MacOS/etc/grid-security/certificates\\\"" in currenttab
+  do script "source \\\"" & ARCPATH & "Contents/MacOS/arc-client-setup.sh\\\""
 
 # Get ID of Terminal window just opened. Method assumes the window is the frontmost (maybe not reliable).
   set w_id to 0
@@ -590,7 +617,7 @@ tell application "Terminal"
   end repeat
 end tell""" % {"appname" : appname} )
         app_start_script.close()
-        os.chmod(self.mypj(appname+".app/Contents/MacOS/arc-client-setup"), stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+        os.chmod(self.mypj(appname+".app/Contents/MacOS/ARC"), stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
         app_info_plist = open(self.mypj(appname+".app/Contents/Info.plist"), 'w')
         app_info_plist.writelines("""<?xml version="1.0" encoding="UTF-8"?>
@@ -605,7 +632,7 @@ end tell""" % {"appname" : appname} )
     <key>CFBundleVersion</key><string>%(version)s</string>
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleSignature</key><string>NOGR</string>
-    <key>CFBundleExecutable</key><string>arc-client-setup</string>
+    <key>CFBundleExecutable</key><string>ARC</string>
   </dict>
 </plist>""" % {"appname" : appname, "name" : self.name, "version" : self.relversion})
         app_info_plist.close()
