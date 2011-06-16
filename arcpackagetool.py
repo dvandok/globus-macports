@@ -700,6 +700,8 @@ If these are not present here, ARC will most likely not work as expected.
         
     def build(self):
         print(time.asctime())
+        sys.stdout.flush()
+
         if not (self.requiredpackagescheck() and self.initialise()):
             return False
 
@@ -709,6 +711,7 @@ If these are not present here, ARC will most likely not work as expected.
         print "Channel: %s" % self.channel
         print "Install location: %s" % self.install_location
         print "Working directory: %s" % self.workdir
+        sys.stdout.flush()
 
         if not self.fetchsource():
             return False
