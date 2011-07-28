@@ -59,7 +59,8 @@ patchfiles              ${name}-usr.patch \
                         ${name}-mingw.patch \
                         ${name}-pathmax.patch \
                         ${name}-makefile-header.patch \
-                        ${name}-doxygen-workaround.patch
+                        ${name}-doxygen-workaround.patch \
+                        ${name}-environ-mac-os-x.patch
 
 depends_run             port:globus-libtool
 

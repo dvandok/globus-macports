@@ -1,0 +1,17 @@
+diff -ur globus_common-10.2.orig/library/globus_common_include.h globus_common-10.2/library/globus_common_include.h
+--- globus_common-10.2.orig/library/globus_common_include.h	2008-03-12 20:01:04.000000000 +0100
++++ globus_common-10.2/library/globus_common_include.h	2009-05-10 09:54:07.000000000 +0200
+--- globus_common-11.4.orig/library/globus_common_include.h	2011-07-28 16:06:12.000000000 +0200
++++ globus_common-11.4/library/globus_common_include.h	2011-07-28 16:05:31.000000000 +0200
+@@ -34,6 +34,11 @@
+ #define GlobusFuncName(func) static const char * _globus_func_name = #func
+ #endif
+ 
++#ifdef __APPLE__
++#include <crt_externs.h>
++#define environ (*_NSGetEnviron())
++#endif
++
+ extern const char * _globus_func_name;
+ 
+ #define _GCSL(s) globus_common_i18n_get_string(GLOBUS_COMMON_MODULE,\
