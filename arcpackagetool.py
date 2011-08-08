@@ -375,15 +375,15 @@ universal_archs     x86_64 i386
         os.chdir(basedir)
 
         # Dont include the following files in the package
-        shutil.rmtree(self.mypj(self.name, "install/share/arc/examples/config"))
-        shutil.rmtree(self.mypj(self.name, "install/share/arc/examples/echo"))
-        shutil.rmtree(self.mypj(self.name, "install/share/arc/profiles"))
-        shutil.rmtree(self.mypj(self.name, "install/share/arc/schema"))
-        shutil.rmtree(self.mypj(self.name, "install/share/doc"))
-        shutil.rmtree(self.mypj(self.name, "install/man/man5"))
-        shutil.rmtree(self.mypj(self.name, "install/man/man8"))
-        shutil.rmtree(self.mypj(self.name, "install/sbin"))
-        shutil.rmtree(self.mypj(self.name, "install/libexec"))
+        shutil.rmtree(self.mypj(self.name, "install/share/arc/examples/config"), True)
+        shutil.rmtree(self.mypj(self.name, "install/share/arc/examples/echo"), True)
+        shutil.rmtree(self.mypj(self.name, "install/share/arc/profiles"), True)
+        shutil.rmtree(self.mypj(self.name, "install/share/arc/schema"), True)
+        shutil.rmtree(self.mypj(self.name, "install/share/doc"), True)
+        shutil.rmtree(self.mypj(self.name, "install/man/man5"), True)
+        shutil.rmtree(self.mypj(self.name, "install/man/man8"), True )
+        shutil.rmtree(self.mypj(self.name, "install/sbin"), True)
+        shutil.rmtree(self.mypj(self.name, "install/libexec"), True)
 
         return True
 
