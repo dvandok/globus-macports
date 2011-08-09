@@ -351,7 +351,7 @@ universal_archs     x86_64 i386
         configure_args += ["--disable-all", "--enable-hed", "--enable-arclib-client", "--enable-credentials-client", "--enable-data-client", "--enable-srm-client", "--enable-doc", "--enable-cppunit", "--enable-python"]
         configure_args.append("--prefix="+self.mypj(self.name, "install"))
         configure_args.append("PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig")
-        configure_args.append("PATH=/System/Library/Frameworks/Python.framework/Versions/Current/bin:"+os.environ["PATH"])
+        configure_args.append("PATH=/System/Library/Frameworks/Python.framework/Versions/2.6/bin:"+os.environ["PATH"])
 
         if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
             print "configure failed"
@@ -567,7 +567,7 @@ echo "Setting up ARC client environment ..."
 # Set the ARC_LOCATION environment variable. Needed since ARC is installed in a non default location.
 export ARC_LOCATION="`dirname \"${BASH_SOURCE[0]}\"`"
 # Include path to ARC client executables in PATH environment variable. Also add path to the Python executable which was linked against.
-export PATH="${ARC_LOCATION}/bin:/System/Library/Frameworks/Python.framework/Versions/Current/bin:${PATH}"
+export PATH="${ARC_LOCATION}/bin:/System/Library/Frameworks/Python.framework/Versions/2.6/bin:${PATH}"
 # Set the ARC_PLUGIN_PATH enviroment path to the location of ARC modules.
 export ARC_PLUGIN_PATH="${ARC_LOCATION}/lib/arc"
 # For the ARC Globus modules to work the GLOBUS_LOCATION environment variable need to be set. 
