@@ -563,7 +563,6 @@ exist in the $HOME/.arc directory, which can safely be removed.
 # accordingly.
 
 
-echo "Setting up ARC client environment ..."
 # Set the ARC_LOCATION environment variable. Needed since ARC is installed in a non default location.
 export ARC_LOCATION="`dirname \"${BASH_SOURCE[0]}\"`"
 # Include path to ARC client executables in PATH environment variable. Also add path to the Python executable which was linked against.
@@ -576,8 +575,10 @@ export GLOBUS_LOCATION="${ARC_LOCATION}"
 export PYTHONPATH="${ARC_LOCATION}/lib/python2.6/site-packages"
 # Set the path to the directory containing CA Certificates
 export X509_CERT_DIR="${ARC_LOCATION}/etc/grid-security/certificates"
-echo "If you want to make these settings permanent in your Terminal/shell look for instructions in the \"${BASH_SOURCE[0]}\" file."
-echo "ARC client environment ready ..."
+echo "Instructions for using ARC in a regular Terminal can be found here:"
+echo "${BASH_SOURCE[0]}"
+echo
+echo "ARC client environment ready"
 """)
         app_setup_script.close()
         
