@@ -2,7 +2,7 @@
 #
 # This script creates a Mac OS X NorduGrid ARC client package.
 # The following environment variables can be used to control the outcome:
-# ARC_BUILD_CHANNEL (nightlies, releases, testing, experimental)
+# ARC_BUILD_CHANNEL (nightlies, releases, testing, experimental, svn)
 # ARC_BUILD_VERSION (e.g. 1970-01-01, 1.0.0...)
 # ARC_BUILD_MAKECHECK (no, yes)
 # ARC_BUILD_INTERACTIVE (no, yes)
@@ -180,6 +180,13 @@ universal_archs     x86_64 i386
         if not os.path.isdir(self.mypj(self.name)):
             os.mkdir(self.mypj(self.name))
 
+        if self.channel == "svn":
+          if subprocess.Popen(["svn", "co", "http://svn.nordugrid.org/repos/nordugrid/arc1/trunk", "nordugrid-arc-svn"]).wait() != 0:
+            print "Unable to checkout svn source."
+            return False
+          self.source_dir = "nordugrid-arc-svn"
+          return True
+
         if self.channel == "nightlies":
             if not self.version:
                 self.version = str(datetime.date.today())
@@ -190,13 +197,15 @@ universal_archs     x86_64 i386
             try:
                 output = "".join(urllib.urlopen("http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+str(self.version)+"/src/").readlines())
                 self.source = re.search("nordugrid-arc-\d{12}.tar.gz", output).group(0)
+                self.source_dir = self.source[:-7]
             except IOError:
                 print "Unable to locate nightly source."
                 return False
 
             downloadlink = "http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+self.version+"/src/"+self.source
         else:
-            self.source = "nordugrid-arc-"+self.version+".tar.gz"
+            self.source_dir = "nordugrid-arc-"+self.version
+            self.source = self.source_dir+".tar.gz"
             downloadlink = "http://download.nordugrid.org/packages/nordugrid-arc/"+self.channel+"/"+self.version+"/src/"+self.source
 
         try:
@@ -331,21 +340,29 @@ universal_archs     x86_64 i386
         return True
 
     def buildarcclient(self):
-        # Extract source code
-        tarfile.open(self.mypj(self.name, self.source)).extractall(self.mypj(self.name))
+        if self.channel != "svn":
+          # Extract source code
+          tarfile.open(self.mypj(self.name, self.source)).extractall(self.mypj(self.name))
+          makefile_to_patch = "Makefile.in"
+        else:
+          makefile_to_patch = "Makefile.am"
+          
 
-        source_dir = self.mypj(self.name, self.source[:-7])
+        #~ gsed -i "s/@MSGMERGE@ --update/@MSGMERGE@ --update --backup=off/" self.source_dir/po/Makefile.in.in
 
-        #~ gsed -i "s/@MSGMERGE@ --update/@MSGMERGE@ --update --backup=off/" source_dir/po/Makefile.in.in
 
         # Use aclocal located at self.workdir
-        if subprocess.Popen(["gsed", "-i", "s|/opt/local/share/aclocal|"+self.mypj("install/share/aclocal")+"|g", pj(source_dir, "Makefile.in")]).wait() != 0:
-            print "Unable to patch Makefile.in"
+        if subprocess.Popen(["gsed", "-i", "s|/opt/local/share/aclocal|"+self.mypj("install/share/aclocal")+"|g", pj(self.source_dir, makefile_to_patch)]).wait() != 0:
+            print "Unable to patch %s" % makefile_to_patch
             return False
 
         basedir = os.getcwd()
 
-        os.chdir(source_dir)
+        os.chdir(self.source_dir)
+
+        if self.channel == "svn" and subprocess.Popen(["./autogen.sh"]).wait() != 0:
+          print "autogen.sh failed"
+          return False
 
         configure_args = []
         configure_args += ["--disable-all", "--enable-hed", "--enable-arclib-client", "--enable-credentials-client", "--enable-data-client", "--enable-srm-client", "--enable-doc", "--enable-cppunit", "--enable-python"]
@@ -493,7 +510,7 @@ cp ${PACKAGE_PATH}/Contents/Resources/ReadMe %(location)s/.
         postinstall.close()
         os.chmod(self.mypj(self.name+'-'+self.version+'.mpkg/Contents/Resources/postinstall', 0555))
 
-        shutil.copy2(self.mypj(self.name, self.source[:-7], 'LICENSE'), self.mypj(self.name+'-'+self.version+'.mpkg/Contents/Resources/License'))
+        shutil.copy2(self.mypj(self.name, self.source_dir, 'LICENSE'), self.mypj(self.name+'-'+self.version+'.mpkg/Contents/Resources/License'))
 
         readme = os.open(self.name+"-"+self.version+".mpkg/Contents/Resources/ReadMe")
         readme.writelines("""NOTE: You need to do the following steps after installation of ARC
@@ -538,7 +555,7 @@ exist in the $HOME/.arc directory, which can safely be removed.
         return True
 
     def createdmg(self):
-        volname = "NorduGrid ARC client "+self.relversion
+        volname = "NorduGrid-ARC-client-"+self.relversion
         appname = "ARC"
         if self.channel == "nightlies":
             appname += " nightly"
@@ -694,7 +711,7 @@ If these are not present here, ARC will most likely not work as expected.
 """ % { "location" : self.install_location, "name" : self.name } )
         readme.close()
 
-        shutil.copy2(self.mypj(self.name, self.source[:-7], "LICENSE"), pj(mountpoint, "LICENSE"))
+        shutil.copy2(self.mypj(self.name, self.source_dir, "LICENSE"), pj(mountpoint, "LICENSE"))
 
         os.symlink("/Applications", pj(mountpoint, "Applications"))
 
@@ -767,17 +784,23 @@ If these are not present here, ARC will most likely not work as expected.
         self.workdir = workdir
         self.source = source
 
-        available_channels = ['nightlies', 'releases', 'testing', 'experimental']
+        available_channels = ['nightlies', 'svn', 'releases', 'testing', 'experimental']
         self.channel = available_channels[0]
-        if os.environ.has_key('ARC_BUILD_CHANNEL') and os.environ['ARC_BUILD_CHANNEL'] in available_channels[1:]:
+        if os.environ.has_key('ARC_BUILD_CHANNEL') and os.environ['ARC_BUILD_CHANNEL'] in available_channels:
             self.channel = os.environ['ARC_BUILD_CHANNEL']
-            if not os.environ['ARC_BUILD_VERSION']:
+            if self.channel in available_channels[2:] and not os.environ.has_key('ARC_BUILD_VERSION'):
                 print "ARC_BUILD_VERSION environment variable must be set for the \"%s\" channel.", self.channel
                 sys.exit(1)
 
         self.version = self.relversion = ''
         if os.environ.has_key('ARC_BUILD_VERSION') and os.environ['ARC_BUILD_VERSION']:
-            self.version = self.relversion = os.environ['ARC_BUILD_VERSION']
+            if self.channel == "svn":
+              try:
+                self.version = int(os.environ['ARC_BUILD_VERSION'])
+              except exceptions.ValueError:
+                pass
+            else:
+              self.version = self.relversion = os.environ['ARC_BUILD_VERSION']
         if os.environ.has_key('ARC_BUILD_RELEASEVERSION') and os.environ['ARC_BUILD_RELEASEVERSION']:
             self.relversion = os.environ['ARC_BUILD_RELEASEVERSION']
 
