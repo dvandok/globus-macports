@@ -352,7 +352,7 @@ universal_archs     x86_64 i386
 
 
         # Use aclocal located at self.workdir
-        if subprocess.Popen(["gsed", "-i", "s|/opt/local/share/aclocal|"+self.mypj("install/share/aclocal")+"|g", pj(self.source_dir, makefile_to_patch)]).wait() != 0:
+        if subprocess.Popen(["gsed", "-i", "s|/opt/local/share/aclocal|"+self.mypj("install/share/aclocal")+"|g", self.mypj(self.name, self.source_dir, makefile_to_patch)]).wait() != 0:
             print "Unable to patch %s" % makefile_to_patch
             return False
 
