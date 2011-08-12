@@ -358,10 +358,11 @@ universal_archs     x86_64 i386
 
         basedir = os.getcwd()
 
-        os.chdir(self.source_dir)
+        os.chdir(self.mypj(self.name, self.source_dir))
 
         if self.channel == "svn" and subprocess.Popen(["./autogen.sh"]).wait() != 0:
           print "autogen.sh failed"
+          os.chdir(basedir)
           return False
 
         configure_args = []
@@ -372,6 +373,7 @@ universal_archs     x86_64 i386
 
         if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
             print "configure failed"
+            os.chdir(basedir)
             return False
 
         if subprocess.Popen(["make", "-j2"]).wait() != 0:
