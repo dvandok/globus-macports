@@ -1,0 +1,59 @@
+diff -ur lcgdm-1.8.0.1.orig/config/darwin.cf lcgdm-1.8.0.1/config/darwin.cf
+--- lcgdm-1.8.0.1.orig/config/darwin.cf	2010-12-20 11:40:00.000000000 +0100
++++ lcgdm-1.8.0.1/config/darwin.cf	2011-08-11 09:51:44.000000000 +0200
+@@ -12,7 +12,7 @@
+ MTCCFLAGS = -DCTHREAD_POSIX -D_THREAD_SAFE -D_REENTRANT
+ MTLDLIBS =
+ MTLDFLAGS =
+-SHLIBLDFLAGS = -undefined dynamic_lookup -dylib -single_module
++SHLIBLDFLAGS = -Wl,-undefined -Wl,dynamic_lookup -dynamiclib -framework Carbon -Wl,-single_module
+ SHLIBREQLIBS = -lc
+ FC = g77
+ 
+diff -ur lcgdm-1.8.0.1.orig/shlib/Imakefile lcgdm-1.8.0.1/shlib/Imakefile
+--- lcgdm-1.8.0.1.orig/shlib/Imakefile	2011-08-11 10:53:37.000000000 +0200
++++ lcgdm-1.8.0.1/shlib/Imakefile	2011-08-11 10:54:14.000000000 +0200
+@@ -53,24 +53,24 @@
+ libdpm.sl libdpm.so libdpm.dylib: $(RFIOLIB) $(NSLIB) $(DPMLIB)
+ liblfc.sl liblfc.so liblfc.dylib: $(NSLIB)
+ 
+-%.sl %.so %.dynlib: SharedLibraryTargetName(lcgdm)
++%.sl %.so %.dylib: SharedLibraryTargetName(lcgdm)
+ 	@echo " making $@ in `pwd`"
+ 	@-rm -rf tmp
+ 	@mkdir tmp
+ 	@for i in $^ ;\
+ 	do (cd tmp; case $$i in *.a) $(AR) x ../$$i; rm -f $(SYMTABNAM) ;; esac) done
+-	(cd tmp; $(CC) $(SHLIBLDFLAGS) -Wl,-soname,$@.`echo $(VERSION)|cut -f1 -d.` -o ../$@ *.o -L .. -llcgdm $(LIBCSEC))
++	(cd tmp; $(CC) $(SHLIBLDFLAGS) -install_name ${prefix}/${_lib}/$@ -o ../$@ *.o -L.. -llcgdm $(LIBCSEC))
+ 	@-rm $@.`echo $(VERSION)|cut -f1 -d.`
+ 	@-ln -s $@ $@.`echo $(VERSION)|cut -f1 -d.`
+ 	@-rm -rf tmp
+ 
+-liblcgdm.sl liblcgdm.so liblcgdm.dynlib: $(COMMONLIB) $(SECURITYLIB)
++liblcgdm.sl liblcgdm.so liblcgdm.dylib: $(COMMONLIB) $(SECURITYLIB)
+ 	@echo " making $@ in `pwd`"
+ 	@-rm -rf tmp
+ 	@mkdir tmp
+ 	@for i in $^ ;\
+ 	do (cd tmp; $(AR) x ../$$i; rm -f $(SYMTABNAM)) done
+-	(cd tmp; $(CC) $(SHLIBLDFLAGS) -Wl,-soname,$@.`echo $(VERSION)|cut -f1 -d.` -o ../$@ *.o $(SHLIBREQLIBS) -ldl $(LIBCSEC))
++	(cd tmp; $(CC) $(SHLIBLDFLAGS) -install_name ${prefix}/${_lib}/$@ -o ../$@ *.o $(SHLIBREQLIBS) -ldl $(LIBCSEC))
+ 	@-rm $@.`echo $(VERSION)|cut -f1 -d.`
+ 	@-ln -s $@ $@.`echo $(VERSION)|cut -f1 -d.`
+ 	@-rm -rf tmp
+diff -ur lcgdm-1.8.0.1.orig/security/Imakefile lcgdm-1.8.0.1/security/Imakefile
+--- lcgdm-1.8.0.1.orig/security/Imakefile	2011-08-16 13:26:42.000000000 +0200
++++ lcgdm-1.8.0.1/security/Imakefile	2011-08-16 13:43:27.000000000 +0200
+@@ -49,9 +49,9 @@
+ #define GSIMech GSI
+ #define SecAuthMechGSI       -DGSI
+ #define SecIncludeDirGSI -I/tmp/arc-workdir-7j6ERC/install/include/globus -I/tmp/arc-workdir-7j6ERC/install/lib/globus/include -I/usr/kerberos/include $(VOMS_INCLUDE) 
+-#define SecLibsGSI -lglobus_gssapi_gsi -lglobus_gss_assist -lglobus_gsi_credential -lglobus_gsi_callback -lglobus_common $(VOMS_LIB) -lssl -lcrypto
++#define SecLibsGSI -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi -lglobus_gss_assist -lglobus_gsi_credential -lglobus_gsi_callback -lglobus_common $(VOMS_LIB) -lssl -lcrypto
+ #define SecIncludeDirGSIpthr -I/tmp/arc-workdir-7j6ERC/install/include/globus -I/tmp/arc-workdir-7j6ERC/install/lib/globus/include -I/usr/kerberos/include $(VOMS_INCLUDE)
+-#define SecLibsGSIpthr -lglobus_gssapi_gsi -lglobus_gss_assist -lglobus_gsi_credential -lglobus_gsi_callback -lglobus_common $(VOMS_LIB) -lssl -lcrypto
++#define SecLibsGSIpthr -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi -lglobus_gss_assist -lglobus_gsi_credential -lglobus_gsi_callback -lglobus_common $(VOMS_LIB) -lssl -lcrypto
+ #else
+ #define GSIMech
+ #endif
