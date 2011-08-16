@@ -42,18 +42,3 @@ diff -ur lcgdm-1.8.0.1.orig/shlib/Imakefile lcgdm-1.8.0.1/shlib/Imakefile
  	@-rm $@.`echo $(VERSION)|cut -f1 -d.`
  	@-ln -s $@ $@.`echo $(VERSION)|cut -f1 -d.`
  	@-rm -rf tmp
-diff -ur lcgdm-1.8.0.1.orig/security/Imakefile lcgdm-1.8.0.1/security/Imakefile
---- lcgdm-1.8.0.1.orig/security/Imakefile	2011-08-16 13:26:42.000000000 +0200
-+++ lcgdm-1.8.0.1/security/Imakefile	2011-08-16 13:43:27.000000000 +0200
-@@ -49,9 +49,9 @@
- #define GSIMech GSI
- #define SecAuthMechGSI       -DGSI
- #define SecIncludeDirGSI -I/tmp/arc-workdir-7j6ERC/install/include/globus -I/tmp/arc-workdir-7j6ERC/install/lib/globus/include -I/usr/kerberos/include $(VOMS_INCLUDE) 
--#define SecLibsGSI -lglobus_gssapi_gsi -lglobus_gss_assist -lglobus_gsi_credential -lglobus_gsi_callback -lglobus_common $(VOMS_LIB) -lssl -lcrypto
-+#define SecLibsGSI -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi -lglobus_gss_assist -lglobus_gsi_credential -lglobus_gsi_callback -lglobus_common $(VOMS_LIB) -lssl -lcrypto
- #define SecIncludeDirGSIpthr -I/tmp/arc-workdir-7j6ERC/install/include/globus -I/tmp/arc-workdir-7j6ERC/install/lib/globus/include -I/usr/kerberos/include $(VOMS_INCLUDE)
--#define SecLibsGSIpthr -lglobus_gssapi_gsi -lglobus_gss_assist -lglobus_gsi_credential -lglobus_gsi_callback -lglobus_common $(VOMS_LIB) -lssl -lcrypto
-+#define SecLibsGSIpthr -L$(GLOBUS_LOCATION)/lib -lglobus_gssapi_gsi -lglobus_gss_assist -lglobus_gsi_credential -lglobus_gsi_callback -lglobus_common $(VOMS_LIB) -lssl -lcrypto
- #else
- #define GSIMech
- #endif
