@@ -3,7 +3,7 @@
 PortSystem          1.0
 
 name                igtf-certificates
-version             1.38
+version             1.40
 categories          security
 maintainers         nbi.ku.dk:skou
 description         The trusted IGTF CA-certificates
@@ -11,9 +11,9 @@ homepage            http://www.igtf.net
 platforms           darwin
 master_sites        http://download.nordugrid.org/packages/igtf/releases/${version}
 distfiles           igtf-policy-installation-bundle-${version}.tar.gz
-checksums           md5    450069195c9ced70abae2bb4af9d5f6e \
-                    sha1   bf484a2dc2bba64e9fb66bf20b9f8911f7d84458 \
-                    rmd160 7abad4c38285433f37b76e9ad1afb07b3d9b505b
+checksums           md5    db11d7bbecf66580337fb3673f345e81 \
+                    sha1   4e26f5cbc3f21d7fcc88e1cd2811d3bb3e196583 \
+                    rmd160 d7a8f1d6a48f72ee9477640faf0da3e2d55c5082
 
 worksrcdir          igtf-policy-installation-bundle-${version}
 configure.args-append --with-profile=classic --with-profile=slcs --with-profile=mics --prefix=${destroot}/${prefix}/etc/grid-security/certificates
