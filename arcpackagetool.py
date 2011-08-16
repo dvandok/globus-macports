@@ -583,7 +583,7 @@ exist in the $HOME/.arc directory, which can safely be removed.
 
 
 # Set the ARC_LOCATION environment variable. Needed since ARC is installed in a non default location.
-export ARC_LOCATION="`dirname \"${BASH_SOURCE[0]}\"`"
+export ARC_LOCATION="$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )"
 # Include path to ARC client executables in PATH environment variable. Also add path to the Python executable which was linked against.
 export PATH="${ARC_LOCATION}/bin:/System/Library/Frameworks/Python.framework/Versions/2.6/bin:${PATH}"
 # Set the ARC_PLUGIN_PATH enviroment path to the location of ARC modules.
@@ -595,7 +595,7 @@ export PYTHONPATH="${ARC_LOCATION}/lib/python2.6/site-packages"
 # Set the path to the directory containing CA Certificates
 export X509_CERT_DIR="${ARC_LOCATION}/etc/grid-security/certificates"
 echo "Instructions for using ARC in a regular Terminal can be found here:"
-echo "${BASH_SOURCE[0]}"
+echo "${ARC_LOCATION}/$( basename ${BASH_SOURCE[0]} )"
 echo
 echo "ARC client environment ready"
 """)
