@@ -371,6 +371,7 @@ universal_archs     x86_64 i386
         configure_args.append("PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig")
         configure_args.append("PATH=/System/Library/Frameworks/Python.framework/Versions/2.6/bin:"+os.environ["PATH"])
 
+        print "./configure "+" ".join(configure_args)
         if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
             print "configure failed"
             os.chdir(basedir)
