@@ -6,6 +6,7 @@
 # ARC_BUILD_VERSION (e.g. 1970-01-01, 1.0.0...)
 # ARC_BUILD_MAKECHECK (no, yes)
 # ARC_BUILD_INTERACTIVE (no, yes)
+# ARC_BUILD_LFC (no, yes)
 #
 # TODO:
 # - Support building different architectures, currently only x86_64 is
@@ -166,6 +167,8 @@ universal_archs     x86_64 i386
     def requiredpackagescheck(self):
         # The following packages are required to be installed to build the stand-alone package.
         requiredpkgs  = ["gsed", "gperf", "autoconf", "automake", "wget", "doxygen", "p5-archive-tar", "perl5"]
+        if self.buildlfc:
+            requiredpkgs += ["gsoap", "imake"]
         installedpkgs = [ line.split()[0] for line in self.port(["installed"] + requiredpkgs, True, True)["stdout"].splitlines()[1:] ]
 
         if set(requiredpkgs)-set(installedpkgs):
@@ -216,6 +219,58 @@ universal_archs     x86_64 i386
             print "Unable to fetch source."
             return False
 
+        if (self.buildlfc):
+          basedir = os.getcwd()
+          # To extract the VOMS and LFC source RPMs the rpm2cpio script is needed
+          try:
+            if os.path.isfile(self.mypj("rpm2cpio.sh")):
+              os.remove(self.mypj("rpm2cpio.sh"))
+            urllib.urlretrieve("http://svn.nordugrid.org/trac/packaging/export/590/macports/trunk/rpm2cpio.sh", self.mypj("rpm2cpio.sh"))
+          except:
+            print "Unable to fetch the rpm2cpio script."
+            os.chdir(basedir)
+            return False
+          
+          # Fetch VOMS source rpm. LFC depends on VOMS.
+          try:
+            if os.path.isdir(self.mypj("voms")):
+              shutil.rmtree(self.mypj("voms"))
+            os.mkdir(self.mypj("voms"))
+            vomsdownloadlink = "http://download.nordugrid.org/packages/voms/releases/"+self.vomsversion+"-1/fedora/11/x86_64/voms-"+self.vomsversion+"-1.fc11.src.rpm"
+            urllib.urlretrieve(vomsdownloadlink, self.mypj("voms", "voms-"+self.vomsversion+"-1.fc11.src.rpm"))
+
+            # rpm2cpio writes output to cwd.
+            os.chdir(self.mypj("voms"))
+            subprocess.Popen(["sh", self.mypj("rpm2cpio.sh"), self.mypj("voms", "voms-"+self.vomsversion+"-1.fc11.src.rpm")], stdout = subprocess.PIPE, stderr = subprocess.PIPE).wait()
+          except IOError:
+            print "Unable to fetch VOMS source RPM"
+            os.chdir(basedir)
+            return False
+
+          # Fetch LCG-DM source rpm. (lcgdm)
+          try:
+            if os.path.isdir(self.mypj("lcgdm")):
+              shutil.rmtree(self.mypj("lcgdm"))
+            os.mkdir(self.mypj("lcgdm"))
+            lfcdownloadlink = "http://download.nordugrid.org/packages/lcgdm/releases/"+self.lcgdmversion+"-3/fedora/12/x86_64/lcgdm-"+self.lcgdmversion+"-3.fc12.src.rpm"
+            urllib.urlretrieve(lfcdownloadlink, self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion+"-3.fc12.src.rpm"))
+
+            # rpm2cpio writes output to cwd.
+            os.chdir(self.mypj("lcgdm"))
+            subprocess.Popen(["sh", self.mypj("rpm2cpio.sh"), self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion+"-3.fc12.src.rpm")], stdout = subprocess.PIPE, stderr = subprocess.PIPE).wait()
+            
+          except IOError:
+            print "Unable to fetch LCG-DM source RPM"
+            os.chdir(basedir)
+            return False
+
+          try:
+            urllib.urlretrieve("http://svn.nordugrid.org/trac/packaging/export/599/macports/trunk/lcgdm-darwin.patch", self.mypj("lcgdm", "lcgdm-darwin.patch"))
+          except IOError:
+            print "Unable to fetch LCG-DM Mac OS X patch"
+            os.chdir(basedir)
+            return False
+        os.chdir(basedir)
         return True
 
     def modifyportfile(self, pkgname):
@@ -339,6 +394,148 @@ universal_archs     x86_64 i386
 
         return True
 
+    def buildvoms(self):
+      if os.path.isdir(self.mypj("voms", "voms-"+self.vomsversion)):
+        shutil.rmtree(self.mypj("voms", "voms-"+self.vomsversion))
+
+      tarfile.open(self.mypj("voms", "voms-"+self.vomsversion+".tar.gz")).extractall(self.mypj("voms"))
+      
+      basedir = os.getcwd()
+      os.chdir(self.mypj("voms", "voms-"+self.vomsversion))
+      
+      voms_spec = open(self.mypj("voms", "voms.spec")).read()
+      patches = re.findall("^Patch\d+:\s+%{name}-(.*)$", voms_spec, re.M)
+      for patch in patches:
+        if subprocess.Popen(["patch", "-p1", "-i", "../voms-"+patch], stdout = subprocess.PIPE, stderr = subprocess.PIPE).wait() != 0:
+          os.chdir(basedir)
+          print "Unable to patch VOMS"
+          return False
+      
+      # Fix location dir
+      # Fix default Globus location
+      # Fix default vomses file location
+      # Use pdflatex
+      if subprocess.Popen(["gsed", "-e", 's!\(LOCATION_DIR.*\)"\${\?prefix\}?"!\\1""!g', "-i", self.mypj("voms", "voms-"+self.vomsversion, "project/acinclude.m4")]).wait() != 0 or \
+         subprocess.Popen(["gsed", "-e", "s!\(GLOBUS_LOCATION\)!{\\1:-/opt/local}!",     "-i", self.mypj("voms", "voms-"+self.vomsversion, "project/voms.m4")]).wait() != 0 or \
+         subprocess.Popen(["gsed", "-e", "s!/opt/glite/etc/vomses!/etc/vomses!",         "-i", self.mypj("voms", "voms-"+self.vomsversion, "src/api/ccapi/voms_api.cc")]).wait() != 0 or \
+         subprocess.Popen(["gsed", "-e", "s!^\(USE_PDFLATEX *= *\)NO!\\1YES!",           "-i", self.mypj("voms", "voms-"+self.vomsversion, "src/api/ccapi/Makefile.am")]).wait() != 0:
+         print "Unable to modify VOMS source files with gsed."
+         os.chdir(basedir)
+         return False
+
+      # rebootstrap
+      if subprocess.Popen(["./autogen.sh"]).wait() != 0:
+        print "Unable to rebootstrap VOMS"
+        os.chdir(basedir)
+        return False
+      
+      configure_args = ["--prefix="+self.mypj("install"),  "--disable-glite", "--disable-java", "PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig"]
+      if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
+        print "Unable to configure VOMS"
+        os.chdir(basedir)
+        return False
+      
+      if subprocess.Popen(["make", "-j4"]).wait() != 0:
+        print "Unable to build VOMS"
+        os.chdir(basedir)
+        return False
+      
+      if subprocess.Popen(["make", "install"]).wait() != 0:
+        print "Unable to install VOMS"
+        os.chdir(basedir)
+        return False
+      
+      os.rename(self.mypj("install", "include", "glite/security/voms"), self.mypj("install", "include", "voms"))
+      
+      os.chdir(basedir)
+      return True
+
+    def buildlcgdm(self):
+      if os.path.isdir(self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion)):
+        shutil.rmtree(self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion))
+
+      tarfile.open(self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion+".tar.gz")).extractall(self.mypj("lcgdm"))
+      
+      basedir = os.getcwd()
+      os.chdir(self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion))
+
+      # Patch the usr patch.
+      if subprocess.Popen(["gsed", "-e", "s@/usr/include/globus@"+self.mypj("install", "include", "globus")+"@g", "-e" "s@/usr/$(_lib)/globus/include@"+self.mypj("install", "lib", "globus", "include")+"@g", "-i", self.mypj("lcgdm", "lcgdm-usr.patch")]).wait() != 0:
+          os.chdir(basedir)
+          print "Unable to patch LCG-DM (usr patch)."
+          return False
+
+      lcgdm_spec = open(self.mypj("lcgdm", "lcgdm.spec")).read()
+      patches = re.findall("^Patch\d+:\s+%{name}-(.*)$", lcgdm_spec, re.M)
+      for patch in patches:
+        if subprocess.Popen(["patch", "-p1", "-i", "../lcgdm-"+patch], stdout = subprocess.PIPE, stderr = subprocess.PIPE).wait() != 0:
+          os.chdir(basedir)
+          print "Unable to patch LCG-DM"
+          return False
+
+      if subprocess.Popen(["patch", "-p1", "-i", self.mypj("lcgdm", "lcgdm-darwin.patch")], stdout = subprocess.PIPE, stderr = subprocess.PIPE).wait() != 0 or \
+         subprocess.Popen(["gsed", "s!^\(#define SecLibsGSI\(pthr\)\?\)!\\1 -L$(GLOBUS_LOCATION)/lib!", "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "security/Imakefile")]).wait() != 0:
+        os.chdir(basedir)
+        print "Unable to patch LCG-DM (darwin)"
+        return False
+      
+      if subprocess.Popen(["gsed", "s!@@LIBDIR@@!"+self.mypj("install", "lib")+"!", "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "security", "Csec_api_loader.c")]).wait() != 0:
+          os.chdir(basedir)
+          print "Unable to patch LCG-DM (Csec_api_loader.c)"
+          return False
+      
+      # The code violates the strict aliasing rules all over the place...
+      # Need to use -fnostrict-aliasing so that the -O2 optimization in
+      # optflags doesn't try to use them.
+      if subprocess.Popen(["gsed", "s/^CC +=/& -O2 -fno-strict-aliasing/", "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "config", "linux.cf")]).wait() != 0:
+          os.chdir(basedir)
+          print "Unable to patch LCG-DM (no-strict-aliasing)"
+          return False
+
+      gsoapversion = subprocess.Popen(["soapcpp2", "-v"], stderr = subprocess.PIPE).communicate()[1].splitlines()[1].split()[-1]
+
+      configure_args = ["lfc"]
+      configure_args.append("--verbose")
+      configure_args.append("--with-client-only")
+      configure_args.append("--with-gsoap-location=/opt/local")
+      configure_args.append("--with-gsoap-version="+gsoapversion)
+      configure_args.append("--with-voms-location="+self.mypj("install"))
+      configure_args.append("--with-id-map-file="+self.mypj("install", "etc", "lcgdm-mapfile"))
+      configure_args.append("--with-ns-config-file="+self.mypj("install", "etc", "NSCONFIG"))
+      configure_args.append("--with-sysconf-dir="+self.mypj("install", "etc"))
+      configure_args.append("--with-globus-location="+self.mypj("install"))
+
+      if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
+        print "Unable to configure LCG-DM"
+        os.chdir(basedir)
+        return False
+      
+      if subprocess.Popen(["make", "-f", "Makefile.ini", "Makefiles"]).wait() != 0:
+        print "Unable to create LCG-DM makefiles"
+        os.chdir(basedir)
+        return False
+      
+      if subprocess.Popen(["make", "-j4", "prefix="+self.mypj("install")]).wait() != 0:
+        print "Unable to build LCG-DM"
+        os.chdir(basedir)
+        return False
+      
+      if subprocess.Popen(["make", "install", "prefix="+self.mypj("install")]).wait() != 0:
+        print "Unable to install LCG-DM"
+        os.chdir(basedir)
+        return False
+
+
+      # Move plugins out of the default library search path
+      if not os.path.isdir(self.mypj("install", "lib", "lcgdm")):
+          os.mkdir(self.mypj("install", "lib", "lcgdm"))
+      for plugin in glob.glob(self.mypj("install", "lib", "libCsec_plugin_*")):
+          os.rename(plugin, plugin.replace(self.mypj("install", "lib"), self.mypj("install", "lib", "lcgdm")))
+
+      
+      os.chdir(basedir)
+      return True
+
     def buildarcclient(self):
         if self.channel != "svn":
           # Extract source code
@@ -368,6 +565,8 @@ universal_archs     x86_64 i386
         configure_args = []
         configure_args += ["--disable-all", "--enable-hed", "--enable-arclib-client", "--enable-credentials-client", "--enable-data-client", "--enable-srm-client", "--enable-doc", "--enable-cppunit", "--enable-python"]
         configure_args.append("--prefix="+self.mypj(self.name, "install"))
+        if self.buildlfc:
+            configure_args += ["--enable-lfc", "--with-lfc="+self.mypj("install")]
         configure_args.append("PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig")
         configure_args.append("PATH=/System/Library/Frameworks/Python.framework/Versions/2.6/bin:"+os.environ["PATH"])
 
@@ -454,6 +653,10 @@ universal_archs     x86_64 i386
         os.mkdir(self.mypj("packages"))
         os.makedirs(self.mypj("packages/deps/lib"))
         os.makedirs(self.mypj("packages/globus/lib/arc"))
+        if self.buildlfc:
+            os.makedirs(self.mypj("packages/lfc/lib/arc"))
+            os.makedirs(self.mypj("packages/lfc/lib/lcgdm"))
+
         if os.path.isdir(self.mypj(self.name, self.arcglobusdir)):
             shutil.rmtree(self.mypj(self.name, self.arcglobusdir))
         os.makedirs(self.mypj(self.name, self.arcglobusdir, "arc"))
@@ -469,6 +672,18 @@ universal_archs     x86_64 i386
         for filename in glob.glob(self.mypj(self.name, self.arcglobusdir, "arc/lib*")) + glob.glob(self.mypj(self.name, self.arcglobusdir, "lib*")):
             shutil.copy2(filename, filename.replace(self.mypj(self.name, self.arcglobusdir), self.mypj("packages/globus/lib")))
 
+        if self.buildlfc:
+            if os.path.isdir(self.mypj(self.name, "lfc")):
+                shutil.rmtree(self.mypj(self.name, "lfc"))
+            os.makedirs(self.mypj(self.name, "lfc/lib/arc"))
+            
+            # Move ARC LFC modules and libraries in order to separate LFC dependency.
+            for filename in glob.glob(self.mypj(self.name, "install/lib/arc/libdmclfc.*")):
+                os.rename(filename, filename.replace(self.mypj(self.name, "install"), self.mypj(self.name, "lfc")))
+            # Copy ARC LFC modules and libraries to packages directory.
+            for filename in glob.glob(self.mypj(self.name, "lfc/lib/arc/lib*")):
+                shutil.copy2(filename, filename.replace(self.mypj(self.name), self.mypj("packages")))
+
         if not self.copylibraries([self.mypj(self.name, "install/bin/*"), self.mypj(self.name, "install/lib/*.dylib"), self.mypj(self.name, "install/lib/arc/*.so")], self.mypj("packages/deps/lib")):
             print "Unable to separate libraries"
             return False
@@ -477,9 +692,21 @@ universal_archs     x86_64 i386
         if not self.copylibraries([self.mypj(self.name, self.arcglobusdir, "arc/*.so"), self.mypj(self.name, self.arcglobusdir, "*.dylib")], self.mypj("packages/globus/lib"), globus_excludes):
             print "Unable to separate Globus libraries"
             return False
+        if self.buildlfc:
+            # Entries to exclude for LFC
+            lfc_excludes = globus_excludes + [ lib.replace("packages/globus", "install") for lib in glob.glob(self.mypj("packages/globus/lib/*")) ]
+            if not self.copylibraries([self.mypj(self.name, "lfc/lib/arc/*.so"), self.mypj("install/lib/lcgdm/*.dylib")], self.mypj("packages/lfc/lib"), lfc_excludes):
+                print "Unable to separate LFC libraries"
+                return False
 
+        # Copy globus loadable module as well.
         for filename in glob.glob(self.mypj("install/lib/libglobus_*.so")):
             shutil.copy2(filename, filename.replace("install/lib", "packages/globus/lib"))
+
+        if self.buildlfc:
+            # Copy LFC loadable module as well.
+            for filename in glob.glob(self.mypj("install/lib/lcgdm/*")):
+                shutil.copy2(filename, filename.replace("install", "packages/lfc"))
             
         return True
 
@@ -493,6 +720,13 @@ universal_archs     x86_64 i386
                 changeinstallnames(self.mypj(self.name, "install/bin/*"),        {self.mypj(self.name, "install/lib") : "@loader_path/../lib" , self.mypj("install/lib") : "@loader_path/../lib"}) and \
                 changeinstallnames(self.mypj(self.name, "install/lib/python2.6/site-packages/_arc.so"), {self.mypj(self.name, "install/lib") : "@loader_path/../.." , self.mypj("install/lib") : "@loader_path/../.."})):
             print "Unable to change library links to use relative linking"
+            return False
+
+        if self.buildlfc and \
+           not (changeinstallnames(self.mypj("packages/lfc/lib/arc/*.so"), {self.mypj(self.name, "install/lib") : "@loader_path/..", self.mypj("install/lib") : "@loader_path/.."}) and \
+                changeinstallnames(self.mypj("packages/lfc/lib/lcgdm/*.dylib"), {self.mypj("install/lib") : "@loader_path/.."}) and \
+                changeinstallnames(self.mypj("packages/lfc/lib/*.dylib"), {self.mypj("install/lib") : "@loader_path"})):
+            print "Unable to change LFC library links to use relative linking"
             return False
         return True
 
@@ -660,7 +894,11 @@ end tell""" % {"appname" : appname} )
         app_info_plist.close()
 
         # Copy all needed files to ARC.app/Contents/MacOS directory.
-        for install_path in [self.mypj("packages/deps"), self.mypj("packages/globus"), self.mypj(self.name, "install"), self.mypj("igtf-certificates/install")]:
+        needed_paths = [self.mypj("packages/deps"), self.mypj("packages/globus")]
+        if self.buildlfc:
+            needed_paths.append(self.mypj("packages/lfc"))
+        needed_paths += [self.mypj(self.name, "install"), self.mypj("igtf-certificates/install")]
+        for install_path in needed_paths:
             for root, dirs, files in os.walk(install_path):
                 for d in dirs:
                     if not os.path.isdir(pj(root, d).replace(install_path, self.mypj(appname+".app/Contents/MacOS"))):
@@ -769,6 +1007,9 @@ If these are not present here, ARC will most likely not work as expected.
             if not self.installport(package):
                 return False
 
+        if self.buildlfc and not (self.buildvoms() and self.buildlcgdm()):
+            return False
+
         if not (self.buildarcclient() and self.installport("igtf-certificates", "igtf-certificates/install")):
             return False
 
@@ -817,6 +1058,11 @@ If these are not present here, ARC will most likely not work as expected.
 #                sys.exit(1)
 
         self.domakecheck = (os.environ.has_key('ARC_BUILD_MAKECHECK') and os.environ['ARC_BUILD_MAKECHECK'] == "yes")
+
+        self.buildlfc = (os.environ.has_key('ARC_BUILD_LFC') and os.environ['ARC_BUILD_LFC'] == "yes")
+        if self.buildlfc:
+          self.vomsversion = "1.9.19.2"
+          self.lcgdmversion = "1.8.0.1"
 
         if not os.environ.has_key('ARC_BUILD_INTERACTIVE') or os.environ['ARC_BUILD_INTERACTIVE'] != "yes":
             self.build()
