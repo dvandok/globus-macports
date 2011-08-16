@@ -468,12 +468,13 @@ universal_archs     x86_64 i386
         for filename in glob.glob(self.mypj(self.name, self.arcglobusdir, "arc/lib*")) + glob.glob(self.mypj(self.name, self.arcglobusdir, "lib*")):
             shutil.copy2(filename, filename.replace(self.mypj(self.name, self.arcglobusdir), self.mypj("packages/globus/lib")))
 
+        if not self.copylibraries([self.mypj(self.name, "install/bin/*"), self.mypj(self.name, "install/lib/*.dylib"), self.mypj(self.name, "install/lib/arc/*.so")], self.mypj("packages/deps/lib")):
+            print "Unable to separate libraries"
+            return False
         # Entries to exclude for globus
         globus_excludes = [ lib.replace("packages/deps", "install") for lib in glob.glob(self.mypj("packages/deps/lib/*")) ]
-
-        if not (self.copylibraries([self.mypj(self.name, "install/bin/*"), self.mypj(self.name, "install/lib/*.dylib"), self.mypj(self.name, "install/lib/arc/*.so")], self.mypj("packages/deps/lib")) and \
-                self.copylibraries([self.mypj(self.name, self.arcglobusdir, "arc/*.so"), self.mypj(self.name, self.arcglobusdir, "*.dylib")], self.mypj("packages/globus/lib"), globus_excludes)):
-            print "Unable to separate libraries"
+        if not self.copylibraries([self.mypj(self.name, self.arcglobusdir, "arc/*.so"), self.mypj(self.name, self.arcglobusdir, "*.dylib")], self.mypj("packages/globus/lib"), globus_excludes):
+            print "Unable to separate Globus libraries"
             return False
 
         for filename in glob.glob(self.mypj("install/lib/libglobus_*.so")):
