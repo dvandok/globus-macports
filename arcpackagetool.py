@@ -220,7 +220,6 @@ universal_archs     x86_64 i386
             return False
 
         if (self.buildlfc):
-          basedir = os.getcwd()
           # To extract the VOMS and LFC source RPMs the rpm2cpio script is needed
           try:
             if os.path.isfile(self.mypj("rpm2cpio.sh")):
@@ -228,7 +227,7 @@ universal_archs     x86_64 i386
             urllib.urlretrieve("http://svn.nordugrid.org/trac/packaging/export/590/macports/trunk/rpm2cpio.sh", self.mypj("rpm2cpio.sh"))
           except:
             print "Unable to fetch the rpm2cpio script."
-            os.chdir(basedir)
+            os.chdir(self.basedir)
             return False
           
           # Fetch VOMS source rpm. LFC depends on VOMS.
@@ -244,7 +243,7 @@ universal_archs     x86_64 i386
             subprocess.Popen(["sh", self.mypj("rpm2cpio.sh"), self.mypj("voms", "voms-"+self.vomsversion+"-1.fc11.src.rpm")], stdout = subprocess.PIPE, stderr = subprocess.PIPE).wait()
           except IOError:
             print "Unable to fetch VOMS source RPM"
-            os.chdir(basedir)
+            os.chdir(self.basedir)
             return False
 
           # Fetch LCG-DM source rpm. (lcgdm)
@@ -261,16 +260,16 @@ universal_archs     x86_64 i386
             
           except IOError:
             print "Unable to fetch LCG-DM source RPM"
-            os.chdir(basedir)
+            os.chdir(self.basedir)
             return False
 
           try:
             urllib.urlretrieve("http://svn.nordugrid.org/trac/packaging/export/599/macports/trunk/lcgdm-darwin.patch", self.mypj("lcgdm", "lcgdm-darwin.patch"))
           except IOError:
             print "Unable to fetch LCG-DM Mac OS X patch"
-            os.chdir(basedir)
+            os.chdir(self.basedir)
             return False
-        os.chdir(basedir)
+        os.chdir(self.basedir)
         return True
 
     def modifyportfile(self, pkgname):
@@ -400,14 +399,13 @@ universal_archs     x86_64 i386
 
       tarfile.open(self.mypj("voms", "voms-"+self.vomsversion+".tar.gz")).extractall(self.mypj("voms"))
       
-      basedir = os.getcwd()
       os.chdir(self.mypj("voms", "voms-"+self.vomsversion))
       
       voms_spec = open(self.mypj("voms", "voms.spec")).read()
       patches = re.findall("^Patch\d+:\s+%{name}-(.*)$", voms_spec, re.M)
       for patch in patches:
         if subprocess.Popen(["patch", "-p1", "-i", "../voms-"+patch], stdout = subprocess.PIPE, stderr = subprocess.PIPE).wait() != 0:
-          os.chdir(basedir)
+          os.chdir(self.basedir)
           print "Unable to patch VOMS"
           return False
       
@@ -420,34 +418,34 @@ universal_archs     x86_64 i386
          subprocess.Popen(["gsed", "-e", "s!/opt/glite/etc/vomses!/etc/vomses!",         "-i", self.mypj("voms", "voms-"+self.vomsversion, "src/api/ccapi/voms_api.cc")]).wait() != 0 or \
          subprocess.Popen(["gsed", "-e", "s!^\(USE_PDFLATEX *= *\)NO!\\1YES!",           "-i", self.mypj("voms", "voms-"+self.vomsversion, "src/api/ccapi/Makefile.am")]).wait() != 0:
          print "Unable to modify VOMS source files with gsed."
-         os.chdir(basedir)
+         os.chdir(self.basedir)
          return False
 
       # rebootstrap
       if subprocess.Popen(["./autogen.sh"]).wait() != 0:
         print "Unable to rebootstrap VOMS"
-        os.chdir(basedir)
+        os.chdir(self.basedir)
         return False
       
       configure_args = ["--prefix="+self.mypj("install"),  "--disable-glite", "--disable-java", "PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig"]
       if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
         print "Unable to configure VOMS"
-        os.chdir(basedir)
+        os.chdir(self.basedir)
         return False
       
       if subprocess.Popen(["make", "-j4"]).wait() != 0:
         print "Unable to build VOMS"
-        os.chdir(basedir)
+        os.chdir(self.basedir)
         return False
       
       if subprocess.Popen(["make", "install"]).wait() != 0:
         print "Unable to install VOMS"
-        os.chdir(basedir)
+        os.chdir(self.basedir)
         return False
       
       os.rename(self.mypj("install", "include", "glite/security/voms"), self.mypj("install", "include", "voms"))
       
-      os.chdir(basedir)
+      os.chdir(self.basedir)
       return True
 
     def buildlcgdm(self):
@@ -456,12 +454,11 @@ universal_archs     x86_64 i386
 
       tarfile.open(self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion+".tar.gz")).extractall(self.mypj("lcgdm"))
       
-      basedir = os.getcwd()
       os.chdir(self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion))
 
       # Patch the usr patch.
       if subprocess.Popen(["gsed", "-e", "s@/usr/include/globus@"+self.mypj("install", "include", "globus")+"@g", "-e" "s@/usr/$(_lib)/globus/include@"+self.mypj("install", "lib", "globus", "include")+"@g", "-i", self.mypj("lcgdm", "lcgdm-usr.patch")]).wait() != 0:
-          os.chdir(basedir)
+          os.chdir(self.basedir)
           print "Unable to patch LCG-DM (usr patch)."
           return False
 
@@ -469,18 +466,18 @@ universal_archs     x86_64 i386
       patches = re.findall("^Patch\d+:\s+%{name}-(.*)$", lcgdm_spec, re.M)
       for patch in patches:
         if subprocess.Popen(["patch", "-p1", "-i", "../lcgdm-"+patch], stdout = subprocess.PIPE, stderr = subprocess.PIPE).wait() != 0:
-          os.chdir(basedir)
+          os.chdir(self.basedir)
           print "Unable to patch LCG-DM"
           return False
 
       if subprocess.Popen(["patch", "-p1", "-i", self.mypj("lcgdm", "lcgdm-darwin.patch")], stdout = subprocess.PIPE, stderr = subprocess.PIPE).wait() != 0 or \
          subprocess.Popen(["gsed", "s!^\(#define SecLibsGSI\(pthr\)\?\)!\\1 -L$(GLOBUS_LOCATION)/lib!", "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "security/Imakefile")]).wait() != 0:
-        os.chdir(basedir)
+        os.chdir(self.basedir)
         print "Unable to patch LCG-DM (darwin)"
         return False
       
       if subprocess.Popen(["gsed", "s!@@LIBDIR@@!"+self.mypj("install", "lib")+"!", "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "security", "Csec_api_loader.c")]).wait() != 0:
-          os.chdir(basedir)
+          os.chdir(self.basedir)
           print "Unable to patch LCG-DM (Csec_api_loader.c)"
           return False
       
@@ -488,7 +485,7 @@ universal_archs     x86_64 i386
       # Need to use -fnostrict-aliasing so that the -O2 optimization in
       # optflags doesn't try to use them.
       if subprocess.Popen(["gsed", "s/^CC +=/& -O2 -fno-strict-aliasing/", "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "config", "linux.cf")]).wait() != 0:
-          os.chdir(basedir)
+          os.chdir(self.basedir)
           print "Unable to patch LCG-DM (no-strict-aliasing)"
           return False
 
@@ -507,22 +504,22 @@ universal_archs     x86_64 i386
 
       if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
         print "Unable to configure LCG-DM"
-        os.chdir(basedir)
+        os.chdir(self.basedir)
         return False
       
       if subprocess.Popen(["make", "-f", "Makefile.ini", "Makefiles"]).wait() != 0:
         print "Unable to create LCG-DM makefiles"
-        os.chdir(basedir)
+        os.chdir(self.basedir)
         return False
       
       if subprocess.Popen(["make", "-j4", "prefix="+self.mypj("install")]).wait() != 0:
         print "Unable to build LCG-DM"
-        os.chdir(basedir)
+        os.chdir(self.basedir)
         return False
       
       if subprocess.Popen(["make", "install", "prefix="+self.mypj("install")]).wait() != 0:
         print "Unable to install LCG-DM"
-        os.chdir(basedir)
+        os.chdir(self.basedir)
         return False
 
 
@@ -533,7 +530,7 @@ universal_archs     x86_64 i386
           os.rename(plugin, plugin.replace(self.mypj("install", "lib"), self.mypj("install", "lib", "lcgdm")))
 
       
-      os.chdir(basedir)
+      os.chdir(self.basedir)
       return True
 
     def buildarcclient(self):
@@ -553,13 +550,11 @@ universal_archs     x86_64 i386
             print "Unable to patch %s" % makefile_to_patch
             return False
 
-        basedir = os.getcwd()
-
         os.chdir(self.mypj(self.name, self.source_dir))
 
         if self.channel == "svn" and subprocess.Popen(["./autogen.sh"]).wait() != 0:
           print "autogen.sh failed"
-          os.chdir(basedir)
+          os.chdir(self.basedir)
           return False
 
         configure_args = []
@@ -573,25 +568,25 @@ universal_archs     x86_64 i386
         print "./configure "+" ".join(configure_args)
         if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
             print "configure failed"
-            os.chdir(basedir)
+            os.chdir(self.basedir)
             return False
 
         if subprocess.Popen(["make", "-j2"]).wait() != 0:
             print "make failed"
-            os.chdir(basedir)
+            os.chdir(self.basedir)
             return False
 
         if self.domakecheck and subprocess.Popen(["make", "check"]).wait() != 0:
             print "make check failed"
-            os.chdir(basedir)
+            os.chdir(self.basedir)
             return False
 
         if subprocess.Popen(["make", "install"]).wait() != 0:
             print "make install failed"
-            os.chdir(basedir)
+            os.chdir(self.basedir)
             return False
 
-        os.chdir(basedir)
+        os.chdir(self.basedir)
 
         # Dont include the following files in the package
         shutil.rmtree(self.mypj(self.name, "install/share/arc/examples/config"), True)
@@ -1028,6 +1023,7 @@ If these are not present here, ARC will most likely not work as expected.
     def __init__(self, workdir = '', source = ''):
         self.workdir = workdir
         self.source = source
+        self.basedir = os.getcwd()
 
         available_channels = ['nightlies', 'svn', 'releases', 'testing', 'experimental']
         self.channel = available_channels[0]
