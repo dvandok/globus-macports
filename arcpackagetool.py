@@ -1045,6 +1045,7 @@ If these are not present here, ARC will most likely not work as expected.
             if self.channel == "svn":
               try:
                 self.version = int(os.environ['ARC_BUILD_VERSION'])
+                self.relversion = "svn-r"+os.environ['ARC_BUILD_VERSION']
               except exceptions.ValueError:
                 pass
             else:
