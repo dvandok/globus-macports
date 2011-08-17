@@ -235,11 +235,15 @@ universal_archs     x86_64 i386
             return False
 
         if self.channel == "svn":
-          if subprocess.Popen(["svn", "co", "http://svn.nordugrid.org/repos/nordugrid/arc1/trunk", "nordugrid-arc-svn"]).wait() != 0:
+          svn_args = ["co", "http://svn.nordugrid.org/repos/nordugrid/arc1/trunk", "nordugrid-arc-svn"]
+          if self.version:
+              svn_args += ["-r", str(self.version)]
+          print " ".join(["svn"]+svn_args)
+          if subprocess.Popen(["svn"] + svn_args).wait() != 0:
             print "Unable to checkout svn source."
             return False
           self.source_dir = "nordugrid-arc-svn"
-          os.chdir(basedir)
+          os.chdir(self.basedir)
           return True
 
         if self.channel == "nightlies":
