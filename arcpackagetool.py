@@ -235,7 +235,7 @@ universal_archs     x86_64 i386
             return False
 
         if self.channel == "svn":
-          svn_args = ["co", "http://svn.nordugrid.org/repos/nordugrid/arc1/trunk", "nordugrid-arc-svn"]
+          svn_args = ["co", "http://svn.nordugrid.org/repos/nordugrid/arc1/trunk", self.mypj(self.name, "nordugrid-arc-svn")]
           if self.version:
               svn_args += ["-r", str(self.version)]
           print " ".join(["svn"]+svn_args)
