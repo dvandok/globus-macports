@@ -183,42 +183,6 @@ universal_archs     x86_64 i386
         if not os.path.isdir(self.mypj(self.name)):
             os.mkdir(self.mypj(self.name))
 
-        if self.channel == "svn":
-          if subprocess.Popen(["svn", "co", "http://svn.nordugrid.org/repos/nordugrid/arc1/trunk", "nordugrid-arc-svn"]).wait() != 0:
-            print "Unable to checkout svn source."
-            return False
-          self.source_dir = "nordugrid-arc-svn"
-          return True
-
-        if self.channel == "nightlies":
-            if not self.version:
-                self.version = str(datetime.date.today())
-                if not self.relversion:
-                    self.relversion = self.version
-                
-            # Get nightly source name.
-            try:
-                output = "".join(urllib.urlopen("http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+str(self.version)+"/src/").readlines())
-                self.source = re.search("nordugrid-arc-\d{12}.tar.gz", output).group(0)
-                self.source_dir = self.source[:-7]
-            except IOError:
-                print "Unable to locate nightly source."
-                return False
-
-            downloadlink = "http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+self.version+"/src/"+self.source
-        else:
-            self.source_dir = "nordugrid-arc-"+self.version
-            self.source = self.source_dir+".tar.gz"
-            downloadlink = "http://download.nordugrid.org/packages/nordugrid-arc/"+self.channel+"/"+self.version+"/src/"+self.source
-
-        try:
-            if os.path.isfile(self.mypj(self.name, self.source)):
-                os.remove(self.mypj(self.name, self.source))
-            urllib.urlretrieve(downloadlink, self.mypj(self.name, self.source))
-        except IOError:
-            print "Unable to fetch source."
-            return False
-
         if (self.buildlfc):
           # To extract the VOMS and LFC source RPMs the rpm2cpio script is needed
           try:
@@ -269,6 +233,45 @@ universal_archs     x86_64 i386
             print "Unable to fetch LCG-DM Mac OS X patch"
             os.chdir(self.basedir)
             return False
+
+        if self.channel == "svn":
+          if subprocess.Popen(["svn", "co", "http://svn.nordugrid.org/repos/nordugrid/arc1/trunk", "nordugrid-arc-svn"]).wait() != 0:
+            print "Unable to checkout svn source."
+            return False
+          self.source_dir = "nordugrid-arc-svn"
+          os.chdir(basedir)
+          return True
+
+        if self.channel == "nightlies":
+            if not self.version:
+                self.version = str(datetime.date.today())
+                if not self.relversion:
+                    self.relversion = self.version
+                
+            # Get nightly source name.
+            try:
+                output = "".join(urllib.urlopen("http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+str(self.version)+"/src/").readlines())
+                self.source = re.search("nordugrid-arc-\d{12}.tar.gz", output).group(0)
+                self.source_dir = self.source[:-7]
+            except IOError:
+                print "Unable to locate nightly source."
+                return False
+
+            downloadlink = "http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+self.version+"/src/"+self.source
+        else:
+            self.source_dir = "nordugrid-arc-"+self.version
+            self.source = self.source_dir+".tar.gz"
+            downloadlink = "http://download.nordugrid.org/packages/nordugrid-arc/"+self.channel+"/"+self.version+"/src/"+self.source
+        
+            
+        try:
+            if os.path.isfile(self.mypj(self.name, self.source)):
+                os.remove(self.mypj(self.name, self.source))
+            urllib.urlretrieve(downloadlink, self.mypj(self.name, self.source))
+        except IOError:
+            print "Unable to fetch source."
+            return False
+
         os.chdir(self.basedir)
         return True
 
