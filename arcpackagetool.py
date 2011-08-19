@@ -70,8 +70,6 @@ def hdiutil(args):
 
 class ARCPackageTool:
     ## DEFAULT VALUES.
-    # Install package to the specified location.
-    install_location = "/opt/local/nordugrid"
     name = "nordugrid-arc"
 
     # Currently only used for naming
@@ -630,31 +628,6 @@ universal_archs     x86_64 i386
 
         return True
 
-    def createarchive(self, packagedir):
-        # Create bill of materials (bom)
-        if subprocess.Popen(["mkbom", self.mypj(packagedir), self.mypj(packagedir+".bom")]).wait() != 0:
-            print "Unable to create bom for dependency package"
-            return False
-
-        # Create pax archive
-        pax_args  = []
-        pax_args += ["-w", self.mypj(packagedir)] # Input path
-        pax_args += ["-f", self.mypj(packagedir+".pax")] # Output file
-        pax_args += ["-x", "cpio"] # Archive
-        pax_args += ["-s", "/"+self.mypj(packagedir).replace("/", "\/")+"/"+self.install_location.replace("/", "\/")+"/"] # Replacement pattern
-        if subprocess.Popen(["pax"] + pax_args).wait() != 0:
-            print "Unable to create pax archive"
-            return False
-
-        # Compress pax archive
-        paxf = open(self.mypj(packagedir+'.pax'), 'rb')
-        paxf_gz = gzip.open(self.mypj(packagedir+'.pax.gz'), 'wb')
-        paxf_gz.writelines(paxf)
-        paxf_gz.close()
-        paxf.close()
-
-        return True
-
     def separatelibraries(self):
         if os.path.isdir(self.mypj("packages")):
             shutil.rmtree(self.mypj("packages"))
@@ -736,68 +709,6 @@ universal_archs     x86_64 i386
                 changeinstallnames(self.mypj("packages/lfc/lib/*.dylib"), {self.mypj("install/lib") : "@loader_path"})):
             print "Unable to change LFC library links to use relative linking"
             return False
-        return True
-
-    def completepackage(self):
-        if not (self.createarchive("packages/deps") and self.createarchive("packages/globus") and \
-                self.createarchive("igtf-certificates/install") and self.createarchive(self.mypj(self.name, "install"))):
-            print "Unable to create sub-packages"
-            return False
-
-        # Add PATHs to environment by using postinstall script. Copy ReadMe to location.
-        postinstall = os.open(self.name+"-"+self.version+".mpkg/Contents/Resources/postinstall")
-        postinstall.writelines("""#!/bin/bash
-cat << EOF > /etc/paths.d/%(name)s
-%(location)s/bin
-EOF
-
-cp ${PACKAGE_PATH}/Contents/Resources/ReadMe %(location)s/.
-""" % {"location" : self.install_location, "name" : self.name})
-        postinstall.close()
-        os.chmod(self.mypj(self.name+'-'+self.version+'.mpkg/Contents/Resources/postinstall', 0555))
-
-        shutil.copy2(self.mypj(self.name, self.source_dir, 'LICENSE'), self.mypj(self.name+'-'+self.version+'.mpkg/Contents/Resources/License'))
-
-        readme = os.open(self.name+"-"+self.version+".mpkg/Contents/Resources/ReadMe")
-        readme.writelines("""NOTE: You need to do the following steps after installation of ARC
--------------------------------------------------------------------
-Install Grid certificate and private key:
-
-  Copy your user certificate (e.g. usercert.pem) to: $HOME/.globus/usercert.pem
-  Copy your user key (e.g. userkey.pem) to: $HOME/.globus/userkey.pem
-
-Also you must set the environment variable GLOBUS_LOCATION to %(location)s in
-the shell where ARC will be executed in order for the certain ARC modules to
-function. E.g. for bash:
-export GLOBUS_LOCATION=%(location)s
-
-Other information
------------------
-Default client.conf, jobs.xml directory location (these directories are
-hidden by default):
-
-  $HOME/.arc
-
-Uninstalling this package
--------------------------
-To uninstall this package simply remove the '%(location)s' directory and the
-file '/etc/paths.d/%(name)s'. Additionally user configuration files might
-exist in the $HOME/.arc directory, which can safely be removed.
-""" % { "location" : self.install_location, "name" : self.name } )
-        readme.close()
-
-        try:
-            urllib.urlretrieve('http://www.nordugrid.org/images/ng-logo.png', self.mypj(self.name+'-'+self.version+'.mpkg/Contents/Resources/background'))
-            # Put logo in bottom-left corner, and do not scale it.
-            #~ '''<key>IFPkgFlagComponentDirectory</key>/i
-            #~ <key>IFPkgFlagBackgroundAlignment</key>
-            #~ <string>bottomleft</string>
-            #~ <key>IFPkgFlagBackgroundScaling</key>
-            #~ <string>none</string>'''
-            #~ "<string>${name}-${version}.pkg</string><string>required</string>"
-                #~ self.name+'-'+self.version+'.mpkg/Contents/Info.plist'
-        except IOError:
-            print "WARNING: Unable to fetch NG-logo"
         return True
 
     def createdmg(self):
@@ -960,7 +871,7 @@ ARC will look for the certificate and private key in:
 and
   ${HOME}/.globus/userkey.pem (private key)
 If these are not present here, ARC will most likely not work as expected.
-""" % { "location" : self.install_location, "name" : self.name } )
+"""
         readme.close()
 
         shutil.copy2(self.mypj(self.name, self.source_dir, "LICENSE"), pj(mountpoint, "LICENSE"))
@@ -1006,7 +917,6 @@ If these are not present here, ARC will most likely not work as expected.
         print "Name: %s" % self.name
         print "Version: %s" % self.version
         print "Channel: %s" % self.channel
-        print "Install location: %s" % self.install_location
         print "Working directory: %s" % self.workdir
         sys.stdout.flush()
 
