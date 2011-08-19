@@ -8,6 +8,7 @@
 # ARC_BUILD_MAKECHECK (no, yes)
 # ARC_BUILD_INTERACTIVE (no, yes)
 # ARC_BUILD_LFC (no, yes)
+# ARC_BUILD_CLEANONSUCCESS (yes, no)
 #
 # TODO:
 # - Support building different architectures, currently only x86_64 is
@@ -940,7 +941,8 @@ If these are not present here, ARC will most likely not work as expected.
             return False
 
         # Cleanup
-        shutil.rmtree(self.workdir)
+        if self.cleanonsuccess:
+            shutil.rmtree(self.workdir)
 
         print "%s was created successfully" % self.name
         print(time.asctime())
@@ -985,6 +987,8 @@ If these are not present here, ARC will most likely not work as expected.
         if self.buildlfc:
           self.vomsversion = "1.9.19.2"
           self.lcgdmversion = "1.8.0.1"
+
+        self.cleanonsuccess = (not os.environ.has_key('ARC_BUILD_CLEANONSUCCESS') or os.environ['ARC_BUILD_CLEANONSUCCESS'] != "no")
 
         if not os.environ.has_key('ARC_BUILD_INTERACTIVE') or os.environ['ARC_BUILD_INTERACTIVE'] != "yes":
             self.build()
