@@ -801,6 +801,8 @@ exist in the $HOME/.arc directory, which can safely be removed.
         appname = "ARC"
         if self.channel == "nightlies":
             appname += " nightly"
+        elif self.channel == "svn":
+            appname += " svn"
         
         if os.path.isdir(self.mypj(appname+".app")):
             shutil.rmtree(self.mypj(appname+".app"))
