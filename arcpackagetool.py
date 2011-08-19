@@ -872,7 +872,7 @@ ARC will look for the certificate and private key in:
 and
   ${HOME}/.globus/userkey.pem (private key)
 If these are not present here, ARC will most likely not work as expected.
-"""
+""")
         readme.close()
 
         shutil.copy2(self.mypj(self.name, self.source_dir, "LICENSE"), pj(mountpoint, "LICENSE"))
