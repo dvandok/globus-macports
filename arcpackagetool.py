@@ -4,6 +4,7 @@
 # The following environment variables can be used to control the outcome:
 # ARC_BUILD_CHANNEL (nightlies, releases, testing, experimental, svn)
 # ARC_BUILD_VERSION (e.g. 1970-01-01, 1.0.0...)
+# ARC_BUILD_RELEASEVERSION (ARC_BUILD_VERSION)
 # ARC_BUILD_MAKECHECK (no, yes)
 # ARC_BUILD_INTERACTIVE (no, yes)
 # ARC_BUILD_LFC (no, yes)
