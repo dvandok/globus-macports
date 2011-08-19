@@ -236,15 +236,18 @@ universal_archs     x86_64 i386
             return False
 
         if self.channel == "svn":
-          svn_args = ["co", "http://svn.nordugrid.org/repos/nordugrid/arc1/trunk", self.mypj(self.name, "nordugrid-arc-svn")]
+          self.source_dir = "nordugrid-arc-svn"
+          svn_args = ["co", "http://svn.nordugrid.org/repos/nordugrid/arc1/trunk", self.mypj(self.name, self.source_dir)]
           if self.version:
               svn_args += ["-r", str(self.version)]
           print " ".join(["svn"]+svn_args)
           sys.stdout.flush()
-          if subprocess.Popen(["svn"] + svn_args).wait() != 0:
+          if subprocess.Popen(["svn"] + svn_args, stderr = subprocess.PIPE).wait() != 0:
             print "Unable to checkout svn source."
             return False
-          self.source_dir = "nordugrid-arc-svn"
+          if not self.version:
+              self.version = subprocess.Popen(["svnversion", self.mypj(self.name, self.source_dir)], stdout = subprocess.PIPE, stderr = subprocess.PIPE).communicate()[0].strip()
+              self.relversion = "svn-r"+self.version
           os.chdir(self.basedir)
           return True
 
