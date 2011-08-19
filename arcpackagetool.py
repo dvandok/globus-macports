@@ -239,6 +239,7 @@ universal_archs     x86_64 i386
           if self.version:
               svn_args += ["-r", str(self.version)]
           print " ".join(["svn"]+svn_args)
+          sys.stdout.flush()
           if subprocess.Popen(["svn"] + svn_args).wait() != 0:
             print "Unable to checkout svn source."
             return False
@@ -573,6 +574,7 @@ universal_archs     x86_64 i386
         configure_args.append("PATH=/System/Library/Frameworks/Python.framework/Versions/2.6/bin:"+os.environ["PATH"])
 
         print "./configure "+" ".join(configure_args)
+        sys.stdout.flush()
         if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
             print "configure failed"
             os.chdir(self.basedir)
