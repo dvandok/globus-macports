@@ -81,8 +81,8 @@ class ARCPackageTool:
 
     # The following packages must be installed before building ARC.
     # Order matters!
-    deppackages =  ['pkgconfig', 'libiconv', 'gettext', 'libsigcxx2',
-                    'glib2', 'glibmm', 'libtool', 'grid-packaging-tools']
+    deppackages =  ['libiconv', 'gettext', 'glib2', 'pkgconfig', 'libsigcxx2',
+                    'glibmm', 'libtool', 'grid-packaging-tools']
 
     # The following globus packages are needed by the ARC globus modules.
     # Order matters!
