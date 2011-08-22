@@ -63,7 +63,10 @@ patch.pre_args          -p1
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen
+# Disable building doxygen documentation for now, since it is broken due to PDF-hyperlinks ending up on different pages.
+#configure.post_args     --with-flavor=${flavor} --enable-doxygen
+configure.post_args     --with-flavor=${flavor}
+
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
