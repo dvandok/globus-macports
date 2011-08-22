@@ -120,15 +120,17 @@ post-destroot {
         ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
         ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
 
+    # -- Doxygen documentation is currently disabled.
     # Move documentation to default macports location
-    move ${destroot}${prefix}/share/doc/${_name} \
-        ${destroot}${prefix}/share/doc/${name}-${version}
+    #move ${destroot}${prefix}/share/doc/${_name} \
+    #    ${destroot}${prefix}/share/doc/${name}-${version}
 
     # Fix doxygen glitches
-    foreach f { globus_xio_driver.3 GLOBUS_XIO_API_ASSIST.3 } {
-        reinplace "s/P\\.RS/P\\\n.RS/" \
-            ${destroot}${prefix}/share/man/man3/${f}
-    }
+    #foreach f { globus_xio_driver.3 GLOBUS_XIO_API_ASSIST.3 } {
+    #    reinplace "s/P\\.RS/P\\\n.RS/" \
+    #        ${destroot}${prefix}/share/man/man3/${f}
+    #}
+    # --
 
     # Install license file
     file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
