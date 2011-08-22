@@ -329,6 +329,10 @@ universal_archs     x86_64 i386
             elif portfile[i][:5]  == "name ":
                 portfile[i] = "name "+pkgname+"-arc"
 
+            # Ignore any conflicts keywords: ports are built and installed in a isolated area. 
+            if portfile[i][:10] == "conflicts ":
+                portfile[i] = ''
+
             # Modify master_sites since name was modified.
             elif portfile[i][:13] == "master_sites ":
                 portfile[i] = re.sub("(master_sites\s*gnu)", "\\1:"+pkgname, portfile[i])
