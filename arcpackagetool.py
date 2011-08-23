@@ -164,7 +164,14 @@ universal_archs     x86_64 i386
 
         return True
 
-    def requiredpackagescheck(self):
+    def dependenciescheck(self):
+        # First check whether MacPorts is installed
+        p = self.port(["info", "--name", "macports"])
+        if not p["success"] or p["stdout"].strip() != "name: MacPorts":
+            print "ERROR: Unable to locate or use the MacPorts build system."
+            print "This script uses the MacPorts build system to create an ARC Mac OS X binary."
+            return False
+
         # The following packages are required to be installed to build the stand-alone package.
         requiredpkgs  = ["gsed", "gperf", "autoconf", "automake", "wget", "doxygen", "p5-archive-tar", "perl5"]
         if self.buildlfc:
@@ -172,9 +179,25 @@ universal_archs     x86_64 i386
         installedpkgs = [ line.split()[0] for line in self.port(["installed"] + requiredpkgs, True, True)["stdout"].splitlines()[1:] ]
 
         if set(requiredpkgs)-set(installedpkgs):
-            print "The following packages are required to build the stand-alone:"
+            print "ERROR: The following packages are required to build the stand-alone:"
             print " ".join(set(requiredpkgs)-set(installedpkgs))
             print "Please install them."
+            return False
+
+        missingpkgs = []
+        for pkg in self.deppackages:
+            p = self.port(["info", "--name", pkg])
+            if not p["success"] or p["stdout"].strip() != "name: "+pkg:
+              missingpkgs.append(pkg)
+
+        if missingpkgs:
+            print "ERROR: The following ports must be available to the script in order to build the ARC binary."
+            print " ".join(missingpkgs)
+            if [pkg for pkg in missingpkgs if pkg[:6] == "globus"]:
+                print "Note: The globus port files are located here:"
+                print "http://svn.nordugrid.org/trac/packaging/browser/macports/trunk/ports"
+                print "To use these port files download them to a directory and use the 'portindex' command."
+                print "Next add the path containing the port files to the MacPorts sources configuration file (e.g. /opt/local/etc/macports/sources.conf)."
             return False
 
         return True
@@ -915,7 +938,7 @@ If these are not present here, ARC will most likely not work as expected.
         print(time.asctime())
         sys.stdout.flush()
 
-        if not (self.requiredpackagescheck() and self.initialise()):
+        if not (self.dependenciescheck() and self.initialise()):
             return False
 
         print "Building ARC client for Mac OS X with the following options:"
