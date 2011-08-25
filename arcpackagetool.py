@@ -340,7 +340,7 @@ universal_archs     x86_64 i386
         portfile = re.sub("\${prefix}/share/libtool", "/opt/local/share/libtool", portfile)
 
         # Install Perl modules to prefix.
-        portfile = re.sub("\${perl_vendor_lib}", "${prefix}/lib/perl5/vendor_perl", portfile)
+        portfile = re.sub("\${perl_vendor_lib}", "${prefix}/lib/perl", portfile)
 
         # Split into lines, to be able to parse line by line.
         portfile = portfile.splitlines()
