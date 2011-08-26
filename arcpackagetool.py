@@ -173,7 +173,7 @@ universal_archs     x86_64 i386
             return False
 
         # The following packages are required to be installed to build the stand-alone package.
-        requiredpkgs  = ["gsed", "gperf", "autoconf", "automake", "wget", "doxygen", "p5-archive-tar", "perl5"]
+        requiredpkgs  = ["gsed", "gperf", "autoconf", "automake", "wget", "doxygen", "p5-archive-tar", "p5-xml-dom", "p5-xml-parser", "perl5"]
         if self.buildlfc:
             requiredpkgs += ["gsoap", "imake"]
         installedpkgs = [ line.split()[0] for line in self.port(["installed"] + requiredpkgs, True, True)["stdout"].splitlines()[1:] ]
