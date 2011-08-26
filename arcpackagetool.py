@@ -330,9 +330,17 @@ universal_archs     x86_64 i386
         if re.search("^configure.env-append", portfile, re.M):
           portfile = re.sub("^(configure.env-append.*)$", "\\1 PKG_CONFIG_LIBDIR="+self.mypj("install/lib/pkgconfig")+":/usr/lib/pkgconfig", portfile, re.M)
         elif re.search("^configure\s+{", portfile, re.M):
-          portfile = re.sub('(\nconfigure {[^\n]*\n)', '\\1    set env(PKG_CONFIG_LIBDIR) '+self.mypj("install/lib/pkgconfig")+':/usr/lib/pkgconfig\n', portfile)
+          portfile = re.sub('(\nconfigure {[^\n]*\n)', '\\1    set env(PKG_CONFIG_LIBDIR) '+self.mypj("install/lib/pkgconfig")+':/usr/lib/pkgconfig'+os.linesep, portfile)
         else:
           portfile += os.linesep + "configure.env-append PKG_CONFIG_LIBDIR="+self.mypj("install/lib/pkgconfig")+":/usr/lib/pkgconfig"
+        
+
+        # Set GPT_LOCATION and GLOBUS_LOCATION in build and destroot port phases.
+        if re.search("^configure\s+{", portfile, re.M):
+            portfile = re.sub('(\nconfigure {[^\n]*\n)', "\\1    set env(GPT_LOCATION) "+self.mypj("install")+os.linesep+"    set env(GLOBUS_LOCATION) "+self.mypj("install")+os.linesep, portfile)
+        else:
+            portfile += os.linesep + "build.env-append GPT_LOCATION='"+self.mypj("install")+"' GLOBUS_LOCATION='"+self.mypj("install")+"'"
+        portfile += os.linesep + "destroot.env-append GPT_LOCATION='"+self.mypj("install")+"' GLOBUS_LOCATION='"+self.mypj("install")+"'"
 
         # Specify that port installs files outside common MacPorts structure (avoids massive warnings)
         portfile += os.linesep + "destroot.violate_mtree yes"
