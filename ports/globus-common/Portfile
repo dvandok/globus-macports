@@ -160,6 +160,7 @@ post-destroot {
     system "chmod 644 ${destroot}${prefix}/share/globus/globus-sh-tools.sh"
 
     # Register setup
+    set env(PERL5LIB) ${prefix}/lib/perl
     set perlfile [ open ${worksrcpath}/gpt-setup.pl w ]
     puts $perlfile "my \$metadata = new Grid::GPT::Setup(package_name => \"globus_common_setup\", globusdir => \"${destroot}/${prefix}\");"
     puts $perlfile "\$metadata->finish();"
