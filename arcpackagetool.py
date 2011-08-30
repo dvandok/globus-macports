@@ -185,7 +185,10 @@ universal_archs     x86_64 i386
             return False
 
         missingpkgs = []
-        for pkg in self.deppackages:
+        deppackages = self.deppackages
+        if self.domakecheck:
+            deppackages.append("cppunit")
+        for pkg in deppackages:
             p = self.port(["info", "--name", pkg])
             if not p["success"] or p["stdout"].strip() != "name: "+pkg:
               missingpkgs.append(pkg)
@@ -357,7 +360,7 @@ universal_archs     x86_64 i386
             if portfile[i][:8] == "depends_" or portfile[i][:15] == "archcheck.files":
                 portfile[i] = ''
             # Rename package as to not conflict with existing packages.
-            elif portfile[i][:5]  == "name ":
+            elif re.search("^name\s+", portfile[i]):
                 portfile[i] = "name "+pkgname+"-arc"
 
             # Ignore any conflicts keywords: ports are built and installed in a isolated area. 
@@ -365,8 +368,8 @@ universal_archs     x86_64 i386
                 portfile[i] = ''
 
             # Modify master_sites since name was modified.
-            elif portfile[i][:13] == "master_sites ":
-                portfile[i] = re.sub("(master_sites\s*gnu)", "\\1:"+pkgname, portfile[i])
+            elif re.search("^master_sites\s+", portfile[i]):
+                portfile[i] = re.sub("(master_sites\s*(gnu|sourceforge))", "\\1:"+pkgname, portfile[i])
 
         return os.linesep.join(portfile)
 
@@ -604,8 +607,10 @@ universal_archs     x86_64 i386
           return False
 
         configure_args = []
-        configure_args += ["--disable-all", "--enable-hed", "--enable-arclib-client", "--enable-credentials-client", "--enable-data-client", "--enable-srm-client", "--enable-doc", "--enable-cppunit", "--enable-python"]
+        configure_args += ["--disable-all", "--enable-hed", "--enable-arclib-client", "--enable-credentials-client", "--enable-data-client", "--enable-srm-client", "--enable-doc", "--enable-python"]
         configure_args.append("--prefix="+self.mypj(self.name, "install"))
+        if self.domakecheck:
+            configure_args +=  ["--enable-cppunit", "--with-cppunit="+self.mypj("install")]
         if self.buildlfc:
             configure_args += ["--enable-lfc", "--with-lfc="+self.mypj("install")]
         configure_args.append("PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig")
@@ -964,6 +969,9 @@ If these are not present here, ARC will most likely not work as expected.
                 return False
 
         if self.buildlfc and not (self.buildvoms() and self.buildlcgdm()):
+            return False
+
+        if self.domakecheck and not self.installport("cppunit"):
             return False
 
         if not (self.buildarcclient() and self.installport("igtf-certificates", "igtf-certificates/install")):
