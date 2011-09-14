@@ -5,9 +5,9 @@
 # ARC_BUILD_CHANNEL (nightlies, releases, testing, experimental, svn)
 # ARC_BUILD_VERSION (e.g. 1970-01-01, 1.0.0...)
 # ARC_BUILD_RELEASEVERSION (ARC_BUILD_VERSION)
-# ARC_BUILD_MAKECHECK (no, yes)
+# ARC_BUILD_MAKECHECK (yes, no)
 # ARC_BUILD_INTERACTIVE (no, yes)
-# ARC_BUILD_LFC (no, yes)
+# ARC_BUILD_LFC (yes, no)
 # ARC_BUILD_CLEANONSUCCESS (yes, no)
 #
 # TODO:
@@ -1024,9 +1024,9 @@ If these are not present here, ARC will most likely not work as expected.
 #                print "Architecture \"%s\" not supported", os.environ['ARC_BUILD_ARCHITECTURE']
 #                sys.exit(1)
 
-        self.domakecheck = (os.environ.has_key('ARC_BUILD_MAKECHECK') and os.environ['ARC_BUILD_MAKECHECK'] == "yes")
+        self.domakecheck = ((not os.environ.has_key('ARC_BUILD_MAKECHECK')) or os.environ['ARC_BUILD_MAKECHECK'] != "yes")
 
-        self.buildlfc = (os.environ.has_key('ARC_BUILD_LFC') and os.environ['ARC_BUILD_LFC'] == "yes")
+        self.buildlfc = ((not os.environ.has_key('ARC_BUILD_LFC')) or os.environ['ARC_BUILD_LFC'] != "no")
         if self.buildlfc:
           self.vomsversion = "1.9.19.2"
           self.lcgdmversion = "1.8.0.1"
