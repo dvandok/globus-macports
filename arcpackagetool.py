@@ -219,7 +219,7 @@ universal_archs     x86_64 i386
             print "Unable to fetch the rpm2cpio script."
             os.chdir(self.basedir)
             return False
-          
+
           # Fetch VOMS source rpm. LFC depends on VOMS.
           try:
             if os.path.isdir(self.mypj("voms")):
@@ -247,7 +247,7 @@ universal_archs     x86_64 i386
             # rpm2cpio writes output to cwd.
             os.chdir(self.mypj("lcgdm"))
             subprocess.Popen(["sh", self.mypj("rpm2cpio.sh"), self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion+"-3.fc12.src.rpm")], stdout = subprocess.PIPE, stderr = subprocess.PIPE).wait()
-            
+
           except IOError:
             print "Unable to fetch LCG-DM source RPM"
             os.chdir(self.basedir)
@@ -281,7 +281,7 @@ universal_archs     x86_64 i386
                 self.version = str(datetime.date.today())
                 if not self.relversion:
                     self.relversion = self.version
-                
+
             # Get nightly source name.
             try:
                 output = "".join(urllib.urlopen("http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+str(self.version)+"/src/").readlines())
@@ -296,8 +296,8 @@ universal_archs     x86_64 i386
             self.source_dir = "nordugrid-arc-"+self.version
             self.source = self.source_dir+".tar.gz"
             downloadlink = "http://download.nordugrid.org/packages/nordugrid-arc/"+self.channel+"/"+self.version+"/src/"+self.source
-        
-            
+
+
         try:
             if os.path.isfile(self.mypj(self.name, self.source)):
                 os.remove(self.mypj(self.name, self.source))
@@ -336,7 +336,7 @@ universal_archs     x86_64 i386
           portfile = re.sub('(\nconfigure {[^\n]*\n)', '\\1    set env(PKG_CONFIG_LIBDIR) '+self.mypj("install/lib/pkgconfig")+':/usr/lib/pkgconfig'+os.linesep, portfile)
         else:
           portfile += os.linesep + "configure.env-append PKG_CONFIG_LIBDIR="+self.mypj("install/lib/pkgconfig")+":/usr/lib/pkgconfig"
-        
+
 
         # Set GPT_LOCATION and GLOBUS_LOCATION in build and destroot port phases.
         if re.search("^configure\s+{", portfile, re.M):
@@ -363,7 +363,7 @@ universal_archs     x86_64 i386
             elif re.search("^name\s+", portfile[i]):
                 portfile[i] = "name "+pkgname+"-arc"
 
-            # Ignore any conflicts keywords: ports are built and installed in a isolated area. 
+            # Ignore any conflicts keywords: ports are built and installed in a isolated area.
             if portfile[i][:10] == "conflicts ":
                 portfile[i] = ''
 
@@ -431,7 +431,7 @@ universal_archs     x86_64 i386
             return False
 
         # Check if correctly linked
-        if not self.linkcheck(pj(port_work["stdout"].strip(), 'destroot', self.mypj(prefix))):
+        if not self.linkcheck(pj(port_work["stdout"].strip(), 'destroot', self.workdir.lstrip('/'), prefix)):
             print "The %s package is inconsistently linked." % portname
             return False
 
@@ -447,9 +447,9 @@ universal_archs     x86_64 i386
         shutil.rmtree(self.mypj("voms", "voms-"+self.vomsversion))
 
       tarfile.open(self.mypj("voms", "voms-"+self.vomsversion+".tar.gz")).extractall(self.mypj("voms"))
-      
+
       os.chdir(self.mypj("voms", "voms-"+self.vomsversion))
-      
+
       voms_spec = open(self.mypj("voms", "voms.spec")).read()
       patches = re.findall("^Patch\d+:\s+%{name}-(.*)$", voms_spec, re.M)
       for patch in patches:
@@ -457,7 +457,7 @@ universal_archs     x86_64 i386
           os.chdir(self.basedir)
           print "Unable to patch VOMS"
           return False
-      
+
       # Fix location dir
       # Fix default Globus location
       # Fix default vomses file location
@@ -475,25 +475,25 @@ universal_archs     x86_64 i386
         print "Unable to rebootstrap VOMS"
         os.chdir(self.basedir)
         return False
-      
+
       configure_args = ["--prefix="+self.mypj("install"),  "--disable-glite", "--disable-java", "PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig"]
       if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
         print "Unable to configure VOMS"
         os.chdir(self.basedir)
         return False
-      
+
       if subprocess.Popen(["make", "-j4"]).wait() != 0:
         print "Unable to build VOMS"
         os.chdir(self.basedir)
         return False
-      
+
       if subprocess.Popen(["make", "install"]).wait() != 0:
         print "Unable to install VOMS"
         os.chdir(self.basedir)
         return False
-      
+
       os.rename(self.mypj("install", "include", "glite/security/voms"), self.mypj("install", "include", "voms"))
-      
+
       os.chdir(self.basedir)
       return True
 
@@ -502,7 +502,7 @@ universal_archs     x86_64 i386
         shutil.rmtree(self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion))
 
       tarfile.open(self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion+".tar.gz")).extractall(self.mypj("lcgdm"))
-      
+
       os.chdir(self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion))
 
       # Patch the usr patch.
@@ -524,12 +524,12 @@ universal_archs     x86_64 i386
         os.chdir(self.basedir)
         print "Unable to patch LCG-DM (darwin)"
         return False
-      
+
       if subprocess.Popen(["gsed", "s!@@LIBDIR@@!"+self.mypj("install", "lib")+"!", "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "security", "Csec_api_loader.c")]).wait() != 0:
           os.chdir(self.basedir)
           print "Unable to patch LCG-DM (Csec_api_loader.c)"
           return False
-      
+
       # The code violates the strict aliasing rules all over the place...
       # Need to use -fnostrict-aliasing so that the -O2 optimization in
       # optflags doesn't try to use them.
@@ -555,17 +555,17 @@ universal_archs     x86_64 i386
         print "Unable to configure LCG-DM"
         os.chdir(self.basedir)
         return False
-      
+
       if subprocess.Popen(["make", "-f", "Makefile.ini", "Makefiles"]).wait() != 0:
         print "Unable to create LCG-DM makefiles"
         os.chdir(self.basedir)
         return False
-      
+
       if subprocess.Popen(["make", "-j4", "prefix="+self.mypj("install")]).wait() != 0:
         print "Unable to build LCG-DM"
         os.chdir(self.basedir)
         return False
-      
+
       if subprocess.Popen(["make", "install", "prefix="+self.mypj("install")]).wait() != 0:
         print "Unable to install LCG-DM"
         os.chdir(self.basedir)
@@ -578,7 +578,7 @@ universal_archs     x86_64 i386
       for plugin in glob.glob(self.mypj("install", "lib", "libCsec_plugin_*")):
           os.rename(plugin, plugin.replace(self.mypj("install", "lib"), self.mypj("install", "lib", "lcgdm")))
 
-      
+
       os.chdir(self.basedir)
       return True
 
@@ -589,7 +589,7 @@ universal_archs     x86_64 i386
           makefile_to_patch = "Makefile.in"
         else:
           makefile_to_patch = "Makefile.am"
-          
+
 
         #~ gsed -i "s/@MSGMERGE@ --update/@MSGMERGE@ --update --backup=off/" self.source_dir/po/Makefile.in.in
 
@@ -698,7 +698,7 @@ universal_archs     x86_64 i386
             if os.path.isdir(self.mypj(self.name, "lfc")):
                 shutil.rmtree(self.mypj(self.name, "lfc"))
             os.makedirs(self.mypj(self.name, "lfc/lib/arc"))
-            
+
             # Move ARC LFC modules and libraries in order to separate LFC dependency.
             for filename in glob.glob(self.mypj(self.name, "install/lib/arc/libdmclfc.*")):
                 os.rename(filename, filename.replace(self.mypj(self.name, "install"), self.mypj(self.name, "lfc")))
@@ -729,7 +729,7 @@ universal_archs     x86_64 i386
             # Copy LFC loadable module as well.
             for filename in glob.glob(self.mypj("install/lib/lcgdm/*")):
                 shutil.copy2(filename, filename.replace("install", "packages/lfc"))
-            
+
         return True
 
     def userelativelinking(self):
@@ -759,7 +759,7 @@ universal_archs     x86_64 i386
             appname += " nightly"
         elif self.channel == "svn":
             appname += " svn"
-        
+
         if os.path.isdir(self.mypj(appname+".app")):
             shutil.rmtree(self.mypj(appname+".app"))
         os.makedirs(self.mypj(appname+".app/Contents/MacOS"))
@@ -786,7 +786,7 @@ export ARC_LOCATION="$( cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )"
 export PATH="${ARC_LOCATION}/bin:/System/Library/Frameworks/Python.framework/Versions/2.6/bin:${PATH}"
 # Set the ARC_PLUGIN_PATH enviroment path to the location of ARC modules.
 export ARC_PLUGIN_PATH="${ARC_LOCATION}/lib/arc"
-# For the ARC Globus modules to work the GLOBUS_LOCATION environment variable need to be set. 
+# For the ARC Globus modules to work the GLOBUS_LOCATION environment variable need to be set.
 export GLOBUS_LOCATION="${ARC_LOCATION}"
 # For the ARC Python bindings to work the PYTHONPATH need to be set.
 export PYTHONPATH="${ARC_LOCATION}/lib/python2.6/site-packages"
@@ -798,7 +798,7 @@ echo
 echo "ARC client environment ready"
 """)
         app_setup_script.close()
-        
+
         app_start_script = open(self.mypj(appname+".app/Contents/MacOS/ARC"), 'w')
         app_start_script.writelines("""#!/usr/bin/osascript
 # Delay otherwise application doesnt show up in the launch bar
@@ -824,7 +824,7 @@ tell application "Terminal"
   set window_is_open to true
   repeat while window_is_open
     set nWindows to number of windows
-    set window_is_open to false 
+    set window_is_open to false
     repeat with i from 1 to nWindows
       if id of window i is equal w_id then
         set window_is_open to true
@@ -882,7 +882,7 @@ end tell""" % {"appname" : appname} )
         app_size = app_size/1024/1024+20
 
         dmg_name = self.name+"-"+self.relversion+"-snow_leopard-"+self.architecture
-        
+
         if os.path.isfile(self.mypj(dmg_name+".tmp.dmg")):
             os.remove(self.mypj(dmg_name+".tmp.dmg"))
 
@@ -893,7 +893,7 @@ end tell""" % {"appname" : appname} )
             print hdiutil_proc["stdout"]
             print hdiutil_proc["stderr"]
             return False
-        
+
         # Attach and get mount point of DMG
         hdiutil_proc = hdiutil(["attach", "-readwrite", "-noverify", "-noautoopen", self.mypj(dmg_name+".tmp.dmg")])
         if not hdiutil_proc["success"]:
@@ -944,9 +944,9 @@ If these are not present here, ARC will most likely not work as expected.
             print "Unable to compress DMG"
             print hdiutil_proc["stderr"]
             return False
-        
+
         return True
-        
+
     def build(self):
         print(time.asctime())
         sys.stdout.flush()
