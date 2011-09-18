@@ -9,12 +9,7 @@
 # ARC_BUILD_INTERACTIVE (no, yes)
 # ARC_BUILD_LFC (yes, no)
 # ARC_BUILD_CLEANONSUCCESS (yes, no)
-#
-# TODO:
-# - Support building different architectures, currently only x86_64 is
-#   supported.
-#   ARC_BUILD_ARCHITECTURE (x86_64, i386)
-
+# ARC_BUILD_ARCHITECTURE (x86_64, i386)
 
 import os, sys, stat
 from os.path import join as pj
@@ -72,9 +67,6 @@ def hdiutil(args):
 class ARCPackageTool:
     ## DEFAULT VALUES.
     name = "nordugrid-arc"
-
-    # Currently only used for naming
-    architecture = "x86_64"
 
     # Where to store ARC globus modules/libraries in order to separate globus dependency. Relative to nordugrid working directory.
     arcglobusdir = "globus/lib"
@@ -157,9 +149,10 @@ applications_dir /Applications/MacPorts
 frameworks_dir   /opt/local/Library/Frameworks
 sources_conf     /opt/local/etc/macports/sources.conf
 variants_conf    %(workdir)s/macports/variants.conf
-binpath          %(workdir)s/install/bin:/opt/local/bin:/opt/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin
-universal_archs     x86_64 i386
-""" % { 'workdir' : self.workdir})
+binpath          %(workdir)s/insall/bin:/opt/local/bin:/opt/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin
+build_arch       %(arch)s
+universal_archs  x86_64 i386
+""" % { 'workdir' : self.workdir, 'arch' : self.architecture })
         mp_conf.close()
 
         return True
@@ -186,8 +179,6 @@ universal_archs     x86_64 i386
 
         missingpkgs = []
         deppackages = self.deppackages
-        if self.domakecheck:
-            deppackages.append("cppunit")
         for pkg in deppackages:
             p = self.port(["info", "--name", pkg])
             if not p["success"] or p["stdout"].strip() != "name: "+pkg:
@@ -477,6 +468,9 @@ universal_archs     x86_64 i386
         return False
 
       configure_args = ["--prefix="+self.mypj("install"),  "--disable-glite", "--disable-java", "PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig"]
+      configure_args.append("CFLAGS=-pipe -O2 -arch " + self.architecture)
+      configure_args.append("CXXFLAGS=-pipe -O2 -arch " + self.architecture)
+      configure_args.append("LDFLAGS=-L" + self.mypj("install", "lib") + " -arch " + self.architecture)
       if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
         print "Unable to configure VOMS"
         os.chdir(self.basedir)
@@ -533,9 +527,10 @@ universal_archs     x86_64 i386
       # The code violates the strict aliasing rules all over the place...
       # Need to use -fnostrict-aliasing so that the -O2 optimization in
       # optflags doesn't try to use them.
-      if subprocess.Popen(["gsed", "s/^CC +=/& -O2 -fno-strict-aliasing/", "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "config", "linux.cf")]).wait() != 0:
+      # Support building different architecture.
+      if subprocess.Popen(["gsed", "-e", "s|^MTLDFLAGS =|& -L" + self.mypj("install") + " -arch " + self.architecture + "|", "-e", "/MTLDFLAGS/a \\" + os.linesep + "CC += -O2 -fno-strict-aliasing -pipe -O2 -arch " + self.architecture + "\\" + os.linesep, "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "config", "darwin.cf")]).wait() != 0:
           os.chdir(self.basedir)
-          print "Unable to patch LCG-DM (no-strict-aliasing)"
+          print "Unable to patch LCG-DM (darwin.cf)"
           return False
 
       gsoapversion = subprocess.Popen(["soapcpp2", "-v"], stderr = subprocess.PIPE).communicate()[1].splitlines()[1].split()[-1]
@@ -615,6 +610,9 @@ universal_archs     x86_64 i386
             configure_args += ["--enable-lfc", "--with-lfc="+self.mypj("install")]
         configure_args.append("PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig")
         configure_args.append("PATH=/System/Library/Frameworks/Python.framework/Versions/2.6/bin:"+os.environ["PATH"])
+        configure_args.append("CFLAGS=-pipe -O2 -arch " + self.architecture)
+        configure_args.append("CXXFLAGS=-pipe -O2 -arch " + self.architecture)
+        configure_args.append("LDFLAGS=-L" + self.mypj("install", "lib") + " -arch " + self.architecture)
 
         print "./configure "+" ".join(configure_args)
         sys.stdout.flush()
@@ -957,7 +955,11 @@ If these are not present here, ARC will most likely not work as expected.
         print "Building ARC client for Mac OS X with the following options:"
         print "Name: %s" % self.name
         print "Version: %s" % self.version
+        print "Release version: %s" % self.relversion
         print "Channel: %s" % self.channel
+        print "Build arch: %s" % self.architecture
+        print "With LFC: %s" % self.buildlfc
+        print "Do make check: %s" % self.domakecheck
         print "Working directory: %s" % self.workdir
         sys.stdout.flush()
 
@@ -969,9 +971,6 @@ If these are not present here, ARC will most likely not work as expected.
                 return False
 
         if self.buildlfc and not (self.buildvoms() and self.buildlcgdm()):
-            return False
-
-        if self.domakecheck and not self.installport("cppunit"):
             return False
 
         if not (self.buildarcclient() and self.installport("igtf-certificates", "igtf-certificates/install")):
@@ -1016,15 +1015,18 @@ If these are not present here, ARC will most likely not work as expected.
         if os.environ.has_key('ARC_BUILD_RELEASEVERSION') and os.environ['ARC_BUILD_RELEASEVERSION']:
             self.relversion = os.environ['ARC_BUILD_RELEASEVERSION']
 
-# Building packages for custom architectures is currently not supported.
-#        supported_architectures = ['x86_64', 'i386']
-#        self.architecture = supported_architectures[0]
-#        if os.environ.has_key('ARC_BUILD_ARCHITECTURE') and os.environ['ARC_BUILD_ARCHITECTURE']:
-#            if os.environ['ARC_BUILD_ARCHITECTURE'] not in supported_architectures:
-#                print "Architecture \"%s\" not supported", os.environ['ARC_BUILD_ARCHITECTURE']
-#                sys.exit(1)
+        supported_architectures = ['x86_64', 'i386']
+        self.architecture = supported_architectures[0]
+        if os.environ.has_key('ARC_BUILD_ARCHITECTURE') and os.environ['ARC_BUILD_ARCHITECTURE']:
+            if os.environ['ARC_BUILD_ARCHITECTURE'] not in supported_architectures:
+                print "Architecture \"%s\" not supported", os.environ['ARC_BUILD_ARCHITECTURE']
+                sys.exit(1)
+            self.architecture = os.environ['ARC_BUILD_ARCHITECTURE']
 
         self.domakecheck = ((not os.environ.has_key('ARC_BUILD_MAKECHECK')) or os.environ['ARC_BUILD_MAKECHECK'] != "yes")
+        if self.domakecheck:
+            deppackages.append("cppunit")
+
 
         self.buildlfc = ((not os.environ.has_key('ARC_BUILD_LFC')) or os.environ['ARC_BUILD_LFC'] != "no")
         if self.buildlfc:
