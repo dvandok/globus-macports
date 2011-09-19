@@ -1023,7 +1023,7 @@ If these are not present here, ARC will most likely not work as expected.
                 sys.exit(1)
             self.architecture = os.environ['ARC_BUILD_ARCHITECTURE']
 
-        self.domakecheck = ((not os.environ.has_key('ARC_BUILD_MAKECHECK')) or os.environ['ARC_BUILD_MAKECHECK'] != "yes")
+        self.domakecheck = ((not os.environ.has_key('ARC_BUILD_MAKECHECK')) or os.environ['ARC_BUILD_MAKECHECK'] != "no")
         if self.domakecheck:
             self.deppackages.append("cppunit")
 
