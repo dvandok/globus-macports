@@ -1025,7 +1025,7 @@ If these are not present here, ARC will most likely not work as expected.
 
         self.domakecheck = ((not os.environ.has_key('ARC_BUILD_MAKECHECK')) or os.environ['ARC_BUILD_MAKECHECK'] != "yes")
         if self.domakecheck:
-            deppackages.append("cppunit")
+            self.deppackages.append("cppunit")
 
 
         self.buildlfc = ((not os.environ.has_key('ARC_BUILD_LFC')) or os.environ['ARC_BUILD_LFC'] != "no")
