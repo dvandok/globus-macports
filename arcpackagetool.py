@@ -519,7 +519,8 @@ universal_archs  x86_64 i386
         print "Unable to patch LCG-DM (darwin)"
         return False
 
-      if subprocess.Popen(["gsed", "s!@@LIBDIR@@!"+self.mypj("install", "lib")+"!", "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "security", "Csec_api_loader.c")]).wait() != 0:
+      # Set default path from where to load lcg-dm plugins.
+      if subprocess.Popen(["gsed", "s!@@LIBDIR@@!/Applications/"+self.appname+".app/Contents/MacOS/lib/lcgdm!", "-i", self.mypj("lcgdm", "lcgdm-"+self.lcgdmversion, "security", "Csec_api_loader.c")]).wait() != 0:
           os.chdir(self.basedir)
           print "Unable to patch LCG-DM (Csec_api_loader.c)"
           return False
@@ -752,18 +753,13 @@ universal_archs  x86_64 i386
 
     def createdmg(self):
         volname = "NorduGrid-ARC-client-"+self.relversion
-        appname = "ARC"
-        if self.channel == "nightlies":
-            appname += " nightly"
-        elif self.channel == "svn":
-            appname += " svn"
 
-        if os.path.isdir(self.mypj(appname+".app")):
-            shutil.rmtree(self.mypj(appname+".app"))
-        os.makedirs(self.mypj(appname+".app/Contents/MacOS"))
-        os.mkdir(self.mypj(appname+".app/Contents/Resources"))
+        if os.path.isdir(self.mypj(self.appname+".app")):
+            shutil.rmtree(self.mypj(self.appname+".app"))
+        os.makedirs(self.mypj(self.appname+".app/Contents/MacOS"))
+        os.mkdir(self.mypj(self.appname+".app/Contents/Resources"))
 
-        app_setup_script = open(self.mypj(appname+".app/Contents/MacOS/arc-client-setup.sh"), 'w')
+        app_setup_script = open(self.mypj(self.appname+".app/Contents/MacOS/arc-client-setup.sh"), 'w')
         app_setup_script.writelines("""
 # If you want to make the setup carried out here permanent you should put
 # the \"export\" statements in a setup file used by your favourite shell.
@@ -782,12 +778,14 @@ universal_archs  x86_64 i386
 export ARC_LOCATION="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # Include path to ARC client executables in PATH environment variable. Also add path to the Python executable which was linked against.
 export PATH="${ARC_LOCATION}/bin:/System/Library/Frameworks/Python.framework/Versions/2.6/bin:${PATH}"
+# Set DYLD_LIBRARY_PATH so LCG-DM plugins can be located.
+export DYLD_LIBRARY_PATH="${ARC_LOCATION}/lib/lcgdm:${DYLD_LIBRARY_PATH}"
 # Set the ARC_PLUGIN_PATH enviroment path to the location of ARC modules.
 export ARC_PLUGIN_PATH="${ARC_LOCATION}/lib/arc"
 # For the ARC Globus modules to work the GLOBUS_LOCATION environment variable need to be set.
 export GLOBUS_LOCATION="${ARC_LOCATION}"
 # For the ARC Python bindings to work the PYTHONPATH need to be set.
-export PYTHONPATH="${ARC_LOCATION}/lib/python2.6/site-packages"
+export PYTHONPATH="${ARC_LOCATION}/lib/python2.6/site-packages:${PYTHONPATH}"
 # Set the path to the directory containing CA Certificates
 export X509_CERT_DIR="${ARC_LOCATION}/etc/grid-security/certificates"
 echo "Instructions for using ARC in a regular Terminal can be found here:"
@@ -797,7 +795,7 @@ echo "ARC client environment ready"
 """)
         app_setup_script.close()
 
-        app_start_script = open(self.mypj(appname+".app/Contents/MacOS/ARC"), 'w')
+        app_start_script = open(self.mypj(self.appname+".app/Contents/MacOS/ARC"), 'w')
         app_start_script.writelines("""#!/usr/bin/osascript
 # Delay otherwise application doesnt show up in the launch bar
 delay 1
@@ -831,11 +829,11 @@ tell application "Terminal"
       end if
     end repeat
   end repeat
-end tell""" % {"appname" : appname} )
+end tell""" % {"appname" : self.appname} )
         app_start_script.close()
-        os.chmod(self.mypj(appname+".app/Contents/MacOS/ARC"), stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+        os.chmod(self.mypj(self.appname+".app/Contents/MacOS/ARC"), stat.S_IRUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
-        app_info_plist = open(self.mypj(appname+".app/Contents/Info.plist"), 'w')
+        app_info_plist = open(self.mypj(self.appname+".app/Contents/Info.plist"), 'w')
         app_info_plist.writelines("""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -850,7 +848,7 @@ end tell""" % {"appname" : appname} )
     <key>CFBundleSignature</key><string>NOGR</string>
     <key>CFBundleExecutable</key><string>ARC</string>
   </dict>
-</plist>""" % {"appname" : appname, "name" : self.name, "version" : self.relversion})
+</plist>""" % {"appname" : self.appname, "name" : self.name, "version" : self.relversion})
         app_info_plist.close()
 
         # Copy all needed files to ARC.app/Contents/MacOS directory.
@@ -861,21 +859,21 @@ end tell""" % {"appname" : appname} )
         for install_path in needed_paths:
             for root, dirs, files in os.walk(install_path):
                 for d in dirs:
-                    if not os.path.isdir(pj(root, d).replace(install_path, self.mypj(appname+".app/Contents/MacOS"))):
-                        os.mkdir(pj(root, d).replace(install_path, self.mypj(appname+".app/Contents/MacOS")))
+                    if not os.path.isdir(pj(root, d).replace(install_path, self.mypj(self.appname+".app/Contents/MacOS"))):
+                        os.mkdir(pj(root, d).replace(install_path, self.mypj(self.appname+".app/Contents/MacOS")))
                 for f in files:
-                    shutil.copy2(pj(root, f), pj(root,f).replace(install_path, self.mypj(appname+".app/Contents/MacOS")))
+                    shutil.copy2(pj(root, f), pj(root,f).replace(install_path, self.mypj(self.appname+".app/Contents/MacOS")))
 
         try:
             urllib.urlretrieve('http://www.nordugrid.org/images/Logo_ARC-ball.png', self.mypj("arc.png"))
-            sips_proc = subprocess.Popen(["sips", "--resampleWidth", "128", "-s", "format","icns", self.mypj("arc.png"), "--out", self.mypj(appname+".app/Contents/Resources/arc.icns")], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            sips_proc = subprocess.Popen(["sips", "--resampleWidth", "128", "-s", "format","icns", self.mypj("arc.png"), "--out", self.mypj(self.appname+".app/Contents/Resources/arc.icns")], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
             stdout, stderr = sips_proc.communicate()
             if sips_proc.returncode != 0:
                 print "WARNING: Unable to convert PNG to ICNS format"
         except IOError:
             print "WARNING: Unable to fetch ARC-logo to use as APP icon"
 
-        app_size = sum(os.path.getsize(os.path.join(root, file)) for root, dir, files in os.walk(self.mypj(appname+".app")) for file in files)
+        app_size = sum(os.path.getsize(os.path.join(root, file)) for root, dir, files in os.walk(self.mypj(self.appname+".app")) for file in files)
         # Convert to Mb, and increase size a little so the DMG will not be too small.
         app_size = app_size/1024/1024+20
 
@@ -885,7 +883,7 @@ end tell""" % {"appname" : appname} )
             os.remove(self.mypj(dmg_name+".tmp.dmg"))
 
         # Create DMG
-        hdiutil_proc = hdiutil(["create", "-srcfolder", self.mypj(appname+".app"), "-size", str(app_size)+"m", "-fs", "HFS+", "-fsargs", "-c c=64,a=16,e=16", "-format", "UDRW", "-volname", volname, self.mypj(dmg_name+".tmp.dmg")])
+        hdiutil_proc = hdiutil(["create", "-srcfolder", self.mypj(self.appname+".app"), "-size", str(app_size)+"m", "-fs", "HFS+", "-fsargs", "-c c=64,a=16,e=16", "-format", "UDRW", "-volname", volname, self.mypj(dmg_name+".tmp.dmg")])
         if not hdiutil_proc["success"]:
             print "Unable to create DMG"
             print hdiutil_proc["stdout"]
@@ -1001,6 +999,12 @@ If these are not present here, ARC will most likely not work as expected.
             if self.channel in available_channels[2:] and not os.environ.has_key('ARC_BUILD_VERSION'):
                 print "ARC_BUILD_VERSION environment variable must be set for the \"%s\" channel.", self.channel
                 sys.exit(1)
+
+        self.appname = "ARC"
+        if self.channel == "nightlies":
+            self.appname += " nightly"
+        elif self.channel == "svn":
+            self.appname += " svn"
 
         self.version = self.relversion = ''
         if os.environ.has_key('ARC_BUILD_VERSION') and os.environ['ARC_BUILD_VERSION']:
