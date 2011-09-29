@@ -547,17 +547,17 @@ universal_archs  x86_64 i386
       configure_args.append("--with-sysconf-dir="+self.mypj("install", "etc"))
       configure_args.append("--with-globus-location="+self.mypj("install"))
 
-      if subprocess.Popen(["./configure"] + configure_args).wait() != 0:
+      if subprocess.Popen(["./configure"] + configure_args, env = {"PATH": "/System/Library/Frameworks/Python.framework/Versions/2.6/bin:"+os.environ["PATH"]}).wait() != 0:
         print "Unable to configure LCG-DM"
         os.chdir(self.basedir)
         return False
 
-      if subprocess.Popen(["make", "-f", "Makefile.ini", "Makefiles"]).wait() != 0:
+      if subprocess.Popen(["make", "-f", "Makefile.ini", "Makefiles"], env = {"PATH": "/System/Library/Frameworks/Python.framework/Versions/2.6/bin:"+os.environ["PATH"]}).wait() != 0:
         print "Unable to create LCG-DM makefiles"
         os.chdir(self.basedir)
         return False
 
-      if subprocess.Popen(["make", "-j4", "prefix="+self.mypj("install")]).wait() != 0:
+      if subprocess.Popen(["make", "-j4", "prefix="+self.mypj("install")], env = {"PATH": "/System/Library/Frameworks/Python.framework/Versions/2.6/bin:"+os.environ["PATH"]}).wait() != 0:
         print "Unable to build LCG-DM"
         os.chdir(self.basedir)
         return False
@@ -677,6 +677,7 @@ universal_archs  x86_64 i386
         if self.buildlfc:
             os.makedirs(self.mypj("packages/lfc/lib/arc"))
             os.makedirs(self.mypj("packages/lfc/lib/lcgdm"))
+            os.makedirs(self.mypj("packages/lfc/lib/python2.6/site-packages"))
 
         if os.path.isdir(self.mypj(self.name, self.arcglobusdir)):
             shutil.rmtree(self.mypj(self.name, self.arcglobusdir))
@@ -728,6 +729,9 @@ universal_archs  x86_64 i386
             # Copy LFC loadable module as well.
             for filename in glob.glob(self.mypj("install/lib/lcgdm/*")):
                 shutil.copy2(filename, filename.replace("install", "packages/lfc"))
+            # Copy LFC python bindings.
+            for filename in glob.glob(self.mypj("install/lib/python2.6/site-packages/*")):
+                shutil.copy2(filename, filename.replace("install", "packages/lfc"))
 
         return True
 
@@ -746,7 +750,8 @@ universal_archs  x86_64 i386
         if self.buildlfc and \
            not (changeinstallnames(self.mypj("packages/lfc/lib/arc/*.so"), {self.mypj(self.name, "install/lib") : "@loader_path/..", self.mypj("install/lib") : "@loader_path/.."}) and \
                 changeinstallnames(self.mypj("packages/lfc/lib/lcgdm/*.dylib"), {self.mypj("install/lib") : "@loader_path/.."}) and \
-                changeinstallnames(self.mypj("packages/lfc/lib/*.dylib"), {self.mypj("install/lib") : "@loader_path"})):
+                changeinstallnames(self.mypj("packages/lfc/lib/*.dylib"), {self.mypj("install/lib") : "@loader_path"}) and \
+                changeinstallnames(self.mypj("packages/lfc/lib/python2.6/site-packages/*.so"), {self.mypj("install/lib") : "@loader_path/../.."})):
             print "Unable to change LFC library links to use relative linking"
             return False
         return True
