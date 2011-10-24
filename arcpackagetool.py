@@ -275,14 +275,14 @@ universal_archs  x86_64 i386
 
             # Get nightly source name.
             try:
-                output = "".join(urllib.urlopen("http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+str(self.version)+"/src/").readlines())
+                output = "".join(urllib.urlopen("http://download.nordugrid.org/nightlies/packages/nordugrid-arc/trunk/"+str(self.version)+"/src/").readlines())
                 self.source = re.search("nordugrid-arc-\d{12}.tar.gz", output).group(0)
                 self.source_dir = self.source[:-7]
             except IOError:
                 print "Unable to locate nightly source."
                 return False
 
-            downloadlink = "http://download.nordugrid.org/nightlies/nordugrid-arc/trunk/"+self.version+"/src/"+self.source
+            downloadlink = "http://download.nordugrid.org/nightlies/packages/nordugrid-arc/trunk/"+self.version+"/src/"+self.source
         else:
             self.source_dir = "nordugrid-arc-"+self.version
             self.source = self.source_dir+".tar.gz"
