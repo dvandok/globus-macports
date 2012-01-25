@@ -341,6 +341,12 @@ universal_archs  x86_64 i386
 
         portfile = re.sub("\${prefix}/share/libtool", "/opt/local/share/libtool", portfile)
 
+        # Modify LIBFFI_CFLAGS to use system libffi.
+        portfile = re.sub('LIBFFI_CFLAGS="[^"]*"', 'LIBFFI_CFLAGS="-I/usr/include/ffi"', portfile)
+
+        # Modify LIBFFI_LIBS to use system libffi.
+        portfile = re.sub('LIBFFI_LIBS="[^"]*"', 'LIBFFI_LIBS="-lffi"', portfile)
+
         # Install Perl modules to prefix.
         portfile = re.sub("\${perl_vendor_lib}", "${prefix}/lib/perl", portfile)
 
@@ -355,12 +361,17 @@ universal_archs  x86_64 i386
                 portfile[i] = "name "+pkgname+"-arc"
 
             # Ignore any conflicts keywords: ports are built and installed in a isolated area.
-            if portfile[i][:10] == "conflicts ":
+            elif portfile[i][:10] == "conflicts ":
                 portfile[i] = ''
 
             # Modify master_sites since name was modified.
             elif re.search("^master_sites\s+", portfile[i]):
                 portfile[i] = re.sub("(master_sites\s*(gnu|sourceforge))", "\\1:"+pkgname, portfile[i])
+
+            # Dont look for pkgconfig for libffi
+            elif re.search("pkgconfig/libffi\.pc", portfile[i]):
+                portfile[i] = ''
+            
 
         return os.linesep.join(portfile)
 
