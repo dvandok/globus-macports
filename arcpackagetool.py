@@ -623,6 +623,21 @@ universal_archs  x86_64 i386
         configure_args.append("PKG_CONFIG_LIBDIR="+self.mypj("install", "lib/pkgconfig")+":/usr/lib/pkgconfig")
         configure_args.append("PATH=/System/Library/Frameworks/Python.framework/Versions/2.6/bin:"+os.environ["PATH"])
         configure_args.append("CFLAGS=-pipe -O2 -arch " + self.architecture)
+        
+        '''According to <http://www.personal.psu.edu/stm134/Software.html>
+           the '-mmacosx-version-min=10.4' option must be used when
+           compiling and linking:
+             There is a bug using the C++ dynamic_cast mechanism that
+             first appears in Mac OS 10.6 Snow Leopard. If the
+             dynamic_cast is using in a shared library (*.dylib), it
+             will fail even when used correctly. The fix is to compile
+             and link the shared library with the flag
+             "-mmacosx-version-min=10.4". Alternatively, compiling the
+             shared library with the flag "-Wl,-no_compact_linkedit"
+             seems to fix the problem.
+        '''
+        configure_args.append("CPPFLAGS=-mmacosx-version-min=10.4")
+        
         configure_args.append("CXXFLAGS=-pipe -O2 -arch " + self.architecture)
         configure_args.append("LDFLAGS=-L" + self.mypj("install", "lib") + " -arch " + self.architecture)
 
