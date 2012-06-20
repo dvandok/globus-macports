@@ -639,7 +639,7 @@ universal_archs  x86_64 i386
         configure_args.append("CPPFLAGS=-mmacosx-version-min=10.4")
         
         configure_args.append("CXXFLAGS=-pipe -O2 -arch " + self.architecture)
-        configure_args.append("LDFLAGS=-L" + self.mypj("install", "lib") + " -arch " + self.architecture)
+        configure_args.append("LDFLAGS=-L" + self.mypj("install", "lib") + " -arch " + self.architecture +  " -mmacosx-version-min=10.4")
 
         print "./configure "+" ".join(configure_args)
         sys.stdout.flush()
