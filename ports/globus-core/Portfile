@@ -16,7 +16,7 @@ PortSystem              1.0
 
 name                    globus-core
 set _name               [ string map {"-" "_"} $name ]
-version                 5.16
+version                 8.9
 revision                1
 platforms               darwin
 categories              devel
@@ -35,30 +35,14 @@ long_description        The Globus Toolkit is an open source software \
                         cause. The ${name} package contains: \
                         Globus Core
 
-master_sites            http://www.grid.tsl.uu.se/repos/globus/source
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz \
                         globus-gpt2pkg-config
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 27ea6f4c8468471875dc2362b2160f2c \
-                            sha1 969fd662b2133981c9330865394665b017b550de \
-                            rmd160 dac612138bfcc638d894fe9044dbf395bb2014bf
-
-patchfiles              ${name}-conf.patch \
-                        ${name}-usr.patch \
-                        ${name}-func.patch \
-                        ${name}-gnusource.patch \
-                        ${name}-age-version.patch \
-                        ${name}-bootstrap-shebang.patch \
-                        ${name}-helpstring.patch \
-                        ${name}-doxygen.patch \
-                        ${name}-compat.patch \
-                        ${name}-libtool.patch \
-                        ${name}-ar-ranlib.patch \
-                        ${name}-mingw.patch \
-                        ${name}-platforms.patch \
-                        ${name}-fedora.patch
+                            sha256 9a24ea02add51c2fb2d510be45cf223226fdf2efc259cffa3871d7624c57998b \
+                            rmd160 36c957ee7e0848cdffdd7445fcf4ac8992e243c4
 
 depends_run             port:p5-xml-dom \
                         port:p5-xml-parser
@@ -68,8 +52,6 @@ depends_build           port:grid-packaging-tools \
                         port:p5-xml-parser
 
 worksrcdir              ${_name}-${version}
-
-patch.pre_args          -p1
 
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -99,10 +81,6 @@ pre-configure {
 post-destroot {
     # These scripts are intended to be sourced, not executed
     system "chmod 644 ${destroot}${prefix}/share/globus/globus-build-env-*.sh"
-
-    # Add -Wl,--as-needed to the libtool script if supported
-    reinplace "s! -shared ! \${wl}--as-needed&!g" \
-        ${destroot}${prefix}/sbin/libtool-${flavor}
 
     # Install the GPT metadata to pkg-config file converter
     xinstall ${filespath}/globus-gpt2pkg-config \
