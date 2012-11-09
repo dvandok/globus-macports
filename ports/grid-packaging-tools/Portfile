@@ -7,12 +7,12 @@ set perl_vendor_lib [ exec sh -c "eval \"\`perl -V:installvendorlib\`\" ; echo \
 PortSystem              1.0
 
 name                    grid-packaging-tools
-version                 3.2
+version                 3.6.2
 revision                1
 platforms               darwin
 categories              devel
 license                 NCSA
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.gridpackagingtools.com/
 
 description             Grid Packaging Tools (GPT)
@@ -38,38 +38,15 @@ depends_run             port:perl5 \
                         port:automake \
                         port:libtool
 
-master_sites            http://www-unix.globus.org/ftppub/gt4/4.2.1/gpt
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 
-distfiles               gpt-3.2globus2.tar.gz
+distfiles               gpt-3.6.2.tar.gz
 
-checksums               gpt-3.2globus2.tar.gz \
-                            md5 988dfe71611afcd3768141eaf2fb985c \
-                            sha1 13a08cb148cd245af11f99be1f87fad9eeca38be \
-                            rmd160 99a844f8ba3ebab133ff7d978dd1bbb417972124
+checksums               gpt-3.6.2.tar.gz \
+                            sha256 0f9ca829bdad6f3958ab06d64f7740f378522e4d3148ab5e7c7e4a36fde52b0d \
+                            rmd160 63beaad19972bb25b688561e9c2c86c2bdd16a26
 
-patchfiles              ${name}-perlpath.patch \
-                        ${name}-share.patch \
-                        ${name}-usr.patch \
-                        ${name}-man.patch \
-                        ${name}-filelists.patch \
-                        ${name}-globus-package-dtd.patch \
-                        ${name}-bootstrap-shebang.patch \
-                        ${name}-flavored-headers.patch \
-                        ${name}-colocate-bugfix.patch \
-                        ${name}-age-version.patch \
-                        ${name}-target.patch \
-                        ${name}-xml.patch \
-                        ${name}-gpt-update.patch \
-                        ${name}-helpstring.patch \
-                        ${name}-compat.patch \
-                        ${name}-version-info.patch \
-                        ${name}-wrong-url.patch \
-                        ${name}-escape-topdir.patch
-
-patch.dir               ${workpath}/gpt
-patch.pre_args          -p1
-
-worksrcdir              gpt/packaging_tools
+worksrcdir              gpt-3.6.2
 
 configure.post_args     --libexecdir='\${datadir}/globus' \
                         --mandir='\${datadir}/man' \
@@ -82,6 +59,7 @@ pre-configure {
     touch ${worksrcpath}/aclocal.m4
     touch ${worksrcpath}/Makefile.in
     touch ${worksrcpath}/configure
+    file attributes ${worksrcpath}/install-sh -permissions +x
 
     foreach i {config.guess config.sub} {
         file copy -force ${prefix}/share/libtool/config/$i ${worksrcpath}/$i
@@ -89,30 +67,13 @@ pre-configure {
 }
 
 post-destroot {
-    # Remove perl version check script that is not used for anything (and even
-    # gets installed without shebang so it is not executable from the path)
-    delete ${destroot}${prefix}/sbin/gpt-perl-version
-
-    # Remove old globus core source tarball users should install an up-to-date
-    # globus-core package instead of having gpt compile it from source
-    delete ${destroot}${prefix}/share/globus/globus_core-src.tar.gz
-
-    # Remove temporary build file
-    delete ${destroot}${prefix}/share/globus/gpt_scripts_list
-
-    # Rename config.guess script in order not to clash with globus-common
-    move ${destroot}${prefix}/share/globus/config.guess \
-        ${destroot}${prefix}/share/globus/config.guess.gpt
-    reinplace "s/config.guess/config.guess.gpt/" \
-        ${destroot}${perl_vendor_lib}/Grid/GPT/Localize.pm
-
     # Rename libtoolize to glibtoolize
     reinplace "s/libtoolize/glibtoolize/g" \
         ${destroot}${prefix}/share/globus/gpt-bootstrap.sh
 
     # Install documentation
     file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${workpath}/gpt/CHANGES \
-        ${workpath}/gpt/LICENSE ${workpath}/gpt/README \
+    xinstall -m 644 ${worksrcpath}/CHANGES \
+        ${worksrcpath}/LICENSE ${worksrcpath}/README \
         ${destroot}${prefix}/share/doc/${name}-${version}
 }
