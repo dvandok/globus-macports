@@ -12,7 +12,7 @@ PortSystem              1.0
 
 name                    globus-common
 set _name               [ string map {"-" "_"} $name ]
-version                 11.4
+version                 14.7
 set setupversion        2.6
 revision                1
 platforms               darwin
@@ -32,35 +32,13 @@ long_description        The Globus Toolkit is an open source software \
                         cause. The ${name} package contains: \
                         Common Library and Common Setup
 
-master_sites            http://www.grid.tsl.uu.se/repos/globus/source
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 
-distfiles               ${_name}-${version}.tar.gz \
-                        ${_name}_setup-${setupversion}.tar.gz \
-                        ${name}-setup.patch
+distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 6b29844884c08330fb6b51465a0dbe51 \
-                            sha1 1f1061c3042ac94da75a4d83ffff25b542898e5b \
-                            rmd160 a4b5f42f10af4124bbf54acce302da9c8a5f5d62 \
-                        ${_name}_setup-${setupversion}.tar.gz \
-                            md5 61567df0e5e65ee8e20d498323d8dde2 \
-                            sha1 2ee6f4991e4f2791584ccda22dc05ee04800493e \
-                            rmd160 c04968fe27d60f1bbb4ac16c3f8ee22ebfcba687
-
-patchfiles              ${name}-usr.patch \
-                        ${name}-no-pthread-exceptions.patch \
-                        ${name}-noflavext.patch \
-                        ${name}-deps.patch \
-                        ${name}-typo.patch \
-                        ${name}-nosuchfile.patch \
-                        ${name}-doxygen.patch \
-                        ${name}-extradist.patch \
-                        ${name}-ltdlmutex.patch \
-                        ${name}-mingw.patch \
-                        ${name}-pathmax.patch \
-                        ${name}-makefile-header.patch \
-                        ${name}-doxygen-workaround.patch \
-                        ${name}-environ-mac-os-x.patch
+                            sha256 b669d76baea3787cf8a320f511720c52e3c4852d4aa9ee0e3e5866e58f964a7e \
+                            rmd160 e1207e4ffc455c182102ff21f0e0d2571fa1ffe6 \
 
 depends_run             port:globus-libtool
 
@@ -70,7 +48,10 @@ depends_build           port:grid-packaging-tools \
                         bin:doxygen:doxygen \
                         bin:dot:graphviz \
                         bin:gs:ghostscript \
-                        bin:pdflatex:texlive-latex
+                        bin:pdflatex:texlive-latex \
+                        port:texlive-latex-recommended \
+                        port:texlive-latex-extra \
+                        port:texlive-fonts-recommended
 
 worksrcdir              ${_name}-${version}
 
@@ -78,18 +59,13 @@ patch.pre_args          -p1
 
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix} \
-                        GLOBUS_VERSION=5.0.1
+                        GLOBUS_VERSION=5.2.2
 
 configure.post_args     --with-flavor=${flavor} --enable-doxygen
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-post-patch {
-    # Patch setup package
-    system "cd ${workpath}/${_name}_setup-${setupversion} && \
-        patch -p1 < ${filespath}/${name}-setup.patch"
-}
 
 pre-configure {
     # Remove files that should be replaced during bootstrap
@@ -111,61 +87,19 @@ pre-configure {
             "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
             $file
     }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
 
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
         ${prefix}/share/globus/globus-bootstrap.sh"
 
-    # Remove files that should be replaced during bootstrap (setup package)
-    eval file delete -force [ glob -nocomplain \
-        ${workpath}/${_name}_setup-${setupversion}/doxygen/Doxyfile* ] dummy
-    file delete -force \
-        ${workpath}/${_name}_setup-${setupversion}/doxygen/Makefile.am
-    file delete -force \
-        ${workpath}/${_name}_setup-${setupversion}/pkgdata/Makefile.am
-    eval file delete -force [ glob -nocomplain \
-        ${workpath}/${_name}_setup-${setupversion}/globus_automake* ] dummy
-    file delete -force \
-        ${workpath}/${_name}_setup-${setupversion}/autom4te.cache
-
-    system "cd ${workpath}/${_name}_setup-${setupversion} && \
-        GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
-        ${prefix}/share/globus/globus-bootstrap.sh"
 }
 
-post-configure {
-    # Configure setup package
-    system "cd ${workpath}/${_name}_setup-${setupversion} && \
-        ${configure.env} ./configure ${configure.pre_args} \
-        --without-flavor --with-secure-tmpdir=${prefix}/var/tmp"
-}
-
-post-build {
-    # Build setup package
-    system "cd ${workpath}/${_name}_setup-${setupversion} && \
-        ${build.env} make"
-}
 
 post-destroot {
-    # Install setup package
-    system "cd ${workpath}/${_name}_setup-${setupversion} && \
-        ${build.env} make install DESTDIR=${destroot}"
-
     # These scripts are intended to be sourced, not executed
     system "chmod 644 ${destroot}${prefix}/share/globus/globus-args-parser-header"
-    system "chmod 644 ${destroot}${prefix}/share/globus/setup/setup-globus-common.pl"
     system "chmod 644 ${destroot}${prefix}/share/globus/globus-script-initializer"
     system "chmod 644 ${destroot}${prefix}/share/globus/globus-sh-tools.sh"
-
-    # Register setup
-    set env(PERL5LIB) ${prefix}/lib/perl
-    set perlfile [ open ${worksrcpath}/gpt-setup.pl w ]
-    puts $perlfile "my \$metadata = new Grid::GPT::Setup(package_name => \"globus_common_setup\", globusdir => \"${destroot}/${prefix}\");"
-    puts $perlfile "\$metadata->finish();"
-    close $perlfile
-    system "perl -MGrid::GPT::Setup < ${worksrcpath}/gpt-setup.pl"
 
     # Remove libtool archives (.la files)
     foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.la" ] {
@@ -183,10 +117,10 @@ post-destroot {
         ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
         ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
 
-    # Don't use /usr/bin/env
-    reinplace "s!/usr/bin/env perl!${prefix}/bin/perl!" \
-        ${destroot}${prefix}/bin/globus-makefile-header
-
+#    # Don't use /usr/bin/env
+#    reinplace "s!/usr/bin/env perl!${prefix}/bin/perl!" \
+#        ${destroot}${prefix}/bin/globus-makefile-header
+#
     # Move documentation to default macports location
     move ${destroot}${prefix}/share/doc/${_name} \
         ${destroot}${prefix}/share/doc/${name}-${version}
@@ -196,16 +130,4 @@ post-destroot {
     reinplace "/deprecated\\.3/d" \
         ${destroot}${prefix}/share/globus/packages/${_name}/noflavor_doc.filelist
 
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
-
-    # Find shell tools
-    system "cd ${destroot}${prefix}/share/globus/setup && \
-        ./findshelltools > /dev/null"
-    file copy ${destroot}${prefix}/share/globus/setup/globus-sh-tools-vars.sh \
-        ${destroot}${prefix}/share/globus/globus-sh-tools-vars.sh
-    file delete ${destroot}${prefix}/share/globus/setup/config.log
-    file delete ${destroot}${prefix}/share/globus/setup/config.status
 }
