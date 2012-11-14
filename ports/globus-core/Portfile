@@ -37,8 +37,7 @@ long_description        The Globus Toolkit is an open source software \
 
 master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 
-distfiles               ${_name}-${version}.tar.gz \
-                        globus-gpt2pkg-config
+distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
                             sha256 9a24ea02add51c2fb2d510be45cf223226fdf2efc259cffa3871d7624c57998b \
@@ -81,16 +80,6 @@ pre-configure {
 post-destroot {
     # These scripts are intended to be sourced, not executed
     system "chmod 644 ${destroot}${prefix}/share/globus/globus-build-env-*.sh"
-
-    # Install the GPT metadata to pkg-config file converter
-    xinstall ${filespath}/globus-gpt2pkg-config \
-        ${destroot}${prefix}/share/globus/globus-gpt2pkg-config
-
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${destroot}${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
 
     # Don't use /usr/bin/env
     foreach file [ glob ${destroot}${prefix}/sbin/globus-* ] {
