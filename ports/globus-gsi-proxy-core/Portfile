@@ -31,7 +31,7 @@ long_description        The Globus Toolkit is an open source software \
                         cause. The ${name} package contains: \
                         Globus GSI Proxy Core Library
 
-master_sites            http://www.grid.tsl.uu.se/repos/globus/source
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz
 

@@ -33,7 +33,7 @@ long_description        The Globus Toolkit is an open source software \
                         independent way of dealing with runtime \
                         loadable functions.
 
-master_sites            http://www.grid.tsl.uu.se/repos/globus/source
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz
 
