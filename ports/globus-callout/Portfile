@@ -12,12 +12,12 @@ PortSystem              1.0
 
 name                    globus-callout
 set _name               [ string map {"-" "_"} $name ]
-version                 0.7
+version                 2.2
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - Globus Callout Library
@@ -38,18 +38,12 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 c2b5eeec562021d2e87fb1ef306bddec \
-                            sha1 47f85fe08fa0551de52e578efb7c9468d3d89504 \
-                            rmd160 01113f6d862d511bf4489914fe7be55f9d32b731
+                            sha256 a7fc4630b3dd690f4d832e439d092ec86d4e35d86f0bc9fa57b1fa31aa6eefa0 \
+                            rmd160 ca1f82c76a2a135e048e729d8eb4e385083b5a53
 
-patchfiles              ${name}-noflavext.patch \
-                        ${name}-mingw.patch
-
-depends_run             port:globus-common \
-                        port:globus-libtool
+depends_run             port:globus-common
 
 depends_build           port:grid-packaging-tools \
-                        port:globus-libtool \
                         port:globus-common \
                         port:globus-core \
                         bin:doxygen:doxygen \
@@ -59,12 +53,11 @@ depends_build           port:grid-packaging-tools \
 
 worksrcdir              ${_name}-${version}
 
-patch.pre_args          -p1
-
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -78,19 +71,6 @@ pre-configure {
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
 
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
@@ -107,19 +87,4 @@ post-destroot {
     foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
         delete $file
     }
-
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # Move documentation to default macports location
-    move ${destroot}${prefix}/share/doc/${_name} \
-        ${destroot}${prefix}/share/doc/${name}-${version}
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }
