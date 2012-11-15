@@ -21,7 +21,7 @@ revision                1
 platforms               darwin
 categories              devel
 license                 Apache-2
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - Globus Core
