@@ -46,7 +46,7 @@ depends_run             port:globus-common \
                         port:globus-gsi-sysconfig \
                         port:globus-gssapi-gsi \
                         port:globus-xio \
-                        port:globus-gsi-xio-popen-driver
+                        port:globus-xio-popen-driver
 
 depends_build           port:grid-packaging-tools \
                         port:globus-common \
