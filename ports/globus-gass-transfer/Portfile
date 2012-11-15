@@ -12,12 +12,12 @@ PortSystem              1.0
 
 name                    globus-gass-transfer
 set _name               [ string map {"-" "_"} $name ]
-version                 4.3
+version                 7.3
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - Globus Gass Transfer
@@ -36,20 +36,19 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 ee7d68a6523169815422770b282a8f77 \
-                            sha1 3e39c0a3432424a2fb6a81ded1234c60a9d07486 \
-                            rmd160 d70d533704e05c3917df9c1f7ea5f3b23da7da7d
-
-patchfiles              ${name}-doxygen.patch
+                            sha256 1890a4ee4bc8781ffbfffc3f33b942b88319cdc038fb4bdd885c0ca7c77bbe3e \
+                            rmd160 cb3dcb7746815b29cd6d64ef7f1d62d7e5c53111
 
 depends_run             port:globus-common \
                         port:globus-gssapi-gsi \
+                        port:globus-gss-assist \
                         port:globus-io
 
 depends_build           port:grid-packaging-tools \
                         port:globus-common \
                         port:globus-io \
                         port:globus-gssapi-gsi \
+                        port:globus-gss-assist \
                         port:globus-core \
                         bin:doxygen:doxygen \
                         bin:dot:graphviz \
@@ -58,12 +57,11 @@ depends_build           port:grid-packaging-tools \
 
 worksrcdir              ${_name}-${version}
 
-patch.pre_args          -p1
-
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -77,20 +75,6 @@ pre-configure {
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
-
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
         ${prefix}/share/globus/globus-bootstrap.sh"
@@ -106,19 +90,4 @@ post-destroot {
     foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
         delete $file
     }
-
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # Move documentation to default macports location
-    move ${destroot}${prefix}/share/doc/${_name} \
-        ${destroot}${prefix}/share/doc/${name}-${version}
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }
