@@ -44,7 +44,7 @@ depends_run             port:globus-common \
                         port:globus-gsi-callback \
                         port:globus-gsi-credential \
                         port:globus-gsi-sysconfig \
-                        port:globus-gsi-gssapi-gsi \
+                        port:globus-gssapi-gsi \
                         port:globus-gsi-xio \
                         port:globus-gsi-xio-popen-driver
 
@@ -55,7 +55,7 @@ depends_build           port:grid-packaging-tools \
                         port:globus-gsi-callback \
                         port:globus-gsi-credential \
                         port:globus-gsi-sysconfig \
-                        port:globus-gsi-gssapi-gsi \
+                        port:globus-gssapi-gsi \
                         port:globus-gsi-xio \
                         port:globus-xio-popen-driver \
                         bin:doxygen:doxygen \
