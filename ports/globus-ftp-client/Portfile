@@ -45,7 +45,7 @@ depends_run             port:globus-common \
                         port:globus-gsi-credential \
                         port:globus-gsi-sysconfig \
                         port:globus-gssapi-gsi \
-                        port:globus-gsi-xio \
+                        port:globus-xio \
                         port:globus-gsi-xio-popen-driver
 
 depends_build           port:grid-packaging-tools \
@@ -56,7 +56,7 @@ depends_build           port:grid-packaging-tools \
                         port:globus-gsi-credential \
                         port:globus-gsi-sysconfig \
                         port:globus-gssapi-gsi \
-                        port:globus-gsi-xio \
+                        port:globus-xio \
                         port:globus-xio-popen-driver \
                         bin:doxygen:doxygen \
                         bin:dot:graphviz \
