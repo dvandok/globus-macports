@@ -76,17 +76,6 @@ pre-configure {
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
 
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
         ${prefix}/share/globus/globus-bootstrap.sh"
@@ -110,16 +99,6 @@ post-destroot {
         delete $file
     }
 
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-#    # Don't use /usr/bin/env
-#    reinplace "s!/usr/bin/env perl!${prefix}/bin/perl!" \
-#        ${destroot}${prefix}/bin/globus-makefile-header
-#
     # Move documentation to default macports location
     move ${destroot}${prefix}/share/doc/${_name} \
         ${destroot}${prefix}/share/doc/${name}-${version}
