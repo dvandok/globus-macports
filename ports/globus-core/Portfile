@@ -20,7 +20,7 @@ version                 8.9
 revision                1
 platforms               darwin
 categories              devel
-license                 Apache 2.0
+license                 Apache-2
 maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
@@ -65,7 +65,7 @@ configure.post_args     --includedir=${prefix}/include/globus \
                         --with-flavorincludedir='\${libdir}/globus/include' \
                         --with-perlmoduledir=${perl_vendor_lib} \
                         --with-doxygendir='\${datadir}/globus/doxygen' \
-                        --with-newgpt
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -80,14 +80,4 @@ pre-configure {
 post-destroot {
     # These scripts are intended to be sourced, not executed
     system "chmod 644 ${destroot}${prefix}/share/globus/globus-build-env-*.sh"
-
-    # Don't use /usr/bin/env
-    foreach file [ glob ${destroot}${prefix}/sbin/globus-* ] {
-        reinplace "s!/usr/bin/env perl!/opt/local/bin/perl!" ${file}
-    }
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }
