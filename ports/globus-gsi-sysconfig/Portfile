@@ -12,12 +12,12 @@ PortSystem              1.0
 
 name                    globus-gsi-sysconfig
 set _name               [ string map {"-" "_"} $name ]
-version                 3.1
+version                 5.3
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - Globus GSI System Config Library
@@ -36,22 +36,17 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 f6ecfa47611320c03e23df6e64c68c5a \
-                            sha1 69f487fa6c7a19323a37fec6e2d5b69f00855bd2 \
-                            rmd160 76792581bb95b36c4933621ca6a20197f5c3e0f3
-
-patchfiles              ${name}-mingw.patch
+                            sha256 147922c003813daba77c67fd7f1f2cc78b43fed8ffb9087f61d596b9ea4e6a25 \
+                            rmd160 14ef7647e34da5e1bd28dc9c9eccb56e72c00d6d
 
 depends_run             port:globus-common \
                         port:globus-gsi-openssl-error \
-                        port:globus-openssl \
                         port:globus-openssl-module
 
 depends_build           port:grid-packaging-tools \
                         port:globus-common \
                         port:globus-openssl-module \
                         port:globus-gsi-openssl-error \
-                        port:globus-openssl \
                         port:globus-core \
                         bin:doxygen:doxygen \
                         bin:dot:graphviz \
@@ -60,12 +55,11 @@ depends_build           port:grid-packaging-tools \
 
 worksrcdir              ${_name}-${version}
 
-patch.pre_args          -p1
-
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -79,19 +73,6 @@ pre-configure {
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
 
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
@@ -108,19 +89,4 @@ post-destroot {
     foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
         delete $file
     }
-
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # Move documentation to default macports location
-    move ${destroot}${prefix}/share/doc/${_name} \
-        ${destroot}${prefix}/share/doc/${name}-${version}
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }
