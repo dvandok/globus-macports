@@ -12,12 +12,12 @@ PortSystem              1.0
 
 name                    globus-xio
 set _name               [ string map {"-" "_"} $name ]
-version                 2.8
+version                 3.3
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - Globus XIO Framework
@@ -36,16 +36,15 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 b53e6fdd8d3d9f2846f8ab60a7acba10 \
-                            sha1 1ac998fd01d41d94c45b346416f3ce1618364701 \
-                            rmd160 3cee65d9c667b721843d6fa0d9e3600cd16d9395
+                            sha256 1e2f6f6eccc7be5ef50737527c77fba9b7b0d566d55109e273312e4e6d9eb551 \
+                            rmd160 07ad60590d4bed3ce8f42f25fbf2faa48b930457
 
-patchfiles              ${name}-doxygen.patch \
-                        ${name}-bad-age.patch \
-                        ${name}-type-punned-pointer.patch \
-                        ${name}-mingw.patch \
-                        ${name}-format.patch
-
+#patchfiles              ${name}-doxygen.patch \
+#                        ${name}-bad-age.patch \
+#                        ${name}-type-punned-pointer.patch \
+#                        ${name}-mingw.patch \
+#                        ${name}-format.patch
+#
 depends_run             port:globus-common
 
 depends_build           port:grid-packaging-tools \
@@ -65,8 +64,8 @@ configure.env-append    GPT_LOCATION=${prefix} \
 
 # Disable building doxygen documentation for now, since it is broken due to PDF-hyperlinks ending up on different pages.
 #configure.post_args     --with-flavor=${flavor} --enable-doxygen
-configure.post_args     --with-flavor=${flavor}
-
+configure.post_args     --with-flavor=${flavor} \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -80,23 +79,6 @@ pre-configure {
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
-    reinplace -E \
-        "s!\(lib\[a-zA-Z_\\$\\{\\}\]*\)_\\$\\{GLOBUS_FLAVOR_NAME\\}\\.la!\\1.la!g" \
-        ${worksrcpath}/configure.in
-
 
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
@@ -114,26 +96,4 @@ post-destroot {
         delete $file
     }
 
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # -- Doxygen documentation is currently disabled.
-    # Move documentation to default macports location
-    #move ${destroot}${prefix}/share/doc/${_name} \
-    #    ${destroot}${prefix}/share/doc/${name}-${version}
-
-    # Fix doxygen glitches
-    #foreach f { globus_xio_driver.3 GLOBUS_XIO_API_ASSIST.3 } {
-    #    reinplace "s/P\\.RS/P\\\n.RS/" \
-    #        ${destroot}${prefix}/share/man/man3/${f}
-    #}
-    # --
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }
