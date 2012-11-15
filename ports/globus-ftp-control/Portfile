@@ -12,12 +12,12 @@ PortSystem              1.0
 
 name                    globus-ftp-control
 set _name               [ string map {"-" "_"} $name ]
-version                 2.11
+version                 4.4
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - GridFTP Control Library
@@ -36,22 +36,21 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 af1f932952c99fde4957fe6992b98e86 \
-                            sha1 5bac741b459be0c95fde3c79c9ee4d3af8110136 \
-                            rmd160 d2282176774364bb174ae6f904cb599188dd5389
-
-patchfiles              ${name}-doxygen.patch \
-                        ${name}-type-punned-pointer.patch \
-                        ${name}-format.patch
+                            sha256 f860b7b56f3e53b0aff97f64cc30038a0873afcdbef4d3c9cbe7d67665d81089 \
+                            rmd160 c38a853edfdb5045956c8cf8c5abfe96c01ed2e5
 
 depends_run             port:globus-common \
                         port:globus-gss-assist \
-                        port:globus-io
+                        port:globus-io \
+                        port:globus-xio \
+                        port:globus-gssapi-error
 
 depends_build           port:grid-packaging-tools \
                         port:globus-common \
                         port:globus-gss-assist \
                         port:globus-io \
+                        port:globus-xio \
+                        port:globus-gssapi-error \
                         port:globus-gssapi-gsi \
                         port:globus-core \
                         bin:doxygen:doxygen \
@@ -61,14 +60,12 @@ depends_build           port:grid-packaging-tools \
 
 worksrcdir              ${_name}-${version}
 
-patch.pre_args          -p1
-
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-# Disable building doxygen documentation for now, since it is broken due to PDF-hyperlinks ending up on different pages. 
-#configure.post_args     --with-flavor=${flavor} --enable-doxygen 
-configure.post_args     --with-flavor=${flavor} 
+
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -82,20 +79,6 @@ pre-configure {
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
-
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
         ${prefix}/share/globus/globus-bootstrap.sh"
@@ -111,25 +94,4 @@ post-destroot {
     foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
         delete $file
     }
-
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # Move documentation to default macports location
-    #move ${destroot}${prefix}/share/doc/${_name} \
-    #    ${destroot}${prefix}/share/doc/${name}-${version}
-
-    # Fix doxygen glitches
-    #foreach f { globus_ftp_control_client.c.3 globus_ftp_extensions.3 } {
-    #    reinplace "s/P\\.RS/P\\\n.RS/" \
-    #        ${destroot}${prefix}/share/man/man3/${f}
-    #}
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }
