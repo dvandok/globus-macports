@@ -12,12 +12,12 @@ PortSystem              1.0
 
 name                    globus-gass-copy
 set _name               [ string map {"-" "_"} $name ]
-version                 5.4
+version                 8.6
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - Globus Gass Copy
@@ -36,25 +36,24 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 eec20b9eba6e6c40be9a8d5e1b361893 \
-                            sha1 f0a4a86be88745f1c57713a36349b7f21eef3e5a \
-                            rmd160 d2aeb642fb57091b8e7efb241a5df8692b119fc9
-
-patchfiles              ${name}-doxygen.patch \
-                        ${name}-mingw.patch \
-                        ${name}-pathmax.patch
+                            sha256 14460a045a46bf0a6e434d77d14392f65d86dbc14d3c7acb9bca5caac32aa8a6 \
+                            rmd160 f2f21a585dc1d3ac90bb9f139fc6357df1694fc3
 
 depends_run             port:globus-common \
                         port:globus-ftp-client \
                         port:globus-ftp-control \
+                        port:globus-gsi-sysconfig \
                         port:globus-gass-transfer \
                         port:globus-gssapi-gsi \
+                        port:globus-gssapi-error \
                         port:globus-io
 
 depends_build           port:grid-packaging-tools \
                         port:globus-ftp-client \
+                        port:globus-gsi-sysconfig \
                         port:globus-common \
                         port:globus-gssapi-gsi \
+                        port:globus-gssapi-error \
                         port:globus-io \
                         port:globus-gass-transfer \
                         port:globus-ftp-control \
@@ -66,12 +65,11 @@ depends_build           port:grid-packaging-tools \
 
 worksrcdir              ${_name}-${version}
 
-patch.pre_args          -p1
-
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -85,20 +83,6 @@ pre-configure {
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
-
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
         ${prefix}/share/globus/globus-bootstrap.sh"
@@ -114,19 +98,4 @@ post-destroot {
     foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
         delete $file
     }
-
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # Move documentation to default macports location
-    move ${destroot}${prefix}/share/doc/${_name} \
-        ${destroot}${prefix}/share/doc/${name}-${version}
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }
