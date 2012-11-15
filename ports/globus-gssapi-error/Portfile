@@ -12,12 +12,12 @@ PortSystem              1.0
 
 name                    globus-gssapi-error
 set _name               [ string map {"-" "_"} $name ]
-version                 2.5
+version                 4.1
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - GSSAPI Error Library
@@ -36,16 +36,17 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 fec09f17f0269480baade5d86b0ddf13 \
-                            sha1 d557237d3713a248346d166f68aac0ad118977eb \
-                            rmd160 437826aefd7e4fa06e04b0dde9f7618250aa04bc
+                            sha256 5a74c1f6316b4d5fd3f554f70f32d725d162dc21ccfb3dc35695194dad7d8faf \
+                            rmd160 186c617319475bf0778ab8add370eaea0b432694
 
 depends_run             port:globus-common \
-                        port:globus-gss-assist
+                        port:globus-gss-assist \
+                        port:globus-gssapi-gsi
 
 depends_build           port:grid-packaging-tools \
                         port:globus-common \
                         port:globus-gss-assist \
+                        port:globus-gssapi-gsi \
                         port:globus-core \
                         bin:doxygen:doxygen \
                         bin:dot:graphviz \
@@ -57,16 +58,13 @@ worksrcdir              ${_name}-${version}
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
 pre-configure {
-    # Fix package metadata
-    reinplace  "s/\"gssapi_error\"/\"globus_gssapi_error\"/" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
-
     # Remove files that should be replaced during bootstrap
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/doxygen/Doxyfile* ] dummy
@@ -75,20 +73,6 @@ pre-configure {
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
-
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
         ${prefix}/share/globus/globus-bootstrap.sh"
@@ -104,19 +88,4 @@ post-destroot {
     foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
         delete $file
     }
-
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # Move documentation to default macports location
-    move ${destroot}${prefix}/share/doc/${_name} \
-        ${destroot}${prefix}/share/doc/${name}-${version}
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }
