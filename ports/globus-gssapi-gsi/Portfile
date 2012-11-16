@@ -12,12 +12,12 @@ PortSystem              1.0
 
 name                    globus-gssapi-gsi
 set _name               [ string map {"-" "_"} $name ]
-version                 7.5
+version                 10.7
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - GSSAPI library
@@ -36,9 +36,8 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 64dd3776e3177fba712c429ebcdd72d5 \
-                            sha1 b09587e85683aac0b5172e4c12958fd2e20fbca2 \
-                            rmd160 c2eeddaff873468ba3ccead8491b71dac579036c
+                            sha256 cdc4ffca7e6e496de9315da1c9d70616d0861556e2142d7fe67fb90cec11ec8d \
+                            rmd160 904415ca924d313b9aad9f971aa6ba34488fb74e
 
 depends_run             port:globus-common \
                         port:globus-gsi-callback \
@@ -46,7 +45,7 @@ depends_run             port:globus-common \
                         port:globus-gsi-credential \
                         port:globus-gsi-openssl-error \
                         port:globus-gsi-proxy-core \
-                        port:globus-openssl \
+                        port:globus-gsi-sysconfig \
                         port:globus-openssl-module
 
 depends_build           port:grid-packaging-tools \
@@ -54,7 +53,7 @@ depends_build           port:grid-packaging-tools \
                         port:globus-gsi-callback \
                         port:globus-openssl-module \
                         port:globus-gsi-openssl-error \
-                        port:globus-openssl \
+                        port:globus-gsi-sysconfig \
                         port:globus-gsi-proxy-core \
                         port:globus-core \
                         port:globus-gsi-cert-utils \
@@ -69,7 +68,8 @@ worksrcdir              ${_name}-${version}
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -83,19 +83,6 @@ pre-configure {
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
 
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
@@ -113,23 +100,8 @@ post-destroot {
         delete $file
     }
 
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # Move documentation to default macports location
-    move ${destroot}${prefix}/share/doc/${_name} \
-        ${destroot}${prefix}/share/doc/${name}-${version}
-
     # Remove deprecated.3 man page (too common name)
     delete ${destroot}${prefix}/share/man/man3/deprecated.3
     reinplace "/deprecated\\.3/d" \
         ${destroot}${prefix}/share/globus/packages/${_name}/noflavor_doc.filelist
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }

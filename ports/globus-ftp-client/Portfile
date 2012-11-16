@@ -12,12 +12,12 @@ PortSystem              1.0
 
 name                    globus-ftp-client
 set _name               [ string map {"-" "_"} $name ]
-version                 5.3
+version                 7.4
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - GridFTP Client Library
@@ -36,23 +36,28 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 f2a9c7b5bb56a099c37f9176ff4d12ff \
-                            sha1 2a3b2bef6eee4492d61553dbc00e0667ea17365b \
-                            rmd160 953d183a0f4ff4977854f79c649b79523d41f2f7
-
-patchfiles              ${name}-doxygen.patch \
-                        ${name}-type-punned-pointer.patch \
-                        ${name}-format.patch
+                            sha256 4939540b64761b47515bd6eaf17b0b331f9882fe4a25047c6f2ee9f3aaed8f68 \
+                            rmd160 9263e818a9b4e6ad0c432765b8cbb5895bf756bf
 
 depends_run             port:globus-common \
                         port:globus-ftp-control \
+                        port:globus-gsi-callback \
+                        port:globus-gsi-credential \
+                        port:globus-gsi-sysconfig \
+                        port:globus-gssapi-gsi \
+                        port:globus-xio \
                         port:globus-xio-popen-driver
 
 depends_build           port:grid-packaging-tools \
-                        port:globus-xio-popen-driver \
                         port:globus-common \
-                        port:globus-ftp-control \
                         port:globus-core \
+                        port:globus-ftp-control \
+                        port:globus-gsi-callback \
+                        port:globus-gsi-credential \
+                        port:globus-gsi-sysconfig \
+                        port:globus-gssapi-gsi \
+                        port:globus-xio \
+                        port:globus-xio-popen-driver \
                         bin:doxygen:doxygen \
                         bin:dot:graphviz \
                         bin:gs:ghostscript \
@@ -60,12 +65,11 @@ depends_build           port:grid-packaging-tools \
 
 worksrcdir              ${_name}-${version}
 
-patch.pre_args          -p1
-
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -79,20 +83,6 @@ pre-configure {
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
-
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
         ${prefix}/share/globus/globus-bootstrap.sh"
@@ -108,24 +98,4 @@ post-destroot {
     foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
         delete $file
     }
-
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # Move documentation to default macports location
-    move ${destroot}${prefix}/share/doc/${_name} \
-        ${destroot}${prefix}/share/doc/${name}-${version}
-
-    # Remove bug.3 man page (too common name)
-    delete ${destroot}${prefix}/share/man/man3/bug.3
-    reinplace "/bug\\.3/d" \
-        ${destroot}${prefix}/share/globus/packages/${_name}/noflavor_doc.filelist
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }

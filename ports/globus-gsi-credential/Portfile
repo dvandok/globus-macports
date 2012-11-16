@@ -12,12 +12,12 @@ PortSystem              1.0
 
 name                    globus-gsi-credential
 set _name               [ string map {"-" "_"} $name ]
-version                 3.3
+version                 5.3
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - Globus GSI Credential Library
@@ -36,29 +36,24 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 6c6b2f03f4249c9518bbcae5854e64ae \
-                            sha1 ad1a5c7a31f860d65f2ade8b3d39efd03595f1c2 \
-                            rmd160 e9adbfd32abfeb3f58969c88ebb61721ff936d01
-
-patchfiles              ${name}-oid.patch
+                            sha256 521893b15367f816835d8beaedc50d4cfe5e83e321ae726b31da5da0553d7a39 \
+                            rmd160 b179c41e2e8edf5eff7328c9f6f5fb7a60ef1523
 
 depends_run             port:globus-common \
-                        port:globus-gsi-callback \
-                        port:globus-gsi-cert-utils \
+                        port:globus-gsi-proxy-ssl \
                         port:globus-gsi-openssl-error \
+                        port:globus-gsi-cert-utils \
                         port:globus-gsi-sysconfig \
-                        port:globus-openssl \
-                        port:globus-openssl-module
+                        port:globus-gsi-callback
 
 depends_build           port:grid-packaging-tools \
-                        port:globus-gsi-callback \
-                        port:globus-openssl-module \
-                        port:globus-gsi-openssl-error \
-                        port:globus-openssl \
                         port:globus-core \
-                        port:globus-gsi-cert-utils \
                         port:globus-common \
+                        port:globus-gsi-proxy-ssl \
+                        port:globus-gsi-openssl-error \
+                        port:globus-gsi-cert-utils \
                         port:globus-gsi-sysconfig \
+                        port:globus-gsi-callback \
                         bin:doxygen:doxygen \
                         bin:dot:graphviz \
                         bin:gs:ghostscript \
@@ -66,12 +61,11 @@ depends_build           port:grid-packaging-tools \
 
 worksrcdir              ${_name}-${version}
 
-patch.pre_args          -p1
-
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -85,20 +79,6 @@ pre-configure {
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
     file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
-
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
         ${prefix}/share/globus/globus-bootstrap.sh"
@@ -114,19 +94,4 @@ post-destroot {
     foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
         delete $file
     }
-
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # Move documentation to default macports location
-    move ${destroot}${prefix}/share/doc/${_name} \
-        ${destroot}${prefix}/share/doc/${name}-${version}
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }
