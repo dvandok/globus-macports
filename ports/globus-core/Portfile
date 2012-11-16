@@ -53,7 +53,8 @@ depends_build           port:grid-packaging-tools \
 worksrcdir              ${_name}-${version}
 
 configure.env-append    GPT_LOCATION=${prefix} \
-                        GLOBUS_LOCATION=${prefix}
+                        GLOBUS_LOCATION=${prefix} \
+                        CPPFLAGS="-I${prefix}/include/globus"
 
 configure.post_args     --includedir=${prefix}/include/globus \
                         --libexecdir='\${datadir}/globus' \
