@@ -54,8 +54,7 @@ worksrcdir              ${_name}-${version}-src
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} \
-                        --with-docdir='\${datadir}/doc/${name}-${version}' \
+configure.post_args     --with-globus-flavor=${flavor} \
                         --with-gsi \
                         --without-kerberos5
 
