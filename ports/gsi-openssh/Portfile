@@ -33,7 +33,7 @@ long_description        The Globus Toolkit is an open source software \
 
 master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
 
-distfiles               ${_name}-${version}.tar.gz
+distfiles               ${_name}-${version}-src.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
                             sha256 66a8cc15e4cb89a77299187ba915012c052cc502b0034fe9e3e3582cd9b04ffc \
