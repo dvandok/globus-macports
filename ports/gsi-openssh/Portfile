@@ -16,9 +16,9 @@ version                 5.5
 revision                1
 platforms               darwin
 categories              net
-license                 Apache-2
+license                 BSD
 maintainers             nikhef.nl:dennisvd
-homepage                http://www.globus.org/
+homepage                http://grid.ncsa.illinois.edu/ssh/
 
 description             Globus Toolkit - secure shell (SSH) with GSI authentication
 long_description        The Globus Toolkit is an open source software \
@@ -40,12 +40,15 @@ checksums               ${_name}-${version}.tar.gz \
                             rmd160 bc78c021bbbab6c2e616644cd2f60856c5689586
 
 depends_run             port:globus-gss-assist \
-                        port:globus-usage
+                        port:globus-usage \
+                        port:xauth
 
 depends_build           port:grid-packaging-tools \
                         port:globus-gss-assist \
                         port:globus-usage \
                         port:globus-core
+
+depends_lib             port:openssl port:zlib
 
 worksrcdir              ${_name}-${version}
 
@@ -53,7 +56,9 @@ configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
 configure.post_args     --with-flavor=${flavor} \
-                        --with-docdir='\${datadir}/doc/${name}-${version}'
+                        --with-docdir='\${datadir}/doc/${name}-${version}' \
+                        --with-gsi \
+                        --without-kerberos5
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
