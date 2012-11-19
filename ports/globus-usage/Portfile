@@ -1,0 +1,80 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+# $Id$
+
+if {$build_arch == "x86_64" || $build_arch == "ppc64"} {
+    set flavor gcc64pthr
+} else {
+    set flavor gcc32pthr
+}
+
+PortSystem              1.0
+
+name                    globus-usage
+set _name               [ string map {"-" "_"} $name ]
+version                 3.1
+revision                1
+platforms               darwin
+categories              net
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd
+homepage                http://www.globus.org/
+
+description             Globus Toolkit - Usage statistics collector
+long_description        The Globus Toolkit is an open source software \
+                        toolkit used for building Grid systems and \
+                        applications. It is being developed by the \
+                        Globus Alliance and many others all over the \
+                        world. A growing number of projects and \
+                        companies are using the Globus Toolkit to \
+                        unlock the potential of grids for their \
+                        cause. The ${name} package contains: \
+                        Usage statistics collector
+
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
+
+distfiles               ${_name}-${version}.tar.gz
+
+checksums               ${_name}-${version}.tar.gz \
+                            sha256 1b60c925e746109f824b8757708595fef8b109fce8ad0c7027add97aa125e330 \
+                            rmd160 f6838d1d599a3d3958f1635327975f3c9b2ec9c6
+
+patchfiles              globus-usage-collector.patch
+
+depends_run             port:globus-common \
+                        port:globus-xio
+
+depends_build           port:grid-packaging-tools \
+                        port:globus-common \
+                        port:globus-core \
+                        port:globus-xio
+
+worksrcdir              ${_name}-${version}
+
+configure.env-append    GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
+
+build.env-append        GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+pre-configure {
+    file delete -force ${worksrcpath}/autom4te.cache
+    system "cd $worksrcpath && \
+        GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
+        ${prefix}/share/globus/globus-bootstrap.sh"
+}
+
+post-destroot {
+    # Remove libtool archives (.la files)
+    foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.la" ] {
+        delete $file
+    }
+
+    # Remove static libraries (.a files)
+    foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
+        delete $file
+    }
+}
