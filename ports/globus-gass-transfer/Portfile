@@ -12,7 +12,7 @@ PortSystem              1.0
 
 name                    globus-gass-transfer
 set _name               [ string map {"-" "_"} $name ]
-version                 7.3
+version                 7.2
 revision                1
 platforms               darwin
 categories              net
