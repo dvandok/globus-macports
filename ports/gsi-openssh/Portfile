@@ -40,8 +40,7 @@ checksums               ${_name}-${version}.tar.gz \
                             rmd160 bc78c021bbbab6c2e616644cd2f60856c5689586
 
 depends_run             port:globus-gss-assist \
-                        port:globus-usage \
-                        port:xauth
+                        port:globus-usage
 
 depends_build           port:grid-packaging-tools \
                         port:globus-gss-assist \
