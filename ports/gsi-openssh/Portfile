@@ -49,7 +49,7 @@ depends_build           port:grid-packaging-tools \
 
 depends_lib             port:openssl port:zlib
 
-worksrcdir              ${_name}-${version}
+worksrcdir              ${_name}-${version}-src
 
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
