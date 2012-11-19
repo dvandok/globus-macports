@@ -63,8 +63,5 @@ build.env-append        GPT_LOCATION=${prefix} \
 
 pre-configure {
     file delete -force ${worksrcpath}/autom4te.cache
-    system "cd $worksrcpath && \
-        GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
-        ${prefix}/share/globus/globus-bootstrap.sh"
 }
 
