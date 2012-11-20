@@ -9,7 +9,7 @@ maintainers         nikhef.nl:dennisvd nbi.ku.dk:skou
 description         The trusted IGTF CA-certificates
 homepage            http://www.igtf.net
 platforms           darwin
-master_sites        https://dist.eugridpma.info/distribution/igtf/${version}
+master_sites        http://dist.eugridpma.info/distribution/igtf/${version}
 distfiles           igtf-policy-installation-bundle-${version}.tar.gz
 checksums           sha256 be08b343ab2e8420db99391e2e598c6487c96e9b64010ef9cad029cfcefed789 \
                     rmd160 7a4aaf5d07cd65e1b5bb15f6abedf2e9db86f3be
