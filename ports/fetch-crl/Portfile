@@ -14,4 +14,9 @@ distfiles           ${name}-${version}.tar.gz
 checksums           sha256 9f65ea0f9bece8817f2b211536d2f805c022d2e661e6bf7a910322f16bb303fb \
                     rmd160 849559332c5d34c9a58150a1383cafe77d2cdc62
 
-configure.args-append --config ${prefix}/etc/fetch-crl.cnf --infodir ${prefix}/etc/grid-security/certificates
+configure {}
+
+install {
+    make install PREFIX=${prefix} ETC=${prefix}/etc CACHE=${prefix}/var/cache
+}
+
