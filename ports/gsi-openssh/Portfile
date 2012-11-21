@@ -65,6 +65,6 @@ configure.post_args     --with-globus-flavor=${flavor} \
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-destroot.post_args      GPT_LOCATION=${prefix} \
+destroot.env-append     GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
