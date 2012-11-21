@@ -65,8 +65,6 @@ configure.post_args     --with-globus-flavor=${flavor} \
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-
-pre-configure {
-    file delete -force ${worksrcpath}/autom4te.cache
-}
+destroot.post_args      GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
 
