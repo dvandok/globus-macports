@@ -10,7 +10,7 @@ description         Download tool for Certificate Revocation Lists
 homepage            http://wiki.nikhef.nl/grid/FetchCRL3
 platforms           darwin
 master_sites        http://dist.eugridpma.info/distribution/util/fetch-crl3/
-distfiles           ${name}-${version}.tar.gz
+distfiles           ${name}-${version}.tar.gz \
 		    org.eugridpma.fetch-crl.plist
 
 checksums           sha256 9f65ea0f9bece8817f2b211536d2f805c022d2e661e6bf7a910322f16bb303fb \
