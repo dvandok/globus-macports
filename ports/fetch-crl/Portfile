@@ -1,3 +1,5 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
 # $Id$
 
 PortSystem          1.0
@@ -11,7 +13,7 @@ homepage            http://wiki.nikhef.nl/grid/FetchCRL3
 platforms           darwin
 master_sites        http://dist.eugridpma.info/distribution/util/fetch-crl3/
 distfiles           ${name}-${version}.tar.gz \
-		    org.eugridpma.fetch-crl.plist
+                    org.eugridpma.fetch-crl.plist
 
 checksums           sha256 9f65ea0f9bece8817f2b211536d2f805c022d2e661e6bf7a910322f16bb303fb \
                     rmd160 849559332c5d34c9a58150a1383cafe77d2cdc62
@@ -20,3 +22,7 @@ use_configure       no
 
 destroot.destdir    PREFIX=${destroot}${prefix} ETC=${destroot}${prefix}/etc CACHE=${destroot}${prefix}/var/cache
 
+post-build {
+    file copy ${filespath}/org.eugridpma.fetch-crl.plist ${worksrcpath}
+    reinplace "s!/opt/local/!${prefix}!g" org.eugridpma.fetch-crl.plist
+}
