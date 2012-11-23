@@ -34,6 +34,7 @@ post-build {
 
 post-destroot {
     # install the plist file
+    file mkdir ${destroot}${prefix}/etc/LaunchDaemons
     xinstall ${worksrcpath}/org.eugridpma.fetch-crl.plist ${destroot}${prefix}/etc/LaunchDaemons/
     file mkdir ${prefix}/var/cache/fetch-crl
 }
