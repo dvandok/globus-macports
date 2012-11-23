@@ -9,14 +9,8 @@
         <key>ProgramArguments</key>
         <array>
                 <string>/opt/local/sbin/fetch-crl</string>
-		<string>-q</string>
-		<string>--infodir</string>
-		<string>/opt/local/etc/grid-security/certificates</string>
-		<string>--statedir</string>
-		<string>/opt/local/var/cache/fetch-crl</string>
-		<string>--nosymlinks</string>
-		<string>--agingtolerance</string>
-		<string>24</string>
+		<string>-c</string>
+		<string>/opt/local/etc/fetch-crl.cnf</string>
         </array>
 	<key>StartInterval</key>
 	<integer>21600</integer>
