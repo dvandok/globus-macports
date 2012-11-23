@@ -41,6 +41,6 @@ post-destroot {
 
 post-activate {
     # symlink the plist file and start with launchctl
-    file ln ${prefix}/etc/LaunchDaemons/org.eugridpma.fetch-crl.plist /Library/Launchdaemons/
+    file link ${prefix}/etc/LaunchDaemons/org.eugridpma.fetch-crl.plist /Library/Launchdaemons/
     system "launchctl load /Library/LaunchDaemons/org.eugridpma.fetch-crl.plist"
 }
