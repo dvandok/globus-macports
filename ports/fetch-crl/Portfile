@@ -23,6 +23,23 @@ use_configure       no
 destroot.destdir    PREFIX=${destroot}${prefix} ETC=${destroot}${prefix}/etc CACHE=${destroot}${prefix}/var/cache
 
 post-build {
+    # update the prefix used in the plist file
     file copy ${filespath}/org.eugridpma.fetch-crl.plist ${worksrcpath}
     reinplace "s!/opt/local!${prefix}!g" org.eugridpma.fetch-crl.plist
+
+    # update the standard config file
+    reinplace "s!/etc!${prefix}/etc!" fetch-crl.cnf
+    system "echo 'statedir ${prefix}/var/cache/fetch-crl' >> fetch-crl.cnf"
+}
+
+post-destroot {
+    # install the plist file
+    xinstall org.eugridpma.fetch-crl.plist ${prefix}/etc/LaunchDaemons/
+    file mkdir ${prefix}/var/cache/fetch-crl
+}
+
+post-activate {
+    # symlink the plist file and start with launchctl
+    file ln ${prefix}/etc/LaunchDaemons/org.eugridpma.fetch-crl.plist /Library/Launchdaemons/
+    system "launchctl load /Library/LaunchDaemons/org.eugridpma.fetch-crl.plist"
 }
