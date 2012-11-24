@@ -46,7 +46,7 @@ post-activate {
 }
 
 pre-deactivate {
-    system "launchctl remove org.eugridpma.fetch-crl"
-    system "launchctl unload /Library/LaunchDaemons/org.eugridpma.fetch-crl.plist"
+    system "launchctl remove org.eugridpma.fetch-crl || true"
+    system "launchctl unload /Library/LaunchDaemons/org.eugridpma.fetch-crl.plist || true "
     file delete /Library/LaunchDaemons/org.eugridpma.fetch-crl.plist
 }
