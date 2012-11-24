@@ -10,7 +10,7 @@
         <array>
                 <string>/opt/local/sbin/fetch-crl</string>
 		<string>-c</string>
-		<string>/opt/local/etc/fetch-crl.cnf</string>
+		<string>/opt/local/etc/fetch-crl.conf</string>
         </array>
 	<key>StartInterval</key>
 	<integer>21600</integer>
