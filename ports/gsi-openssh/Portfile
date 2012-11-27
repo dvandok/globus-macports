@@ -64,6 +64,8 @@ configure.post_args     --with-globus-flavor=${flavor} \
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
+                        SSH_PROGRAM=${prefix}/bin/gsissh
+
 
 destroot.env-append     GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
