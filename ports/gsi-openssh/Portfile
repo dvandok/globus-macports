@@ -60,12 +60,18 @@ configure.cppflags      -I${prefix}/include/globus \
 
 configure.post_args     --with-globus-flavor=${flavor} \
                         --with-gsi \
-                        --without-kerberos5
+                        --without-kerberos5 \
+                        --sysconfdir=${prefix}/etc/gsissh \
+                        --libexecdir=${prefix}/libexec/gsissh \
+                        --without-zlib-version-check \
+                        --with-ssl-engine \
+                        --with-authorized-keys-command \
+                        --with-ipaddr-display 
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix} \
-                        SSH_PROGRAM=${prefix}/bin/gsissh
-
+                        SSH_PROGRAM=${prefix}/bin/gsissh \
+                        ASKPASS_PROGRAM=${prefix}/libexec/openssh/ssh-askpass
 
 destroot.env-append     GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
