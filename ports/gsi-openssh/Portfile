@@ -63,7 +63,7 @@ configure.post_args     --with-globus-flavor=${flavor} \
                         --without-kerberos5
 
 build.env-append        GPT_LOCATION=${prefix} \
-                        GLOBUS_LOCATION=${prefix}
+                        GLOBUS_LOCATION=${prefix} \
                         SSH_PROGRAM=${prefix}/bin/gsissh
 
 
