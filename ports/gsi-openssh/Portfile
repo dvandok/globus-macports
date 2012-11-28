@@ -45,6 +45,8 @@ checksums               ${upstream}-${us_version}.tar.gz \
                             sha256 589d48e952d6c017e667873486b5df63222f9133d417d0002bd6429d9bd882de \
                             rmd160 afad16fac6500da5cdfad94e5b3cac8c68223374
 
+patch.pre_args          -p1
+
 depends_run             port:globus-gss-assist \
                         port:globus-usage
 
@@ -56,7 +58,7 @@ depends_build           port:grid-packaging-tools \
 
 depends_lib             port:openssl port:zlib
 
-worksrcdir              ${_name}-${version}-src
+worksrcdir              ${upstream}-${us_version}
 
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
