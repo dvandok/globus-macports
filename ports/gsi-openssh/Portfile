@@ -84,3 +84,11 @@ build.env-append        GPT_LOCATION=${prefix} \
 destroot.env-append     GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
+# Rename the binaries to prevent conflicting with the real openssh package
+post-destroot {
+    foreach file [ exec find ${destroot}/${prefix}/bin \
+                       ${destroot}/${prefix}/sbin \
+                       ${destroot}/${prefix}/share/man/*/ -type f ] {
+        exec mv $file `dirname $file`/gsi`basename $file`
+    }
+}
