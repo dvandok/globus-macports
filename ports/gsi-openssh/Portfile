@@ -12,6 +12,8 @@ PortSystem              1.0
 
 name                    gsi-openssh
 set _name               [ string map {"-" "_"} $name ]
+set upstream            openssh
+set us_version          6.0p1
 version                 5.5
 revision                1
 platforms               darwin
@@ -30,14 +32,18 @@ long_description        The Globus Toolkit is an open source software \
                         unlock the potential of grids for their \
                         cause. The ${name} package contains: \
                         OpenSSH secure shell with support for GSI authentication
+                        Based on ${upstream} version ${us_version}.
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
+master_sites            http://ftp.bit.nl/pub/OpenBSD/OpenSSH/portable/ \
+                        http://mirror.team-cymru.org/pub/OpenBSD/OpenSSH/portable/
 
-distfiles               ${_name}-${version}-src.tar.gz
+distfiles               ${upstream}-${us_version}.tar.gz
 
-checksums               ${_name}-${version}-src.tar.gz \
-                            sha256 66a8cc15e4cb89a77299187ba915012c052cc502b0034fe9e3e3582cd9b04ffc \
-                            rmd160 bc78c021bbbab6c2e616644cd2f60856c5689586
+patchfiles              ${upstream}-${us_version}.patch
+
+checksums               ${upstream}-${us_version}.tar.gz \
+                            sha256 589d48e952d6c017e667873486b5df63222f9133d417d0002bd6429d9bd882de \
+                            rmd160 afad16fac6500da5cdfad94e5b3cac8c68223374
 
 depends_run             port:globus-gss-assist \
                         port:globus-usage
