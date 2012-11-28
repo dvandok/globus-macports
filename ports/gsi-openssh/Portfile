@@ -88,7 +88,9 @@ destroot.env-append     GPT_LOCATION=${prefix} \
 post-destroot {
     foreach file [ exec find ${destroot}/${prefix}/bin \
                        ${destroot}/${prefix}/sbin \
-                       ${destroot}/${prefix}/share/man/*/ -type f ] {
-        exec mv $file `dirname $file`/gsi`basename $file`
+                       ${destroot}/${prefix}/share/man/ -type f ] {
+	set target "[ file dirname ${file}]/gsi[ file tail ${file} ]"
+        file delete -force $target 
+        file rename ${file} $target
     }
 }
