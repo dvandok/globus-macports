@@ -86,6 +86,18 @@ destroot.env-append     GPT_LOCATION=${prefix} \
 
 # Rename the binaries to prevent conflicting with the real openssh package
 post-destroot {
+    file delete -force ${destroot}/${prefix}/bin/ssh-add
+    file delete -force ${destroot}/${prefix}/bin/ssh-agent
+    file delete -force ${destroot}/${prefix}/bin/ssh-keyscan
+
+    file delete -force [ glob ${destroot}/${prefix}/share/man/man1/ssh-add.1* ]
+    file delete -force [ glob ${destroot}/${prefix}/share/man/man1/ssh-agent.1* ]
+    file delete -force [ glob ${destroot}/${prefix}/share/man/man1/ssh-keyscan.1* ]
+
+    # these two symlinks will need to be renamed as well
+    file delete -force ${destroot}/${prefix}/bin/slogin
+    file delete -force glob ${destroot}/${prefix}/share/man/man1/slogin.1
+
     foreach file [ exec find ${destroot}/${prefix}/bin \
                        ${destroot}/${prefix}/sbin \
                        ${destroot}/${prefix}/share/man/ -type f ] {
@@ -93,4 +105,6 @@ post-destroot {
         file delete -force $target 
         file rename ${file} $target
     }
+    file link -symbolic gsissh ${destroot}/${prefix}/bin/gsislogin
+    file link -symbolic gsissh.1 ${destroot}/${prefix}/share/man/man1/gsislogin.1
 }
