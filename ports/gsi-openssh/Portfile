@@ -105,6 +105,6 @@ post-destroot {
         file delete -force $target 
         file rename ${file} $target
     }
-    file link -symbolic gsissh ${destroot}/${prefix}/bin/gsislogin
-    file link -symbolic gsissh.1 ${destroot}/${prefix}/share/man/man1/gsislogin.1
+    file link -symbolic ${destroot}/${prefix}/bin/gsislogin gsissh 
+    file link -symbolic ${destroot}/${prefix}/share/man/man1/gsislogin.1 gsissh.1
 }
