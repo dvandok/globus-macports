@@ -1,0 +1,11 @@
+--- globus_usage-3.1.orig/globus_usage.c	2010-07-23 18:48:35.000000000 +0200
++++ globus_usage-3.1/globus_usage.c	2012-11-19 14:59:07.859921605 +0100
+@@ -26,7 +26,7 @@
+ static globus_xio_stack_t               globus_l_usage_stats_stack;
+ static globus_xio_driver_t              globus_l_usage_stats_udp_driver;
+ 
+-#define GLOBUS_L_USAGE_STATS_DEFAULT_TARGETS "usage-stats.globus.org:4810"
++#define GLOBUS_L_USAGE_STATS_DEFAULT_TARGETS "statistics.ige-project.eu:4810"
+ #define GLOBUS_L_USAGE_STATS_TIMESTAMP_OFFSET 20
+ 
+ enum

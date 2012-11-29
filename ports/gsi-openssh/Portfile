@@ -1,0 +1,111 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+# $Id$
+
+if {$build_arch == "x86_64" || $build_arch == "ppc64"} {
+    set flavor gcc64pthr
+} else {
+    set flavor gcc32pthr
+}
+
+PortSystem              1.0
+
+name                    gsi-openssh
+set _name               [ string map {"-" "_"} $name ]
+set upstream            openssh
+set us_version          6.0p1
+version                 5.5
+revision                1
+platforms               darwin
+categories              net
+license                 BSD
+maintainers             nikhef.nl:dennisvd
+homepage                http://grid.ncsa.illinois.edu/ssh/
+
+description             Globus Toolkit - secure shell (SSH) with GSI authentication
+long_description        The Globus Toolkit is an open source software \
+                        toolkit used for building Grid systems and \
+                        applications. It is being developed by the \
+                        Globus Alliance and many others all over the \
+                        world. A growing number of projects and \
+                        companies are using the Globus Toolkit to \
+                        unlock the potential of grids for their \
+                        cause. The ${name} package contains: \
+                        OpenSSH secure shell with support for GSI authentication \
+                        Based on ${upstream} version ${us_version}.
+
+master_sites            http://ftp.bit.nl/pub/OpenBSD/OpenSSH/portable/ \
+                        http://mirror.team-cymru.org/pub/OpenBSD/OpenSSH/portable/
+
+distfiles               ${upstream}-${us_version}.tar.gz
+
+patchfiles              ${upstream}-${us_version}.patch
+
+checksums               ${upstream}-${us_version}.tar.gz \
+                            sha256 589d48e952d6c017e667873486b5df63222f9133d417d0002bd6429d9bd882de \
+                            rmd160 afad16fac6500da5cdfad94e5b3cac8c68223374
+
+patch.pre_args          -p1
+
+depends_run             port:globus-gss-assist \
+                        port:globus-usage
+
+depends_build           port:grid-packaging-tools \
+                        port:globus-gss-assist \
+                        port:globus-usage \
+                        port:globus-gssapi-gsi \
+                        port:globus-core
+
+depends_lib             port:openssl port:zlib
+
+worksrcdir              ${upstream}-${us_version}
+
+configure.env-append    GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+configure.cppflags      -I${prefix}/include/globus \
+                        -I${prefix}/include
+
+configure.post_args     --with-globus-flavor=${flavor} \
+                        --with-gsi \
+                        --without-kerberos5 \
+                        --sysconfdir=${prefix}/etc/gsissh \
+                        --libexecdir=${prefix}/libexec/gsissh \
+                        --without-zlib-version-check \
+                        --with-ssl-engine \
+                        --with-authorized-keys-command \
+                        --with-ipaddr-display 
+
+build.env-append        GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix} \
+                        SSH_PROGRAM=${prefix}/bin/gsissh \
+                        ASKPASS_PROGRAM=${prefix}/libexec/openssh/ssh-askpass
+
+destroot.env-append     GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+# Rename the binaries to prevent conflicting with the real openssh package
+post-destroot {
+    file delete -force ${destroot}${prefix}/bin/ssh-add
+    file delete -force ${destroot}${prefix}/bin/ssh-agent
+    file delete -force ${destroot}${prefix}/bin/ssh-keyscan
+
+    file delete -force [ glob ${destroot}${prefix}/share/man/man1/ssh-add.1* ]
+    file delete -force [ glob ${destroot}${prefix}/share/man/man1/ssh-agent.1* ]
+    file delete -force [ glob ${destroot}${prefix}/share/man/man1/ssh-keyscan.1* ]
+
+    # these two symlinks will need to be renamed as well
+    file delete -force ${destroot}${prefix}/bin/slogin
+    file delete -force glob ${destroot}${prefix}/share/man/man1/slogin.1
+
+    foreach file [ exec find ${destroot}/${prefix}/bin \
+                       ${destroot}${prefix}/sbin \
+                       ${destroot}${prefix}/share/man/ -type f ] {
+	set target "[ file dirname ${file}]/gsi[ file tail ${file} ]"
+        file delete -force $target 
+        file rename ${file} $target
+    }
+
+    ln -s gsissh ${destroot}${prefix}/bin/gsislogin 
+    ln -s gsissh.1 ${destroot}${prefix}/share/man/man1/gsislogin.1
+}
