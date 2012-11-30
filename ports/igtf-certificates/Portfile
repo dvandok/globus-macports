@@ -3,7 +3,7 @@
 PortSystem          1.0
 
 name                igtf-certificates
-version             1.50
+version             1.51
 categories          security
 maintainers         nikhef.nl:dennisvd nbi.ku.dk:skou
 description         The trusted IGTF CA-certificates
@@ -11,8 +11,8 @@ homepage            http://www.igtf.net
 platforms           darwin
 master_sites        http://dist.eugridpma.info/distribution/igtf/${version}
 distfiles           igtf-policy-installation-bundle-${version}.tar.gz
-checksums           sha256 be08b343ab2e8420db99391e2e598c6487c96e9b64010ef9cad029cfcefed789 \
-                    rmd160 7a4aaf5d07cd65e1b5bb15f6abedf2e9db86f3be
+checksums           sha256 9686a15f0410d4b20f3d168a3f36223b3f9ea675bcc695a08db2208c3db06082 \
+                    rmd160 e58f391fc8cc445c01a4ddb3f7eed2b39f38b033
 
 worksrcdir          igtf-policy-installation-bundle-${version}
 configure.args-append --with-profile=classic --with-profile=slcs --with-profile=mics --prefix=${destroot}/${prefix}/etc/grid-security/certificates
