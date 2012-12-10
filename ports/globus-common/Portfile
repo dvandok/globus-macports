@@ -40,7 +40,7 @@ checksums               ${_name}-${version}.tar.gz \
                             sha256 b669d76baea3787cf8a320f511720c52e3c4852d4aa9ee0e3e5866e58f964a7e \
                             rmd160 e1207e4ffc455c182102ff21f0e0d2571fa1ffe6 \
 
-#depends_run             port:globus-libtool
+depends_run             port:libtool
 
 depends_build           port:grid-packaging-tools \
                         port:globus-core \
