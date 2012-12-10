@@ -44,6 +44,7 @@ depends_run             port:libtool
 
 depends_build           port:grid-packaging-tools \
                         port:globus-core \
+                        port:libtool \
                         bin:doxygen:doxygen \
                         bin:dot:graphviz \
                         bin:gs:ghostscript \

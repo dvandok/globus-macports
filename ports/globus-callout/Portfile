@@ -41,11 +41,13 @@ checksums               ${_name}-${version}.tar.gz \
                             sha256 a7fc4630b3dd690f4d832e439d092ec86d4e35d86f0bc9fa57b1fa31aa6eefa0 \
                             rmd160 ca1f82c76a2a135e048e729d8eb4e385083b5a53
 
-depends_run             port:globus-common
+depends_run             port:globus-common \
+                        port:libtool
 
 depends_build           port:grid-packaging-tools \
                         port:globus-common \
                         port:globus-core \
+                        port:libtool \
                         bin:doxygen:doxygen \
                         bin:dot:graphviz \
                         bin:gs:ghostscript \
