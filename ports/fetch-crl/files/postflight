@@ -11,12 +11,12 @@ prefix=/opt/globus
 
 # See if the launch daemon is already installed.
 
-if -f /Library/Launchdaemons/org.eugridpma.fetch-crl.plist ; then
+if [ -f /Library/Launchdaemons/org.eugridpma.fetch-crl.plist ]; then
     echo "The org.eugridpma.fetch-crl launchdaemon is already installed."
     exit 0
 fi
 
-if -f ${prefix}/etc/LaunchDaemons/org.eugridpma.fetch-crl.plist ; then
+if [ -f ${prefix}/etc/LaunchDaemons/org.eugridpma.fetch-crl.plist ]; then
     echo "Setting fetch-crl to run automatically every 6 hours"
     ln -s ${prefix}/etc/LaunchDaemons/org.eugridpma.fetch-crl.plist /Library/Launchdaemons/
     launchctl load /Library/LaunchDaemons/org.eugridpma.fetch-crl.plist
