@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Postflight script for the fetch-crl package. This file is required only when
+# creating a standalone-package (.pkg), because the port mechanism should take
+# care of this in post-activate.
+
+
+prefix=/opt/globus
+
+# Install a launchdaemon
+
+# See if the launch daemon is already installed.
+
+if [ -f /Library/Launchdaemons/org.eugridpma.fetch-crl.plist ]; then
+    echo "The org.eugridpma.fetch-crl launchdaemon is already installed."
+    exit 0
+fi
+
+if [ -f ${prefix}/etc/LaunchDaemons/org.eugridpma.fetch-crl.plist ]; then
+    echo "Setting fetch-crl to run automatically every 6 hours"
+    ln -s ${prefix}/etc/LaunchDaemons/org.eugridpma.fetch-crl.plist /Library/Launchdaemons/
+    launchctl load /Library/LaunchDaemons/org.eugridpma.fetch-crl.plist
+fi
+
+
+
