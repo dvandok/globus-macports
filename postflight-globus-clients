@@ -140,6 +140,9 @@ else
     write_setting MANPATH "${MANPAGES}:\$MANPATH"
 fi
 
+if ! ${SHELL} ${LOGIN_FLAG} -c "/usr/bin/env | grep GLOBUS_LOCATION" ; then
+    write_setting GLOBUS_LOCATION ${PREFIX}
+fi
 
 echo "Globus Clients successfully installed."
 exit 0
