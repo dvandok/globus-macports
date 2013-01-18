@@ -39,7 +39,7 @@ checksums               ${_name}-${version}.tar.gz \
                             sha256 d0007e4e388864be5de8d5d93f6078ed82f119190a63cc09d02c9f0360c31a71 \
                             rmd160 0e6a1197150fe0a214b08376f7851ee58a85011d
 
-patchfile               ${name}-automake-obsolete-macro.patch
+patchfiles              ${name}-automake-obsolete-macro.patch
 
 patch.pre_args          -p1
 
