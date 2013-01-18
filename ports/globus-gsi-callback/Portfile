@@ -12,7 +12,7 @@ PortSystem              1.0
 
 name                    globus-gsi-callback
 set _name               [ string map {"-" "_"} $name ]
-version                 4.3
+version                 4.4
 revision                1
 platforms               darwin
 categories              net
@@ -31,13 +31,17 @@ long_description        The Globus Toolkit is an open source software \
                         cause. The ${name} package contains: \
                         Globus GSI Callback Library
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 a1981f3fce4c56797faefec9150addb55e5ce473771b4878ec28bd45b082c759 \
-                            rmd160 80b707af4e9b5550b723d1c730ee963255062f74
+                            sha256 d0007e4e388864be5de8d5d93f6078ed82f119190a63cc09d02c9f0360c31a71 \
+                            rmd160 0e6a1197150fe0a214b08376f7851ee58a85011d
+
+patchfile               ${name}-automake-obsolete-macro.patch
+
+patch.pre_args          -p1
 
 depends_run             port:globus-common \
                         port:globus-gsi-cert-utils \
