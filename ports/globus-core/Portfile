@@ -43,6 +43,10 @@ checksums               ${_name}-${version}.tar.gz \
                             sha256 9a24ea02add51c2fb2d510be45cf223226fdf2efc259cffa3871d7624c57998b \
                             rmd160 36c957ee7e0848cdffdd7445fcf4ac8992e243c4
 
+patchfiles              globus-core-automake-obsolete-macro.patch
+
+patch.pre_args          -p1
+
 depends_run             port:p5-xml-dom \
                         port:p5-xml-parser
 
