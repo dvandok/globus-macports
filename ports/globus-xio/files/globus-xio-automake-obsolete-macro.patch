@@ -1,0 +1,11 @@
+--- globus_xio-3.3.orig/configure.in	2012-07-19 01:03:35.000000000 +0200
++++ globus_xio-3.3/configure.in	2013-01-18 14:02:55.128023681 +0100
+@@ -57,7 +57,7 @@
+             "*.doc", 
+             "${GLOBUS_LOCATION:-/usr}/sbin/globus-vararg-enums-doxygen-filter.pl")
+ 
+-AM_CONFIG_HEADER(config.h)
++AC_CONFIG_HEADERS(config.h)
+ AC_CHECK_FUNCS(sysconf)
+ 
+ GLOBUS_FINALIZE
