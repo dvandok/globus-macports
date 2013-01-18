@@ -41,6 +41,8 @@ checksums               ${_name}-${version}.tar.gz \
 
 patchfiles              ${name}-automake-obsolete-macro.patch
 
+patch.pre_args          -p1
+
 depends_run             port:globus-common \
                         port:globus-gsi-openssl-error \
                         port:globus-openssl-module \
