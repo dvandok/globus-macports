@@ -1,0 +1,11 @@
+--- globus_common-14.9.orig/configure.in	2012-02-13 15:31:55.000000000 +0100
++++ globus_common-14.9/configure.in	2013-01-18 15:58:14.334464347 +0100
+@@ -10,7 +10,7 @@
+ dnl Initialize the automake rules the last argument
+ AM_INIT_AUTOMAKE($GPT_NAME, $GPT_VERSION)
+ 
+-AM_CONFIG_HEADER(config.h)
++AC_CONFIG_HEADERS(config.h)
+ 
+ LAC_THREADS
+ 
