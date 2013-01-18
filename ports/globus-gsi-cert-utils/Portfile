@@ -39,6 +39,8 @@ checksums               ${_name}-${version}.tar.gz \
                             sha256 805628ea0e71e1f90514e02718bb2a11a10cdb02942330e576aad605f0d0d04e \
                             rmd160 ccba87e958f6e5f4e715ab94461f8da1749bdce6
 
+patchfiles              ${name}-automake-obsolete-macro.patch
+
 depends_run             port:globus-common \
                         port:globus-gsi-openssl-error \
                         port:globus-openssl-module \
