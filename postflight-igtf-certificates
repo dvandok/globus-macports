@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# Postflight script for the igtf-certificates package.
+# For special use with the globus-clients only.
+
+# Make a symlink of the certificates directory to
+# $GLOBUS_LOCATION/share/certificates
+
+prefix=/opt/globus
+GLOBUS_LOCATION=${prefix}
+
+if [ -d ${prefix}/etc/grid-security/certificates ]; then
+    if [ ! -e ${GLOBUS_LOCATION}/share/certificates ]; then
+	echo "linking ${GLOBUS_LOCATION}/share/certificates to the IGTF certificates"
+        ln -s ${prefix}/etc/grid-security/certificates ${GLOBUS_LOCATION}/share/
+    else
+        echo "${GLOBUS_LOCATION}/share/certificates already exists"
+    fi
+fi
+

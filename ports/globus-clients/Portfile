@@ -29,6 +29,7 @@ long_description        The Globus Toolkit is an open source software \
                         are relevant to end users.
 
 depends_run             port:globus-ftp-client \
+                        port:globus-gass-copy \
                         port:globus-proxy-utils \
                         port:igtf-certificates \
                         port:fetch-crl \
