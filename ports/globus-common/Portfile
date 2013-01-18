@@ -12,7 +12,7 @@ PortSystem              1.0
 
 name                    globus-common
 set _name               [ string map {"-" "_"} $name ]
-version                 14.7
+version                 14.9
 set setupversion        2.6
 revision                1
 platforms               darwin
@@ -32,7 +32,7 @@ long_description        The Globus Toolkit is an open source software \
                         cause. The ${name} package contains: \
                         Common Library and Common Setup
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz
 
