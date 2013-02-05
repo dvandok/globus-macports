@@ -1,0 +1,44 @@
+* Macports port of the Globus Toolkit clients
+
+  This is the a macports port of the Globus toolkit and related software.
+
+  The purpose of this port is to get up and running with the Globus
+  Toolkit on Mac OS X as quickly as possible. Therefore this collection
+  contains a few packages from other sources:
+
+  - The [[http://www.igtf.net/][IGTF]] distribution of the CA certificates commonly used in Grids
+  - The [[https://dist.eugridpma.info/distribution/util/fetch-crl/][fetch-crl]] tool to update the Certificate Revocation Lists
+  
+  This software can be easily turned into a ready-to-use package or
+  dmg that can be installed with just a few clicks.
+
+** Getting started with the ports
+
+   First of all, you need to set up [[http://www.macports.org/][macports]]. After cloning this
+   repository, run the link_ports.sh script to set up a local
+   port repository:
+
+   : git clone git://github.com/dvandok/globus-macports.git
+   : cd globus-macports
+   : sh link_ports.sh ports ${HOME}/local-macports
+
+   Add the ${HOME}/local-macports directory to the main macports
+   configuration file:
+   : echo "file://${HOME}/local-macports" >> /opt/local/etc/macports/sources.conf
+
+   If you update any of the ports, remember to run the portindex
+   command so macports will see the changes.
+
+   Now you can install the metapackage:
+
+   : sudo port install globus-clients
+
+   And enjoy a hot Earl Grey in the meantime.
+
+** Acknowledgments
+
+   This work is an extension of an earlier effort by the NorduGrid
+   collaboration; it was done as part of the IGE Project, Initiative
+   for Globus in Europe, funded by the European Community Seventh
+   Framework Programme under grant agreement 261560, running from
+   October 1st 2010 to April 1st 2013.
