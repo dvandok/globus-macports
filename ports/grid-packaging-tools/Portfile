@@ -7,7 +7,7 @@ set perl_vendor_lib [ exec sh -c "eval \"\`perl -V:installvendorlib\`\" ; echo \
 PortSystem              1.0
 
 name                    grid-packaging-tools
-version                 3.6.2
+version                 3.6.3
 revision                1
 platforms               darwin
 categories              devel
@@ -38,15 +38,15 @@ depends_run             port:perl5 \
                         port:automake \
                         port:libtool
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
 
-distfiles               gpt-3.6.2.tar.gz
+distfiles               gpt-3.6.3.tar.gz
 
-checksums               gpt-3.6.2.tar.gz \
-                            sha256 0f9ca829bdad6f3958ab06d64f7740f378522e4d3148ab5e7c7e4a36fde52b0d \
-                            rmd160 63beaad19972bb25b688561e9c2c86c2bdd16a26
+checksums               gpt-3.6.3.tar.gz \
+                            sha256 3ce629dbfccc8f551b5e8aa155779edd5752e57399810e4091e15d3a124ce72c \
+                            rmd160 7d80680bfb0d9d365f5867a22bc045040e299d86
 
-worksrcdir              gpt-3.6.2
+worksrcdir              gpt-3.6.3
 
 configure.post_args     --libexecdir='\${datadir}/globus' \
                         --mandir='\${datadir}/man' \
