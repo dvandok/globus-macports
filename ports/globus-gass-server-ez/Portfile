@@ -1,0 +1,85 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
+
+# $Id$
+
+if {$build_arch == "x86_64" || $build_arch == "ppc64"} {
+    set flavor gcc64pthr
+} else {
+    set flavor gcc32pthr
+}
+
+PortSystem              1.0
+
+name                    globus-gass-server-ez
+set _name               [ string map {"-" "_"} $name ]
+version                 4.3
+revision                1
+platforms               darwin
+categories              net
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd
+homepage                http://www.globus.org/
+
+description             Globus Toolkit - Simple File Server Implementation using GASS Server API
+long_description        The Globus Toolkit is an open source software \
+                        toolkit used for building Grid systems and \
+                        applications. It is being developed by the \
+                        Globus Alliance and many others all over the \
+                        world. A growing number of projects and \
+                        companies are using the Globus Toolkit to \
+                        unlock the potential of grids for their \
+                        cause. The ${name} package contains: \
+                        Simple File Server Implementation using GASS Server API
+
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
+
+distfiles               ${_name}-${version}.tar.gz
+
+checksums               ${_name}-${version}.tar.gz \
+                            sha256 eee967fc54a323205067077e1dac2413386f485080b06967908b9e642802abc4 \
+                            rmd160 a3738b34fcaf5951aeac5817b6b71bb58a4bb954
+
+depends_run             port:globus-common \
+                        port:globus-gss-assist \
+                        port:globus-gssapi-gsi \
+                        port:globus-gass-transfer
+
+depends_build           port:grid-packaging-tools \
+                        port:globus-common \
+                        port:globus-core \
+                        port:globus-gass-transfer \
+                        port:globus-gssapi-gsi \
+                        port:globus-gss-assist
+
+worksrcdir              ${_name}-${version}
+
+configure.env-append    GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+configure.post_args     --with-flavor=${flavor} \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
+
+build.env-append        GPT_LOCATION=${prefix} \
+                        GLOBUS_LOCATION=${prefix}
+
+pre-configure {
+    # Remove files that should be replaced during bootstrap
+    file delete -force ${worksrcpath}/pkgdata/Makefile.am
+    eval file delete -force \
+        [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
+    system "cd $worksrcpath && \
+        GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
+        ${prefix}/share/globus/globus-bootstrap.sh"
+}
+
+post-destroot {
+    # Remove libtool archives (.la files)
+    foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.la" ] {
+        delete $file
+    }
+
+    # Remove static libraries (.a files)
+    foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
+        delete $file
+    }
+}
