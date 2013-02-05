@@ -41,7 +41,7 @@ for port in $PORTS; do
         mkdir "$PORTS_DIR/$category"
     fi
 
-    cp -R "$SOURCE/$port" "$PORTS_DIR/$category"
+    ln -s "$SOURCE/$port" "$PORTS_DIR/$category/"
 done
 
 cd $PORTS_DIR
