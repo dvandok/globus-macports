@@ -42,13 +42,11 @@ checksums               ${_name}-${version}.tar.gz \
 depends_run             port:globus-gss-assist \
                         port:globus-gssapi-gsi \
                         port:globus-usage \
-                        port:globus-proxy-utils \
-                        port:voms
+                        port:globus-proxy-utils
 
 depends_build           port:grid-packaging-tools \
                         port:globus-gss-assist \
-                        port:globus-usage \
-                        port:voms
+                        port:globus-usage
 
 worksrcdir              ${_name}-${version}
 
@@ -56,7 +54,6 @@ configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
 configure.post_args     --with-flavor=${flavor} --enable-doxygen \
-                        --with-voms=${prefix} \
                         --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
