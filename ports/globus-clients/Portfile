@@ -9,7 +9,7 @@ PortSystem              1.0
 
 name                    globus-clients
 version                 1.0
-revision                1
+revision                2
 platforms               darwin
 categories              net
 license                 Apache-2
@@ -31,6 +31,7 @@ long_description        The Globus Toolkit is an open source software \
 depends_run             port:globus-ftp-client \
                         port:globus-gass-copy \
                         port:globus-proxy-utils \
+                        port:globus-gram-client-tools \
                         port:igtf-certificates \
                         port:fetch-crl \
                         port:gsi-openssh
