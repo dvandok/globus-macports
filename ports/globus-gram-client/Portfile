@@ -10,17 +10,17 @@ if {$build_arch == "x86_64" || $build_arch == "ppc64"} {
 
 PortSystem              1.0
 
-name                    globus-rsl-assist
+name                    globus-gram-client
 set _name               [ string map {"-" "_"} $name ]
-version                 2.1
+version                 12.4
 revision                1
 platforms               darwin
 categories              net
-license                 Apache 2.0
-maintainers             fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+license                 Apache-2
+maintainers             nikhef.nl:dennisvd
 homepage                http://www.globus.org/
 
-description             Globus Toolkit - RSL Manipulation Library
+description             Globus Toolkit - GRAM Client Library
 long_description        The Globus Toolkit is an open source software \
                         toolkit used for building Grid systems and \
                         applications. It is being developed by the \
@@ -29,29 +29,38 @@ long_description        The Globus Toolkit is an open source software \
                         companies are using the Globus Toolkit to \
                         unlock the potential of grids for their \
                         cause. The ${name} package contains: \
-                        RSL Manipulation Library
+                        The client library of the Resource Allocation \
+                        Management System
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            md5 4d4eaa50da5b18707cfe5e2789b5fdda \
-                            sha1 3a156ddbf1dc057660828c2e1bd1fdfea46e7997 \
-                            rmd160 56afbd3286d63e20c798d8887ce2c608e6926e78
+                            sha256 b0b813a8d30460387884f908f7bfa6ca49c352b7bb569ef419ff9a0fab7521b9 \
+                            rmd160 5bfa7cde2c15f94a4d37a000099a9a04041ed786
 
-depends_run             port:globus-rsl
+depends_run             port:globus-common \
+                        port:globus-gram-protocol \
+                        port:globus-io \
+                        port:globus-rsl \
+                        port:globus-gss-assist
 
 depends_build           port:grid-packaging-tools \
+                        port:globus-core \
+                        port:globus-common \
+                        port:globus-gram-protocol \
+                        port:globus-io \
                         port:globus-rsl \
-                        port:globus-core
+                        port:globus-gss-assist
 
 worksrcdir              ${_name}-${version}
 
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen
+configure.post_args     --with-flavor=${flavor} \
+                        --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
@@ -64,20 +73,6 @@ pre-configure {
     file delete -force ${worksrcpath}/pkgdata/Makefile.am
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
-    file delete -force ${worksrcpath}/autom4te.cache
-
-    # Remove flavor tags
-    foreach file [ exec find ${worksrcpath} -name Makefile.am ] {
-        reinplace "s!^flavorinclude_HEADERS!include_HEADERS!" $file
-        reinplace -E \
-            "s!\(lib\[a-zA-Z_\]*\)_\\$\\(GLOBUS_FLAVOR_NAME\\)\\.la!\\1.la!g" \
-            $file
-        reinplace -E \
-            "s!^\(lib\[a-zA-Z_\]*\)___GLOBUS_FLAVOR_NAME__la_!\\1_la_!" \
-            $file
-    }
-    reinplace "s!<With_Flavors!<With_Flavors ColocateLibraries=\"no\"!" \
-        ${worksrcpath}/pkgdata/pkg_data_src.gpt.in
 
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
@@ -94,15 +89,4 @@ post-destroot {
     foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
         delete $file
     }
-
-    # Generate pkg-config file from GPT metadata
-    file mkdir ${destroot}${prefix}/lib/pkgconfig
-    system "${prefix}/share/globus/globus-gpt2pkg-config \
-        ${worksrcpath}/pkgdata/pkg_data_${flavor}_dev.gpt ${prefix} > \
-        ${destroot}${prefix}/lib/pkgconfig/${name}.pc"
-
-    # Install license file
-    file mkdir ${destroot}${prefix}/share/doc/${name}-${version}
-    xinstall -m 644 ${worksrcpath}/GLOBUS_LICENSE \
-        ${destroot}${prefix}/share/doc/${name}-${version}
 }

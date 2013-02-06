@@ -32,7 +32,7 @@ long_description        The Globus Toolkit is an open source software \
                         uniform I/O interface to stream and datagram \
                         style communications
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz
 

@@ -10,17 +10,17 @@ if {$build_arch == "x86_64" || $build_arch == "ppc64"} {
 
 PortSystem              1.0
 
-name                    globus-callout
+name                    globus-gram-client-tools
 set _name               [ string map {"-" "_"} $name ]
-version                 2.2
+version                 10.4
 revision                1
 platforms               darwin
 categories              net
 license                 Apache-2
-maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+maintainers             nikhef.nl:dennisvd
 homepage                http://www.globus.org/
 
-description             Globus Toolkit - Globus Callout Library
+description             Globus Toolkit - Job Management Tools (globusrun)
 long_description        The Globus Toolkit is an open source software \
                         toolkit used for building Grid systems and \
                         applications. It is being developed by the \
@@ -29,36 +29,42 @@ long_description        The Globus Toolkit is an open source software \
                         companies are using the Globus Toolkit to \
                         unlock the potential of grids for their \
                         cause. The ${name} package contains: \
-                        Globus Callout Library - provides a platform \
-                        independent way of dealing with runtime \
-                        loadable functions.
+                        The client tools for the Resource Allocation \
+                        Management System, such as globusrun and \
+                        globus-job-submit.
 
 master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 a7fc4630b3dd690f4d832e439d092ec86d4e35d86f0bc9fa57b1fa31aa6eefa0 \
-                            rmd160 ca1f82c76a2a135e048e729d8eb4e385083b5a53
+                            sha256 3dc1972bfaa60a26d94c6d68e936ccfafe840bbec1ac7320a4ec403c57fd9a68 \
+                            rmd160 061a43d768fc28c7fb106e42ecd61946616edf31
 
 depends_run             port:globus-common \
-                        port:libtool
+                        port:globus-gram-client \
+                        port:globus-gram-protocol \
+                        port:globus-gass-transfer \
+                        port:globus-gass-server-ez \
+                        port:globus-rsl \
+                        port:globus-gss-assist
 
 depends_build           port:grid-packaging-tools \
-                        port:globus-common \
                         port:globus-core \
-                        port:libtool \
-                        bin:doxygen:doxygen \
-                        bin:dot:graphviz \
-                        bin:gs:ghostscript \
-                        bin:pdflatex:texlive-latex
+                        port:globus-common \
+                        port:globus-gram-client \
+                        port:globus-gram-protocol \
+                        port:globus-gass-transfer \
+                        port:globus-gass-server-ez \
+                        port:globus-rsl \
+                        port:globus-gss-assist
 
 worksrcdir              ${_name}-${version}
 
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
 
-configure.post_args     --with-flavor=${flavor} --enable-doxygen \
+configure.post_args     --with-flavor=${flavor} \
                         --with-docdir='\${datadir}/doc/${name}-${version}'
 
 build.env-append        GPT_LOCATION=${prefix} \
@@ -72,21 +78,9 @@ pre-configure {
     file delete -force ${worksrcpath}/pkgdata/Makefile.am
     eval file delete -force \
         [ glob -nocomplain ${worksrcpath}/globus_automake* ] dummy
-    file delete -force ${worksrcpath}/autom4te.cache
 
     system "cd $worksrcpath && \
         GPT_LOCATION=${prefix} GLOBUS_LOCATION=${prefix} \
         ${prefix}/share/globus/globus-bootstrap.sh"
 }
 
-post-destroot {
-    # Remove libtool archives (.la files)
-    foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.la" ] {
-        delete $file
-    }
-
-    # Remove static libraries (.a files)
-    foreach file [ exec find ${destroot}/${prefix}/lib -name "lib*.a" ] {
-        delete $file
-    }
-}

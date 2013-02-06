@@ -31,13 +31,13 @@ long_description        The Globus Toolkit is an open source software \
                         cause. The ${name} package contains: \
                         Resource Specification Language Library
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.2/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 5f13e631d6fda4841d44fd9568c890e1e53fdf7ed74ca3afdf59d9b7cc4c6339 \
-                            rmd160 5ed4a6bc7f1630bcb05599f39bd0e5e69cf82772
+                            sha256 153426998448c9b827ad73976418d2ebecfb2c790e7495c7cfbf07a4d0945830 \
+                            rmd160 a386e4a4cf0b68522d810ddb95a62de07536002c
 
 depends_run             port:globus-common
 
