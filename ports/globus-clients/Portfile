@@ -34,7 +34,8 @@ depends_run             port:globus-ftp-client \
                         port:globus-gram-client-tools \
                         port:igtf-certificates \
                         port:fetch-crl \
-                        port:gsi-openssh
+                        port:gsi-openssh \
+                        port:myproxy
 
 distfiles
 
