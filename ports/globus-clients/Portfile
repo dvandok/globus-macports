@@ -8,8 +8,8 @@
 PortSystem              1.0
 
 name                    globus-clients
-version                 1.0
-revision                2
+version                 2.0
+revision                1
 platforms               darwin
 categories              net
 license                 Apache-2
@@ -35,7 +35,10 @@ depends_run             port:globus-ftp-client \
                         port:igtf-certificates \
                         port:fetch-crl \
                         port:gsi-openssh \
-                        port:myproxy
+                        port:myproxy \
+                        port:voms \
+                        port:globus-gram-client-tools \
+                        port:globus-proxy-utils
 
 distfiles
 
