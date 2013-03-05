@@ -47,7 +47,7 @@ for port in "$SOURCE"/* ; do
         continue
     fi
 
-    category=`awk '/^categories/ {print $2}'  "$SOURCE/$port/Portfile"`
+    category=`awk '/^categories/ {print $2}'  "$port/Portfile"`
 
     if [ "$?" != "0" ]; then
         echo "error"
@@ -58,7 +58,7 @@ for port in "$SOURCE"/* ; do
         mkdir "$PORTS_DIR/$category"
     fi
 
-    ln -s "$SOURCE/$port" "$PORTS_DIR/$category/"
+    ln -s "$port" "$PORTS_DIR/$category/"
 done
 
 cd $PORTS_DIR
