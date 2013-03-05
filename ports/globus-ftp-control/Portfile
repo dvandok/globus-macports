@@ -12,7 +12,7 @@ PortSystem              1.0
 
 name                    globus-ftp-control
 set _name               [ string map {"-" "_"} $name ]
-version                 4.4
+version                 4.5
 revision                1
 platforms               darwin
 categories              net
@@ -36,8 +36,8 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 f860b7b56f3e53b0aff97f64cc30038a0873afcdbef4d3c9cbe7d67665d81089 \
-                            rmd160 c38a853edfdb5045956c8cf8c5abfe96c01ed2e5
+                            sha256 e7f46c672365def7c242af16cabf6f707d75aeaebf9fedcc19ef46a7b15999f5 \
+                            rmd160 91c1e7865274910bb98abd8432ace5263b2c89d9
 
 depends_run             port:globus-common \
                         port:globus-gss-assist \
