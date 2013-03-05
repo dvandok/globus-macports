@@ -38,7 +38,7 @@ depends_run             port:perl5 \
                         port:automake \
                         port:libtool
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
 
 distfiles               gpt-3.6.3.tar.gz
 

@@ -35,7 +35,7 @@ long_description        The Globus Toolkit is an open source software \
                         cause. The ${name} package contains: \
                         Globus Core
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz
 

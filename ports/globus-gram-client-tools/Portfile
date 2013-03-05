@@ -33,7 +33,7 @@ long_description        The Globus Toolkit is an open source software \
                         Management System, such as globusrun and \
                         globus-job-submit.
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
 
 distfiles               ${_name}-${version}.tar.gz
 
