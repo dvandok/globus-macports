@@ -43,7 +43,7 @@ fi
 mkdir -p $PORTS_DIR
 
 for port in "$SOURCE"/* ; do
-    if [ ! -f "$SOURCE/$port/Portfile" ]; then
+    if [ ! -f "$port/Portfile" ]; then
         continue
     fi
 
