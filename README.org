@@ -1,6 +1,6 @@
 * Macports port of the Globus Toolkit clients
 
-  This is the a macports port of the Globus toolkit and related software.
+  This is a macports port of the Globus toolkit and related software.
 
   The purpose of this port is to get up and running with the Globus
   Toolkit on Mac OS X as quickly as possible. Therefore this collection
@@ -34,6 +34,70 @@
    : sudo port install globus-clients
 
    And enjoy a hot Earl Grey in the meantime.
+
+** Creating a standalone disk image (DMG) for distribution
+
+   Not everybody is comfortable with using Macports on their machine,
+   but luckily there is an easy alternative. Macports can create
+   standalone installable packages from ports. The following procedure
+   describes how to create a complete and useful package with all the
+   necessary ports.
+
+   The globus-clients port is a meta-package with just run-time
+   dependencies on ports of Globus Toolkit client software, the IGTF
+   certificates and the fetch-crl tool. Installing this port will pull
+   in all the required software.
+
+   Before starting, it is recommended to set up a /second/
+   installation of Macports with a [[http://guide.macports.org/#installing.macports.source][different prefix]], such as
+   /opt/globus, so the final standalone package won't conflict with
+   anybody's existing Macports setup.  This can be done by running the
+   following commands:
+   : wget --no-check-certificate https://distfiles.macports.org/MacPorts/MacPorts-2.1.3.tar.gz
+   : tar xfz MacPorts-2.1.3.tar.gz 
+   : cd MacPorts-2.1.3
+   : ./configure --prefix=/opt/globus
+   : make
+   : sudo make install
+   After this step it is necessary to set
+   : macportsuser = root
+   
+   Creating the package is now just a step away:
+   : sudo port mpkg globus-clients
+   Although this results in a nicely installable package with a wizard
+   in ~/opt/globus/var/macports/build/.../globus-clients/work/~, a few
+   things need to be tuned. Optionally, the Welcome.html and
+   background.tiff in the package's Contents/ directory may be
+   replaced by something nicer, and for proper functioning of the
+   package some /postflight/ scripts are recommended. They need to be
+   installed (mode +x and named 'postflight') in the Resources
+   directory of the respective sub-package.
+   
+   - postflight-fetch-crl: This installs a launchdaemon which takes
+     care of periodically downloading the CRLs of the CAs. Without
+     fresh CRLs the software may not work, although the error messages
+     are sometimes not very clear.
+
+   - postflight-igtf-certificates: This links the certificates
+     directory to ~${GLOBUS_LOCATION}/share/certificates~, which is
+     used by default by many Globus tools.
+
+   - postflight-globus-clients: This replaces the script that Macports
+     installs by default; it has the bonus feature of modifying the
+     user's shell environment to automatically include
+     ~GLOBUS_LOCATION~ in the ~PATH~ and ~MANPATH~.
+   
+   The following commands are examples how these scripts may be installed.
+
+   : cp postflight-fetch-crl standalone/globus-clients-2.0.mpkg/Contents/Packages/fetch-crl-3.0.8.pkg/Contents/Resources/postflight
+   : cp postflight-igtf-certificates standalone/globus-clients-2.0.mpkg/Contents/Packages/igtf-certificates-1.52.pkg/Contents/Resources/postflight
+   : cp postflight-globus-clients standalone/globus-clients-2.0.mpkg/Contents/Packages/globus-clients-2.0.pkg/Contents/Resources/postflight
+
+   The last step is to bundle the mpkg file (which is really a
+   directory) into a disk image (DMG) which can easily be spread
+   around. To do that, open the Disk Utility program, create a new
+   sparse image, copy the entiry mpkg file into it, and convert it to
+   a read-only disk image.
 
 ** Acknowledgments
 
