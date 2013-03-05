@@ -12,7 +12,7 @@ PortSystem              1.0
 
 name                    globus-gss-assist
 set _name               [ string map {"-" "_"} $name ]
-version                 8.6
+version                 8.7
 revision                1
 platforms               darwin
 categories              net
@@ -36,8 +36,8 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.3/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 a30b0dd78180f65e4956616578edec6874a55ae4403b168d74152cc39d84e7c0 \
-                            rmd160 de77f99333dcaebbd4daa315e9fd885efa49b187
+                            sha256 ba307e3955c0447806f56a256c898a0ee914c4297cd15daf1004c824bf98da9e \
+                            rmd160 032bed0d4a0f3e7a95941aba98e4a431c83d918f
 
 depends_run             port:globus-callout \
                         port:globus-common \
