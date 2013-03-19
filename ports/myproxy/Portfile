@@ -36,8 +36,8 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 c7a0633cad6f136013e36f56ea805ecaf94b6378f4d10ddbab8764ba29c52e6e \
-                            rmd160 48e83220f74237d98b84cd9e40c004bc0d4d2cf8
+                            sha256 ae17f63a96b79a28c01868a81bd479c3744d2cb043913e2e82b4e019a1143ba4 \
+                            rmp160 931ed0563952be999a29dd69180d4ea2ab1ea60e
 
 depends_run             port:globus-gss-assist \
                         port:globus-gssapi-gsi \

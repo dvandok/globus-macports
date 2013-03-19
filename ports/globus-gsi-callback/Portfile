@@ -36,8 +36,8 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 d0007e4e388864be5de8d5d93f6078ed82f119190a63cc09d02c9f0360c31a71 \
-                            rmd160 0e6a1197150fe0a214b08376f7851ee58a85011d
+                            sha256 0ace8c9dd7ae76c01ad2073f84ee0ac30b8e9be1a86f15cff118cde9338764e7 \
+                            rmp160 5bcfd1203fbaa3776b4d5fb4291461cebdef5382
 
 patchfiles              ${name}-automake-obsolete-macro.patch
 
