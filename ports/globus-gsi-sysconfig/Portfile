@@ -36,8 +36,8 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 147922c003813daba77c67fd7f1f2cc78b43fed8ffb9087f61d596b9ea4e6a25 \
-                            rmd160 14ef7647e34da5e1bd28dc9c9eccb56e72c00d6d
+                            sha256 c813865018b19e922bae21ab7728303b5fff31653e565461ce32e7f3636bf0fa \
+                            rmp160 3929bb1a940f7b594c12a94b484b3376beebafbd
 
 depends_run             port:globus-common \
                         port:globus-gsi-openssl-error \

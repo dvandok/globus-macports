@@ -38,7 +38,7 @@ distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
                             sha256 18a4bd3f0935966da14fcf1e2acd11f7abb44fd3a9acb34150d390ef75e022dd \
-                            rmd160 af094c95339914a880918fd6ea265a840f8268da
+                            rmp160 af094c95339914a880918fd6ea265a840f8268da
 
 depends_run             port:globus-gss-assist \
                         port:globus-common \

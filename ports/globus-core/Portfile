@@ -40,8 +40,8 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 9a24ea02add51c2fb2d510be45cf223226fdf2efc259cffa3871d7624c57998b \
-                            rmd160 36c957ee7e0848cdffdd7445fcf4ac8992e243c4
+                            sha256 75d58415fdcf344ef3c6a4c1214b29a83035bfc014f43b980607b0929998c9c0 \
+                            rmp160 2ca5cdaa7e77c4467409a01cdb0d379bd15a5c7f
 
 patchfiles              globus-core-automake-obsolete-macro.patch
 
