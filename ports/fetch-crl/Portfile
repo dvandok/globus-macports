@@ -29,7 +29,7 @@ post-build {
 
     # update the standard config file
     reinplace "s!/etc!${prefix}/etc!" fetch-crl.cnf
-    system "echo 'statedir ${prefix}/var/cache/fetch-crl' >> fetch-crl.cnf"
+    system "echo 'statedir ${prefix}/var/cache/fetch-crl' >> ${worksrcpath}/fetch-crl.cnf"
 }
 
 post-destroot {
