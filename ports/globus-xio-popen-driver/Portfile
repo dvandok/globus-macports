@@ -36,8 +36,8 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 70d2f38bb9b2981f4e893ac290b4922d246512a6512c9a2ddfd33d0d91d1f25e \
-                            rmd160 b0f5d4b2653b74ab942c14489070d63376c32f41
+                            sha256 916ebe14856960958b6ec3cb7f6b9b5057c15ad2fe4600588e7cbd93ec89ecd8 \
+                            rmp160 e3b45f7f7140b0c2d10e4388796f045a73cafb78
 
 depends_run             port:globus-xio
 

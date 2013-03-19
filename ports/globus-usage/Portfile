@@ -36,8 +36,8 @@ master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
 distfiles               ${_name}-${version}.tar.gz
 
 checksums               ${_name}-${version}.tar.gz \
-                            sha256 1b60c925e746109f824b8757708595fef8b109fce8ad0c7027add97aa125e330 \
-                            rmd160 f6838d1d599a3d3958f1635327975f3c9b2ec9c6
+                            sha256 1d62f587a896e0a2043ad3c47a283f6407583db4b1ff8c17c92f2b92b28f07b9 \
+                            rmp160 dfcef5afdecf0fa736d78c44ad17a2e951779f96
 
 patchfiles              globus-usage-collector.patch
 
