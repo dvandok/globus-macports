@@ -23,8 +23,8 @@
    : sh link_ports.sh ports ${HOME}/local-macports
 
    Add the ${HOME}/local-macports directory to the main macports
-   configuration file:
-   : echo "file://${HOME}/local-macports" >> /opt/local/etc/macports/sources.conf
+   sources file, *above* the main macports sources.
+   : sed -i "\$ifile://${HOME}/local-macports [nosync]" /opt/local/etc/macports/sources.conf
 
    If you update any of the ports, remember to run the portindex
    command so macports will see the changes.
@@ -34,6 +34,13 @@
    : sudo port install globus-clients
 
    And enjoy a hot Earl Grey in the meantime.
+
+*** NOTE: Mac OS X 10.8 issue with VOMS
+
+    There is a [[issues/4][known issue with VOMS]] which won't build under Mac OS X
+    10.8 and possibly other versions. To work around the problem (you
+    miss the voms-proxy tools), remove the line with the voms
+    dependency from the globus-clients portfile.
 
 ** Creating a standalone disk image (DMG) for distribution
 
