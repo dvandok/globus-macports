@@ -53,12 +53,13 @@ configure {}
 
 # Create at least one file in the package
 build {
-    system "echo 'This is the globus-client metapackage' > README"
+    system "mkdir ${worksrcpath}"
+    system "echo 'This is the globus-client metapackage' > ${worksrcpath}/README"
 }
 
 destroot { 
     file mkdir ${destroot}${prefix}/share/doc/${name}
-    xinstall README ${destroot}${prefix}/share/doc/${name}/
+    xinstall ${worksrcpath}/README ${destroot}${prefix}/share/doc/${name}/
     # symlink GLOBUS_LOCATION/share/certificates to the igtf distribution
     # so tools automatically find the CAs
     ln -s ${prefix}/etc/grid-security/certificates ${destroot}${prefix}/share/
