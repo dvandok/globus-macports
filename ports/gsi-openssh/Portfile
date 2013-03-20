@@ -42,8 +42,8 @@ distfiles               ${upstream}-${us_version}.tar.gz
 patchfiles              ${upstream}-${us_version}.patch
 
 checksums               ${upstream}-${us_version}.tar.gz \
-                            sha256 57dcf1e7607ccabaa52aa8224e4aff76a31f9783f85fd153f9a855664406fe2a \
-                            rmp160 3522da1d442db6ee876cc2a1177255ec3c2e450b
+                            sha256 589d48e952d6c017e667873486b5df63222f9133d417d0002bd6429d9bd882de \
+                            rmd160 afad16fac6500da5cdfad94e5b3cac8c68223374
 
 patch.pre_args          -p1
 
