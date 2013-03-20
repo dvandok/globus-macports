@@ -37,7 +37,7 @@
 
 *** NOTE: Mac OS X 10.8 issue with VOMS
 
-    There is a [[/dvandok/globus-macports/issues/4][known issue with VOMS]] which won't build under Mac OS X
+    There is a [[https://github.com/dvandok/globus-macports/issues/4][known issue with VOMS]] which won't build under Mac OS X
     10.8 and possibly other versions. To work around the problem (you
     miss the voms-proxy tools), remove the line with the voms
     dependency from the globus-clients portfile.
