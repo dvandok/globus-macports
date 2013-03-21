@@ -21,7 +21,7 @@ checksums           rmd160  5d6f8ba7aba00173cb22149d7b867ec4684e7435 \
 
 patchfiles          ${name}-obsolete-configure-macro.patch \
                     ${name}-ipv6sock-posix.patch \
-                    ${voms}-empty-replib.patch
+                    ${name}-empty-replib.patch
 
 patch.pre_args      -p1
 
