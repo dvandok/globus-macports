@@ -1,0 +1,20 @@
+diff -ruN voms-2_0_9/src/replib/dummy.c voms-2_0_9-replib/src/replib/dummy.c
+--- voms-2_0_9/src/replib/dummy.c	1970-01-01 01:00:00.000000000 +0100
++++ voms-2_0_9-replib/src/replib/dummy.c	2013-03-21 14:33:11.004031149 +0100
+@@ -0,0 +1,5 @@
++/* just a dummy function to make sure we don't have an empty replib */
++
++static int dummy() {
++    return 0;
++}
+diff -ruN voms-2_0_9/src/replib/Makefile.am voms-2_0_9-replib/src/replib/Makefile.am
+--- voms-2_0_9/src/replib/Makefile.am	2012-10-27 13:50:06.000000000 +0200
++++ voms-2_0_9-replib/src/replib/Makefile.am	2013-03-21 14:20:16.536028177 +0100
+@@ -1,6 +1,6 @@
+ noinst_LTLIBRARIES = librep.la
+ 
+-librep_la_SOURCES =
++librep_la_SOURCES = dummy.c
+ librep_la_LIBADD	= @LTLIBOBJS@
+ 
+ librep_la_CFLAGS = \
