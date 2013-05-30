@@ -46,6 +46,7 @@ checksums               sha256 9aa59106de539476ab0c8d8c119f168e877a696c48737e558
 use_autoreconf          yes
 
 configure.post_args     --with-perlmoduledir=${perl_vendor_lib} \
+                        --libexecdir='\${datadir}/globus' \
                         --disable-compat --with-newgpt
 
 destroot.target-append  install-man
