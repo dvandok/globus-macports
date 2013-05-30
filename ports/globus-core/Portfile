@@ -1,5 +1,4 @@
 # -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
-
 # $Id$
 
 set perl_vendor_lib [ exec sh -c "eval \"\`perl -V:installvendorlib\`\" ; echo \$installvendorlib" ]
@@ -21,7 +20,7 @@ revision                2
 platforms               darwin
 categories              devel
 license                 Apache-2
-maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+maintainers             nikhef.nl:dennisvd openmaintainer
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - Globus Core
@@ -37,11 +36,10 @@ long_description        The Globus Toolkit is an open source software \
 
 master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
 
-distfiles               ${_name}-${version}.tar.gz
+distname                ${_name}-${version}
 
-checksums               ${_name}-${version}.tar.gz \
-                            sha256 75d58415fdcf344ef3c6a4c1214b29a83035bfc014f43b980607b0929998c9c0 \
-                            rmp160 2ca5cdaa7e77c4467409a01cdb0d379bd15a5c7f
+checksums               sha256 75d58415fdcf344ef3c6a4c1214b29a83035bfc014f43b980607b0929998c9c0 \
+                        rmp160 2ca5cdaa7e77c4467409a01cdb0d379bd15a5c7f
 
 patchfiles              globus-core-automake-obsolete-macro.patch
 
@@ -52,9 +50,8 @@ depends_run             port:p5-xml-dom \
 
 depends_build           port:grid-packaging-tools \
                         port:p5-xml-dom \
-                        port:p5-xml-parser
-
-worksrcdir              ${_name}-${version}
+                        port:p5-xml-parser \
+                        port:libtool
 
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix} \
@@ -70,7 +67,7 @@ configure.post_args     --includedir=${prefix}/include/globus \
                         --with-flavorincludedir='\${libdir}/globus/include' \
                         --with-perlmoduledir=${perl_vendor_lib} \
                         --with-doxygendir='\${datadir}/globus/doxygen' \
-                        --with-docdir='\${datadir}/doc/${name}-${version}'
+                        --with-docdir='\${datadir}/doc/${name}'
 
 build.env-append        GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix}
