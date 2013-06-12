@@ -16,6 +16,8 @@ PortSystem              1.0
 name                    globus-core
 set _name               [ string map {"-" "_"} $name ]
 version                 8.9
+set globus_version      5.2.4
+set globus_branch       [join [lrange [split ${globus_version} .] 0 1] .]
 revision                2
 platforms               darwin
 categories              devel
@@ -34,7 +36,7 @@ long_description        The Globus Toolkit is an open source software \
                         cause. The ${name} package contains: \
                         Globus Core
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/${globus_branch}/${globus_version}/packages/src/
 
 distname                ${_name}-${version}
 
@@ -51,7 +53,9 @@ depends_run             port:p5-xml-dom \
 depends_build           port:grid-packaging-tools \
                         port:p5-xml-dom \
                         port:p5-xml-parser \
-                        port:libtool
+                        port:libtool \
+                        port:autoconf \
+                        port:automake
 
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix} \
@@ -83,3 +87,8 @@ post-destroot {
     # These scripts are intended to be sourced, not executed
     system "chmod 644 ${destroot}${prefix}/share/globus/globus-build-env-*.sh"
 }
+
+livecheck.type          regex
+livecheck.version       ${globus_version}
+livecheck.url           http://www.globus.org/toolkit/downloads/latest-stable/
+livecheck.regex         {Globus Toolkit (\d+(?:\.\d+)*) Download}
