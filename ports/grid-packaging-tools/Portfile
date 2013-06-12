@@ -8,6 +8,8 @@ PortSystem              1.0
 
 name                    grid-packaging-tools
 version                 3.6.3
+set globus_version      5.2.4
+set globus_branch       [join [lrange [split ${globus_version} .] 0 1] .]
 revision                1
 platforms               darwin
 categories              devel
@@ -31,12 +33,9 @@ long_description        GPT is a collection of packaging tools built \
 
 depends_lib             port:perl5
 
-depends_run             port:p5-archive-tar \
-                        port:autoconf \
-                        port:automake \
-                        port:libtool
+depends_run             port:p5-archive-tar
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/${globus_branch}/${globus_version}/packages/src/
 
 distname                gpt-${version}
 
@@ -58,3 +57,8 @@ post-destroot {
         ${worksrcpath}/LICENSE ${worksrcpath}/README \
         ${destroot}${prefix}/share/doc/${name}
 }
+
+livecheck.type          regex
+livecheck.version       ${globus_version}
+livecheck.url           http://www.globus.org/toolkit/downloads/latest-stable/
+livecheck.regex         {Globus Toolkit (\d+(?:\.\d+)*) Download}
