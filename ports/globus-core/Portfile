@@ -18,7 +18,7 @@ set _name               [ string map {"-" "_"} $name ]
 version                 8.9
 set globus_version      5.2.4
 set globus_branch       [join [lrange [split ${globus_version} .] 0 1] .]
-revision                2
+revision                0
 platforms               darwin
 categories              devel
 license                 Apache-2
