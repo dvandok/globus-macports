@@ -1,8 +1,6 @@
 # -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
 # $Id$
 
-set perl_vendor_lib [ exec sh -c "eval \"\`perl -V:installvendorlib\`\" ; echo \$installvendorlib" ]
-
 if {$build_arch == "x86_64" || $build_arch == "ppc64"} {
     set flavor gcc64pthr
     set enable64 yes
@@ -18,7 +16,7 @@ set _name               [ string map {"-" "_"} $name ]
 version                 8.9
 set globus_version      5.2.4
 set globus_branch       [join [lrange [split ${globus_version} .] 0 1] .]
-revision                0
+revision                1
 platforms               darwin
 categories              devel
 license                 Apache-2
@@ -48,9 +46,11 @@ patchfiles              patch-globus-core-automake-obsolete-macro.diff
 patch.pre_args          -p1
 
 depends_run             port:p5-xml-dom \
-                        port:p5-xml-parser
+                        port:p5-xml-parser \
+                        port:perl5.12
 
 depends_build           port:grid-packaging-tools \
+                        port:perl5.12 \
                         port:p5-xml-dom \
                         port:p5-xml-parser \
                         port:libtool \
@@ -69,7 +69,7 @@ configure.post_args     --includedir=${prefix}/include/globus \
                         --with-setupdir='\${datadir}/globus/setup' \
                         --with-testdir='\${datadir}/globus/test' \
                         --with-flavorincludedir='\${libdir}/globus/include' \
-                        --with-perlmoduledir=${perl_vendor_lib} \
+                        --with-perlmoduledir=${prefix}/lib/perl5/vendor_perl/5.12.4 \
                         --with-doxygendir='\${datadir}/globus/doxygen' \
                         --with-docdir='\${datadir}/doc/${name}'
 
