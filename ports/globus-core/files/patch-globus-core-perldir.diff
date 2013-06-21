@@ -5,8 +5,8 @@
  ],
  [
 -    perlmoduledir='${prefix}/lib/perl'
-+    if test -x ${bindir}/perl ; then
-+        perlmoduledir=`${bindir}/perl -V:installvendorlib | cut -d\' -f 2`
++    if test -x ${prefix}/bin/perl ; then
++        perlmoduledir=`${prefix}/bin/perl -V:installvendorlib | cut -d\' -f 2`
 +    else
 +        perlmoduledir='${prefix}/lib/perl'
 +    fi
