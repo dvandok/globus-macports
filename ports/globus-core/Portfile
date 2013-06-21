@@ -70,7 +70,6 @@ configure.post_args     --includedir=${prefix}/include/globus \
                         --with-setupdir='\${datadir}/globus/setup' \
                         --with-testdir='\${datadir}/globus/test' \
                         --with-flavorincludedir='\${libdir}/globus/include' \
-                        --with-perlmoduledir=${prefix}/lib/perl5/vendor_perl/5.12.4 \
                         --with-doxygendir='\${datadir}/globus/doxygen' \
                         --with-docdir='\${datadir}/doc/${name}'
 
