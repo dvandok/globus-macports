@@ -41,7 +41,8 @@ distname                ${_name}-${version}
 checksums               sha256 75d58415fdcf344ef3c6a4c1214b29a83035bfc014f43b980607b0929998c9c0 \
                         rmp160 2ca5cdaa7e77c4467409a01cdb0d379bd15a5c7f
 
-patchfiles              patch-globus-core-automake-obsolete-macro.diff
+patchfiles              patch-globus-core-automake-obsolete-macro.diff \
+                        patch-globus-core-perldir.diff
 
 patch.pre_args          -p1
 
