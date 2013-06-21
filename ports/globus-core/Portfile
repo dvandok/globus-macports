@@ -52,8 +52,8 @@ depends_run             port:p5-xml-dom \
 
 depends_build           port:grid-packaging-tools \
                         port:perl5.12 \
-                        port:p5-xml-dom \
-                        port:p5-xml-parser \
+                        port:p5.12-xml-dom \
+                        port:p5.12-xml-parser \
                         port:libtool \
                         port:autoconf \
                         port:automake
