@@ -57,3 +57,5 @@ post-destroot {
         ${worksrcpath}/LICENSE ${worksrcpath}/README \
         ${destroot}${prefix}/share/doc/${name}
 }
+
+livecheck.type          none
