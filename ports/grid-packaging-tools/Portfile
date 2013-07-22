@@ -2,8 +2,6 @@
 
 # $Id$
 
-set perl_vendor_lib [ exec sh -c "eval \"\`perl -V:installvendorlib\`\" ; echo \$installvendorlib" ]
-
 PortSystem              1.0
 
 name                    grid-packaging-tools
@@ -29,9 +27,9 @@ long_description        GPT is a collection of packaging tools built \
                         are compatible with other packages and can be \
                         easily converted.
 
-depends_lib             port:perl5
+depends_lib             port:perl5.12
 
-depends_run             port:p5-archive-tar \
+depends_run             port:p5.12-archive-tar \
                         port:autoconf \
                         port:automake \
                         port:libtool
@@ -47,7 +45,7 @@ use_autoreconf          yes
 
 configure.post_args     --libexecdir='\${datadir}/globus' \
                         --mandir='\${datadir}/man' \
-                        --with-perlmoduledir=${perl_vendor_lib} \
+                        --with-perlmoduledir=${prefix}/lib/perl5/vendor_perl/5.12.4 \
                         --disable-compat --with-newgpt
 
 destroot.target-append  install-man
