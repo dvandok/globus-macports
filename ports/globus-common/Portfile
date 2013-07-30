@@ -13,12 +13,13 @@ PortSystem              1.0
 name                    globus-common
 set _name               [ string map {"-" "_"} $name ]
 version                 14.9
-set setupversion        2.6
-revision                1
+set globus_version      5.2.4
+set globus_branch       [join [lrange [split ${globus_version} .] 0 1] .]
+revision                0
 platforms               darwin
 categories              net
 license                 Apache-2
-maintainers             nikhef.nl:dennisvd fysast.uu.se:mattias.ellert nbi.ku.dk:skou
+maintainers             nikhef.nl:dennisvd openmaintainer
 homepage                http://www.globus.org/
 
 description             Globus Toolkit - Common Library
@@ -32,15 +33,14 @@ long_description        The Globus Toolkit is an open source software \
                         cause. The ${name} package contains: \
                         Common Library and Common Setup
 
-master_sites            http://www.globus.org/ftppub/gt5/5.2/5.2.4/packages/src/
+master_sites            http://www.globus.org/ftppub/gt5/${globus_branch}/${globus_version}/packages/src/
 
-distfiles               ${_name}-${version}.tar.gz
+distname                ${_name}-${version}
 
-checksums               ${_name}-${version}.tar.gz \
-                            sha256 6ad0cc8a54ce75b2c31f876538896bca1a6feb140a54274ddb923832f74b6152 \
-                            rmp160 b58bfc6957c055a734a20675d396796a59520de0
+checksums               sha256 6ad0cc8a54ce75b2c31f876538896bca1a6feb140a54274ddb923832f74b6152 \
+                        rmp160 b58bfc6957c055a734a20675d396796a59520de0
 
-patchfiles              ${name}-automake-obsolete-macro.patch
+patchfiles              patch-${name}-automake-obsolete-macro.patch
 
 patch.pre_args          -p1
 
@@ -63,7 +63,7 @@ patch.pre_args          -p1
 
 configure.env-append    GPT_LOCATION=${prefix} \
                         GLOBUS_LOCATION=${prefix} \
-                        GLOBUS_VERSION=5.2.2
+                        GLOBUS_VERSION=${globus_version}
 
 configure.post_args     --with-flavor=${flavor} --enable-doxygen
 
@@ -114,3 +114,8 @@ post-destroot {
         ${destroot}${prefix}/share/globus/packages/${_name}/noflavor_doc.filelist
 
 }
+
+livecheck.type          regex
+livecheck.version       ${globus_version}
+livecheck.url           http://www.globus.org/toolkit/downloads/latest-stable/
+livecheck.regex         {Globus Toolkit (\d+(?:\.\d+)*) Download}
