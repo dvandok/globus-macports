@@ -46,14 +46,11 @@ patchfiles              patch-globus-core-automake-obsolete-macro.diff \
 
 patch.pre_args          -p1
 
-depends_run             port:p5.12-xml-dom \
+depends_lib             port:p5.12-xml-dom \
                         port:p5.12-xml-parser \
                         port:perl5.12
 
 depends_build           port:grid-packaging-tools \
-                        port:perl5.12 \
-                        port:p5.12-xml-dom \
-                        port:p5.12-xml-parser \
                         port:libtool \
                         port:autoconf \
                         port:automake
