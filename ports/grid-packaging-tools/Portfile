@@ -30,10 +30,7 @@ long_description        GPT is a collection of packaging tools built \
 
 depends_lib             port:perl5.12
 
-depends_run             port:p5.12-archive-tar \
-                        port:autoconf \
-                        port:automake \
-                        port:libtool
+depends_run             port:p5.12-archive-tar
 
 master_sites            http://www.globus.org/ftppub/gt5/${globus_branch}/${globus_version}/packages/src/
 
