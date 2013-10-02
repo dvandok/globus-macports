@@ -18,3 +18,9 @@ worksrcdir          igtf-policy-installation-bundle-${version}
 configure.args-append --with-profile=classic --with-profile=slcs --with-profile=mics --prefix=${destroot}/${prefix}/etc/grid-security/certificates
 
 build {}
+
+post-destroot { 
+    # symlink GLOBUS_LOCATION/share/certificates to the igtf distribution
+    # so tools automatically find the CAs
+    ln -s ${prefix}/etc/grid-security/certificates ${destroot}${prefix}/share/
+}
